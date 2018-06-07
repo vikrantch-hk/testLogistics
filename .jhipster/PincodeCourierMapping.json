@@ -1,0 +1,67 @@
+{
+    "fields": [
+        {
+            "fieldName": "routingCode",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "applicableForCheapestCourier",
+            "fieldType": "Boolean",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "estimatedDeliveryDays",
+            "fieldType": "Double"
+        },
+        {
+            "fieldName": "pickupAvailable",
+            "fieldType": "Boolean",
+            "fieldValidateRules": [
+                "required"
+            ]
+        }
+    ],
+    "relationships": [
+        {
+            "relationshipType": "many-to-one",
+            "relationshipName": "pincode",
+            "otherEntityName": "pincode",
+            "otherEntityField": "id"
+        },
+        {
+            "relationshipType": "many-to-one",
+            "relationshipName": "attributes",
+            "otherEntityName": "courierAttributes",
+            "otherEntityField": "id"
+        },
+        {
+            "relationshipType": "many-to-one",
+            "relationshipName": "productGroup",
+            "otherEntityName": "productGroup",
+            "otherEntityField": "name"
+        },
+        {
+            "relationshipType": "many-to-one",
+            "relationshipName": "vendorWHCourierMapping",
+            "otherEntityName": "vendorWHCourierMapping",
+            "otherEntityField": "id"
+        },
+        {
+            "relationshipType": "many-to-one",
+            "relationshipName": "sourceDestinationMapping",
+            "otherEntityName": "sourceDestinationMapping",
+            "otherEntityField": "id"
+        }
+    ],
+    "changelogDate": "20180606051600",
+    "entityTableName": "pincode_courier_mapping",
+    "dto": "mapstruct",
+    "pagination": "no",
+    "service": "no",
+    "jpaMetamodelFiltering": false,
+    "fluentMethods": true,
+    "clientRootFolder": "",
+    "applications": "*"
+}

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <include file="config/liquibase/changelog/00000000000000_initial_schema.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051537_added_entity_Vendor.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051538_added_entity_RegionType.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051539_added_entity_CourierChannel.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051540_added_entity_CourierGroup.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051541_added_entity_Warehouse.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051542_added_entity_Courier.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051543_added_entity_Pincode.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051544_added_entity_CourierPricingEngine.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051545_added_entity_Product.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051546_added_entity_ProductGroup.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051547_added_entity_SourceDestinationMapping.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051548_added_entity_CourierAttributes.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051549_added_entity_VendorWHCourierMapping.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051550_added_entity_AwbStatus.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051551_added_entity_PickupStatus.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051552_added_entity_Awb.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051553_added_entity_City.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051554_added_entity_CityCourierTAT.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051555_added_entity_Country.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051556_added_entity_CourierPickupInfo.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051557_added_entity_State.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051558_added_entity_Zone.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051559_added_entity_Hub.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051600_added_entity_PincodeCourierMapping.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051601_added_entity_PincodeRegionZone.xml" relativeToChangelogFile="false"/>
+    <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
+    <include file="config/liquibase/changelog/20180606051542_added_entity_constraints_Courier.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051543_added_entity_constraints_Pincode.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051544_added_entity_constraints_CourierPricingEngine.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051545_added_entity_constraints_Product.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051549_added_entity_constraints_VendorWHCourierMapping.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051556_added_entity_constraints_CourierPickupInfo.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051600_added_entity_constraints_PincodeCourierMapping.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20180606051601_added_entity_constraints_PincodeRegionZone.xml" relativeToChangelogFile="false"/>
+    <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
+</databaseChangeLog>

@@ -1,0 +1,89 @@
+{
+    "fields": [
+        {
+            "fieldName": "firstBaseWt",
+            "fieldType": "Double",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "firstBaseCost",
+            "fieldType": "Double",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "secondBaseWt",
+            "fieldType": "Double"
+        },
+        {
+            "fieldName": "secondBaseCost",
+            "fieldType": "Double"
+        },
+        {
+            "fieldName": "additionalWt",
+            "fieldType": "Double",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "additionalCost",
+            "fieldType": "Double",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "fuelSurcharge",
+            "fieldType": "Double"
+        },
+        {
+            "fieldName": "minCodCharges",
+            "fieldType": "Double"
+        },
+        {
+            "fieldName": "codCutoffAmount",
+            "fieldType": "Double"
+        },
+        {
+            "fieldName": "variableCodCharges",
+            "fieldType": "Double"
+        },
+        {
+            "fieldName": "validUpto",
+            "fieldType": "LocalDate"
+        }
+    ],
+    "relationships": [
+        {
+            "relationshipType": "many-to-one",
+            "relationshipName": "courier",
+            "otherEntityName": "courier",
+            "otherEntityField": "name"
+        },
+        {
+            "relationshipType": "many-to-one",
+            "relationshipName": "warehouse",
+            "otherEntityName": "warehouse",
+            "otherEntityField": "name"
+        },
+        {
+            "relationshipType": "many-to-one",
+            "relationshipName": "regionType",
+            "otherEntityName": "regionType",
+            "otherEntityField": "name"
+        }
+    ],
+    "changelogDate": "20180606051544",
+    "entityTableName": "courier_pricing_engine",
+    "dto": "mapstruct",
+    "pagination": "no",
+    "service": "no",
+    "jpaMetamodelFiltering": false,
+    "fluentMethods": true,
+    "clientRootFolder": "",
+    "applications": "*"
+}

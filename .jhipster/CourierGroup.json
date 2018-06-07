@@ -1,0 +1,26 @@
+{
+    "fields": [
+        {
+            "fieldName": "name",
+            "fieldType": "String"
+        }
+    ],
+    "relationships": [
+        {
+            "relationshipType": "many-to-many",
+            "relationshipName": "courier",
+            "otherEntityName": "courier",
+            "ownerSide": false,
+            "otherEntityRelationshipName": "courierGroup"
+        }
+    ],
+    "changelogDate": "20180606051540",
+    "entityTableName": "courier_group",
+    "dto": "mapstruct",
+    "pagination": "no",
+    "service": "no",
+    "jpaMetamodelFiltering": false,
+    "fluentMethods": true,
+    "clientRootFolder": "",
+    "applications": "*"
+}
