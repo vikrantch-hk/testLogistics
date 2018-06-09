@@ -38,7 +38,7 @@ export class Product extends React.Component<IProductProps> {
               <tr>
                 <th>ID</th>
                 <th>Name</th>
-                <th>Product Group</th>
+                <th>Is Serviceable</th>
                 <th />
               </tr>
             </thead>
@@ -51,9 +51,7 @@ export class Product extends React.Component<IProductProps> {
                     </Button>
                   </td>
                   <td>{product.name}</td>
-                  <td>
-                    {product.productGroupId ? <Link to={`productGroup/${product.productGroupId}`}>{product.productGroupId}</Link> : ''}
-                  </td>
+                  <td>{product.isServiceable ? 'true' : 'false'}</td>
                   <td className="text-right">
                     <div className="btn-group flex-btn-group-container">
                       <Button tag={Link} to={`${match.url}/${product.id}`} color="info" size="sm">

@@ -50,7 +50,7 @@
             "otherEntityField": "name"
         }
     ],
-    "changelogDate": "20180606051543",
+    "changelogDate": "20180608074053",
     "entityTableName": "pincode",
     "dto": "mapstruct",
     "pagination": "no",

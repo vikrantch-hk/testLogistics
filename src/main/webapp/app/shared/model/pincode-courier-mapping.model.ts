@@ -6,8 +6,6 @@ export interface IPincodeCourierMapping {
   pickupAvailable?: boolean;
   pincodeId?: number;
   attributesId?: number;
-  productGroupName?: string;
-  productGroupId?: number;
   vendorWHCourierMappingId?: number;
   sourceDestinationMappingId?: number;
 }
@@ -21,8 +19,6 @@ export class PincodeCourierMapping implements IPincodeCourierMapping {
     public pickupAvailable?: boolean,
     public pincodeId?: number,
     public attributesId?: number,
-    public productGroupName?: string,
-    public productGroupId?: number,
     public vendorWHCourierMappingId?: number,
     public sourceDestinationMappingId?: number
   ) {

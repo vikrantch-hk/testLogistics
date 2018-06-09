@@ -20,7 +20,7 @@
             "otherEntityRelationshipName": "courierChannel"
         }
     ],
-    "changelogDate": "20180606051539",
+    "changelogDate": "20180608074049",
     "entityTableName": "courier_channel",
     "dto": "mapstruct",
     "pagination": "no",

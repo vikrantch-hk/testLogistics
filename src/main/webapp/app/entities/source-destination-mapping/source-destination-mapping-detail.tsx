@@ -40,6 +40,8 @@ export class SourceDestinationMappingDetail extends React.Component<ISourceDesti
                 <span id="destinationPincode">Destination Pincode</span>
               </dt>
               <dd>{sourceDestinationMapping.destinationPincode}</dd>
+              <dt>Product</dt>
+              <dd>{sourceDestinationMapping.productName ? sourceDestinationMapping.productName : ''}</dd>
             </dl>
           </Row>
           <Button tag={Link} to="/entity/source-destination-mapping" replace color="info">

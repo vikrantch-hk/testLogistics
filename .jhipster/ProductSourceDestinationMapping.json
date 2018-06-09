@@ -1,0 +1,13 @@
+{
+    "fields": [],
+    "relationships": [],
+    "changelogDate": "20180608074056",
+    "entityTableName": "product_source_destination_mapping",
+    "dto": "mapstruct",
+    "pagination": "no",
+    "service": "no",
+    "jpaMetamodelFiltering": false,
+    "fluentMethods": true,
+    "clientRootFolder": "",
+    "applications": "*"
+}

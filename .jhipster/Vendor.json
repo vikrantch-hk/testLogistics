@@ -8,60 +8,6 @@
             ]
         },
         {
-            "fieldName": "shortCode",
-            "fieldType": "String"
-        },
-        {
-            "fieldName": "tinNo",
-            "fieldType": "String",
-            "fieldValidateRules": [
-                "required"
-            ]
-        },
-        {
-            "fieldName": "creditDays",
-            "fieldType": "Integer",
-            "fieldValidateRules": [
-                "required"
-            ]
-        },
-        {
-            "fieldName": "createDt",
-            "fieldType": "LocalDate",
-            "fieldValidateRules": [
-                "required"
-            ]
-        },
-        {
-            "fieldName": "email",
-            "fieldType": "String"
-        },
-        {
-            "fieldName": "addressId",
-            "fieldType": "Long",
-            "fieldValidateRules": [
-                "required"
-            ]
-        },
-        {
-            "fieldName": "billingAddressId",
-            "fieldType": "Long",
-            "fieldValidateRules": [
-                "required"
-            ]
-        },
-        {
-            "fieldName": "active",
-            "fieldType": "Boolean",
-            "fieldValidateRules": [
-                "required"
-            ]
-        },
-        {
-            "fieldName": "gstin",
-            "fieldType": "String"
-        },
-        {
             "fieldName": "pincode",
             "fieldType": "String",
             "fieldValidateRules": [
@@ -77,7 +23,7 @@
             "otherEntityRelationshipName": "vendor"
         }
     ],
-    "changelogDate": "20180606051537",
+    "changelogDate": "20180608074047",
     "entityTableName": "vendor",
     "dto": "mapstruct",
     "pagination": "no",

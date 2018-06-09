@@ -45,7 +45,7 @@
         }
     ],
     "relationships": [],
-    "changelogDate": "20180606051552",
+    "changelogDate": "20180608074101",
     "entityTableName": "awb",
     "dto": "mapstruct",
     "pagination": "no",

@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Button, Row, Col } from 'reactstrap';
 // tslint:disable-next-line:no-unused-variable
-import { ICrudGetAction, TextFormat } from 'react-jhipster';
+import { ICrudGetAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { getEntity } from './vendor.reducer';
@@ -36,44 +36,6 @@ export class VendorDetail extends React.Component<IVendorDetailProps> {
                 <span id="name">Name</span>
               </dt>
               <dd>{vendor.name}</dd>
-              <dt>
-                <span id="shortCode">Short Code</span>
-              </dt>
-              <dd>{vendor.shortCode}</dd>
-              <dt>
-                <span id="tinNo">Tin No</span>
-              </dt>
-              <dd>{vendor.tinNo}</dd>
-              <dt>
-                <span id="creditDays">Credit Days</span>
-              </dt>
-              <dd>{vendor.creditDays}</dd>
-              <dt>
-                <span id="createDt">Create Dt</span>
-              </dt>
-              <dd>
-                <TextFormat value={vendor.createDt} type="date" format={APP_LOCAL_DATE_FORMAT} />
-              </dd>
-              <dt>
-                <span id="email">Email</span>
-              </dt>
-              <dd>{vendor.email}</dd>
-              <dt>
-                <span id="addressId">Address Id</span>
-              </dt>
-              <dd>{vendor.addressId}</dd>
-              <dt>
-                <span id="billingAddressId">Billing Address Id</span>
-              </dt>
-              <dd>{vendor.billingAddressId}</dd>
-              <dt>
-                <span id="active">Active</span>
-              </dt>
-              <dd>{vendor.active ? 'true' : 'false'}</dd>
-              <dt>
-                <span id="gstin">Gstin</span>
-              </dt>
-              <dd>{vendor.gstin}</dd>
               <dt>
                 <span id="pincode">Pincode</span>
               </dt>

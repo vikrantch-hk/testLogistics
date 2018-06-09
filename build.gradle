@@ -50,13 +50,13 @@ dependencyManagement {
 
 defaultTasks 'bootRun'
 
-group = 'com.hk.test'
+group = 'com.hk.logistics'
 version = '0.0.1-SNAPSHOT'
 
 description = ''
 
 bootWar {
-   mainClassName = 'com.hk.test.TestLogisticsApp'
+   mainClassName = 'com.hk.logistics.TestLogisticsApp'
 }
 
 war {
@@ -64,7 +64,7 @@ war {
 }
 
 springBoot {
-    mainClassName = 'com.hk.test.TestLogisticsApp'
+    mainClassName = 'com.hk.logistics.TestLogisticsApp'
     buildInfo()
 }
 
@@ -145,7 +145,9 @@ dependencies {
 
     // TODO To remove after final Spring Boot 2 release
     compile "javax.xml.bind:jaxb-api"
+    compile "org.springframework.boot:spring-boot-starter-cache"
     compile "io.dropwizard.metrics:metrics-core"
+    compile "io.dropwizard.metrics:metrics-jcache"
     compile "io.dropwizard.metrics:metrics-json"
     compile "io.dropwizard.metrics:metrics-jvm"
     compile "io.dropwizard.metrics:metrics-servlet"
@@ -159,11 +161,13 @@ dependencies {
     compile "com.fasterxml.jackson.core:jackson-databind"
     compile "com.fasterxml.jackson.module:jackson-module-afterburner"
     compile "com.ryantenney.metrics:metrics-spring"
+    compile "javax.cache:cache-api"
     compile "org.hibernate:hibernate-core"
     compile "com.zaxxer:HikariCP"
     compile "org.apache.commons:commons-lang3"
     compile "commons-io:commons-io"
     compile "javax.transaction:javax.transaction-api"
+    compile "org.ehcache:ehcache"
     compile "org.hibernate:hibernate-entitymanager"
     compile "org.hibernate:hibernate-envers"
     compile "org.hibernate.validator:hibernate-validator"
@@ -188,7 +192,8 @@ dependencies {
     compile "org.springframework.security:spring-security-config"
     compile "org.springframework.security:spring-security-data"
     compile "org.springframework.security:spring-security-web"
-    compile "io.jsonwebtoken:jjwt"
+    compile "org.springframework.security.oauth:spring-security-oauth2"
+    compile "org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure"
     compile ("io.springfox:springfox-swagger2") {
         exclude module: 'mapstruct'
     }

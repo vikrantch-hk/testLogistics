@@ -91,60 +91,12 @@ export class WarehouseUpdate extends React.Component<IWarehouseUpdateProps, IWar
                   </AvGroup>
                 ) : null}
                 <AvGroup>
-                  <Label id="tinLabel" for="tin">
-                    Tin
-                  </Label>
-                  <AvField
-                    type="text"
-                    name="tin"
-                    validate={{
-                      required: { value: true, errorMessage: 'This field is required.' }
-                    }}
-                  />
-                </AvGroup>
-                <AvGroup>
-                  <Label id="identifierLabel" for="identifier">
-                    Identifier
-                  </Label>
-                  <AvField
-                    type="text"
-                    name="identifier"
-                    validate={{
-                      required: { value: true, errorMessage: 'This field is required.' }
-                    }}
-                  />
-                </AvGroup>
-                <AvGroup>
                   <Label id="nameLabel" for="name">
                     Name
                   </Label>
                   <AvField
                     type="text"
                     name="name"
-                    validate={{
-                      required: { value: true, errorMessage: 'This field is required.' }
-                    }}
-                  />
-                </AvGroup>
-                <AvGroup>
-                  <Label id="line1Label" for="line1">
-                    Line 1
-                  </Label>
-                  <AvField type="text" name="line1" />
-                </AvGroup>
-                <AvGroup>
-                  <Label id="line2Label" for="line2">
-                    Line 2
-                  </Label>
-                  <AvField type="text" name="line2" />
-                </AvGroup>
-                <AvGroup>
-                  <Label id="cityLabel" for="city">
-                    City
-                  </Label>
-                  <AvField
-                    type="text"
-                    name="city"
                     validate={{
                       required: { value: true, errorMessage: 'This field is required.' }
                     }}
@@ -161,68 +113,6 @@ export class WarehouseUpdate extends React.Component<IWarehouseUpdateProps, IWar
                       required: { value: true, errorMessage: 'This field is required.' }
                     }}
                   />
-                </AvGroup>
-                <AvGroup>
-                  <Label id="whPhoneLabel" for="whPhone">
-                    Wh Phone
-                  </Label>
-                  <AvField type="text" name="whPhone" />
-                </AvGroup>
-                <AvGroup>
-                  <Label id="warehouseTypeLabel" for="warehouseType">
-                    Warehouse Type
-                  </Label>
-                  <AvField
-                    type="number"
-                    className="form-control"
-                    name="warehouseType"
-                    validate={{
-                      required: { value: true, errorMessage: 'This field is required.' },
-                      number: { value: true, errorMessage: 'This field should be a number.' }
-                    }}
-                  />
-                </AvGroup>
-                <AvGroup>
-                  <Label id="honoringB2COrdersLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="honoringB2COrders" />
-                    Honoring B 2 C Orders
-                  </Label>
-                </AvGroup>
-                <AvGroup>
-                  <Label id="activeLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="active" />
-                    Active
-                  </Label>
-                </AvGroup>
-                <AvGroup>
-                  <Label id="prefixInvoiceGenerationLabel" for="prefixInvoiceGeneration">
-                    Prefix Invoice Generation
-                  </Label>
-                  <AvField
-                    type="text"
-                    name="prefixInvoiceGeneration"
-                    validate={{
-                      required: { value: true, errorMessage: 'This field is required.' }
-                    }}
-                  />
-                </AvGroup>
-                <AvGroup>
-                  <Label id="fulfilmentCenterCodeLabel" for="fulfilmentCenterCode">
-                    Fulfilment Center Code
-                  </Label>
-                  <AvField type="text" name="fulfilmentCenterCode" />
-                </AvGroup>
-                <AvGroup>
-                  <Label id="storeDeliveryLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="storeDelivery" />
-                    Store Delivery
-                  </Label>
-                </AvGroup>
-                <AvGroup>
-                  <Label id="gstinLabel" for="gstin">
-                    Gstin
-                  </Label>
-                  <AvField type="text" name="gstin" />
                 </AvGroup>
                 <Button tag={Link} id="cancel-save" to="/entity/warehouse" replace color="info">
                   <FontAwesomeIcon icon="arrow-left" />&nbsp;

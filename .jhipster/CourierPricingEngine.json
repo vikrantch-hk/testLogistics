@@ -77,7 +77,7 @@
             "otherEntityField": "name"
         }
     ],
-    "changelogDate": "20180606051544",
+    "changelogDate": "20180608074054",
     "entityTableName": "courier_pricing_engine",
     "dto": "mapstruct",
     "pagination": "no",

@@ -45,7 +45,7 @@
             "ownerSide": true
         }
     ],
-    "changelogDate": "20180606051542",
+    "changelogDate": "20180608074052",
     "entityTableName": "courier",
     "dto": "mapstruct",
     "pagination": "pagination",

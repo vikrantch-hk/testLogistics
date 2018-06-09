@@ -1,9 +1,11 @@
 export interface IProduct {
   id?: number;
   name?: string;
-  productGroupId?: number;
+  isServiceable?: boolean;
 }
 
 export class Product implements IProduct {
-  constructor(public id?: number, public name?: string, public productGroupId?: number) {}
+  constructor(public id?: number, public name?: string, public isServiceable?: boolean) {
+    this.isServiceable = false;
+  }
 }

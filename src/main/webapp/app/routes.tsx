@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import Login from 'app/modules/login/login';
 import Logout from 'app/modules/login/logout';
 import Register from 'app/modules/account/register/register';
 import Home from 'app/modules/home/home';
@@ -16,7 +15,6 @@ import { AUTHORITIES } from 'app/config/constants';
 
 const Routes = () => (
   <div className="view-routes">
-    <Route path="/login" component={Login} />
     <Switch>
       <Route path="/logout" component={Logout} />
       <Route path="/register" component={Register} />

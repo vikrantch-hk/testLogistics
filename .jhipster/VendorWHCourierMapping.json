@@ -28,7 +28,7 @@
             "otherEntityField": "name"
         }
     ],
-    "changelogDate": "20180606051549",
+    "changelogDate": "20180608074059",
     "entityTableName": "vendor_wh_courier_mapping",
     "dto": "mapstruct",
     "pagination": "no",

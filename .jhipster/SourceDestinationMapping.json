@@ -15,8 +15,15 @@
             ]
         }
     ],
-    "relationships": [],
-    "changelogDate": "20180606051547",
+    "relationships": [
+        {
+            "relationshipType": "many-to-one",
+            "relationshipName": "product",
+            "otherEntityName": "product",
+            "otherEntityField": "name"
+        }
+    ],
+    "changelogDate": "20180608074057",
     "entityTableName": "source_destination_mapping",
     "dto": "mapstruct",
     "pagination": "no",

@@ -24,7 +24,7 @@
             "otherEntityRelationshipName": "hub"
         }
     ],
-    "changelogDate": "20180606051559",
+    "changelogDate": "20180608074106",
     "entityTableName": "hub",
     "dto": "mapstruct",
     "pagination": "no",

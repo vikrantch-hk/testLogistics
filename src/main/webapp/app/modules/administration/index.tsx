@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Route } from 'react-router-dom';
 
-import UserManagement from './user-management';
 import Logs from './logs/logs';
 import Health from './health/health';
 import Metrics from './metrics/metrics';
@@ -11,7 +10,6 @@ import Docs from './docs/docs';
 
 const Routes = ({ match }) => (
   <div>
-    <Route path={`${match.url}/user-management`} component={UserManagement} />
     <Route exact path={`${match.url}/health`} component={Health} />
     <Route exact path={`${match.url}/metrics`} component={Metrics} />
     <Route exact path={`${match.url}/docs`} component={Docs} />

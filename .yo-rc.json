@@ -1,15 +1,16 @@
 {
   "generator-jhipster": {
     "promptValues": {
-      "packageName": "com.hk.test"
+      "packageName": "com.hk.logistics"
     },
     "jhipsterVersion": "5.0.0-beta.1",
     "baseName": "testLogistics",
-    "packageName": "com.hk.test",
-    "packageFolder": "com/hk/test",
+    "packageName": "com.hk.logistics",
+    "packageFolder": "com/hk/logistics",
     "serverPort": "8080",
-    "authenticationType": "jwt",
-    "cacheProvider": "no",
+    "authenticationType": "oauth2",
+    "cacheProvider": "ehcache",
+    "enableHibernateCache": false,
     "websocket": false,
     "databaseType": "sql",
     "devDatabaseType": "h2Memory",
@@ -19,7 +20,6 @@
     "serviceDiscoveryType": false,
     "buildTool": "gradle",
     "enableSwaggerCodegen": false,
-    "jwtSecretKey": "be6bb1564094fc6b7c9555495891de35401a796c",
     "clientFramework": "react",
     "useSass": true,
     "clientPackageManager": "npm",

@@ -20,7 +20,7 @@
             "otherEntityField": "id"
         }
     ],
-    "changelogDate": "20180606051601",
+    "changelogDate": "20180608074108",
     "entityTableName": "pincode_region_zone",
     "dto": "mapstruct",
     "pagination": "no",

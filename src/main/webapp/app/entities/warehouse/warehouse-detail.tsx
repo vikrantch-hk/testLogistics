@@ -33,65 +33,13 @@ export class WarehouseDetail extends React.Component<IWarehouseDetailProps> {
           <Row size="md">
             <dl className="jh-entity-details">
               <dt>
-                <span id="tin">Tin</span>
-              </dt>
-              <dd>{warehouse.tin}</dd>
-              <dt>
-                <span id="identifier">Identifier</span>
-              </dt>
-              <dd>{warehouse.identifier}</dd>
-              <dt>
                 <span id="name">Name</span>
               </dt>
               <dd>{warehouse.name}</dd>
               <dt>
-                <span id="line1">Line 1</span>
-              </dt>
-              <dd>{warehouse.line1}</dd>
-              <dt>
-                <span id="line2">Line 2</span>
-              </dt>
-              <dd>{warehouse.line2}</dd>
-              <dt>
-                <span id="city">City</span>
-              </dt>
-              <dd>{warehouse.city}</dd>
-              <dt>
                 <span id="pincode">Pincode</span>
               </dt>
               <dd>{warehouse.pincode}</dd>
-              <dt>
-                <span id="whPhone">Wh Phone</span>
-              </dt>
-              <dd>{warehouse.whPhone}</dd>
-              <dt>
-                <span id="warehouseType">Warehouse Type</span>
-              </dt>
-              <dd>{warehouse.warehouseType}</dd>
-              <dt>
-                <span id="honoringB2COrders">Honoring B 2 C Orders</span>
-              </dt>
-              <dd>{warehouse.honoringB2COrders ? 'true' : 'false'}</dd>
-              <dt>
-                <span id="active">Active</span>
-              </dt>
-              <dd>{warehouse.active ? 'true' : 'false'}</dd>
-              <dt>
-                <span id="prefixInvoiceGeneration">Prefix Invoice Generation</span>
-              </dt>
-              <dd>{warehouse.prefixInvoiceGeneration}</dd>
-              <dt>
-                <span id="fulfilmentCenterCode">Fulfilment Center Code</span>
-              </dt>
-              <dd>{warehouse.fulfilmentCenterCode}</dd>
-              <dt>
-                <span id="storeDelivery">Store Delivery</span>
-              </dt>
-              <dd>{warehouse.storeDelivery ? 'true' : 'false'}</dd>
-              <dt>
-                <span id="gstin">Gstin</span>
-              </dt>
-              <dd>{warehouse.gstin}</dd>
             </dl>
           </Row>
           <Button tag={Link} to="/entity/warehouse" replace color="info">

@@ -20,6 +20,7 @@ import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import { NavLink as Link } from 'react-router-dom';
 import LoadingBar from 'react-redux-loading-bar';
 
+import { getLoginUrl } from 'app/shared/util/url-utils';
 import appConfig from 'app/config/constants';
 
 export interface IHeaderProps {
@@ -86,8 +87,8 @@ export default class Header extends React.Component<IHeaderProps, IHeaderState> 
       <DropdownItem tag={Link} key="product" to="/entity/product">
         <FontAwesomeIcon icon="asterisk" />&nbsp; Product
       </DropdownItem>,
-      <DropdownItem tag={Link} key="product-group" to="/entity/product-group">
-        <FontAwesomeIcon icon="asterisk" />&nbsp; Product Group
+      <DropdownItem tag={Link} key="product-source-destination-mapping" to="/entity/product-source-destination-mapping">
+        <FontAwesomeIcon icon="asterisk" />&nbsp; Product Source Destination Mapping
       </DropdownItem>,
       <DropdownItem tag={Link} key="source-destination-mapping" to="/entity/source-destination-mapping">
         <FontAwesomeIcon icon="asterisk" />&nbsp; Source Destination Mapping
@@ -101,23 +102,14 @@ export default class Header extends React.Component<IHeaderProps, IHeaderState> 
       <DropdownItem tag={Link} key="awb-status" to="/entity/awb-status">
         <FontAwesomeIcon icon="asterisk" />&nbsp; Awb Status
       </DropdownItem>,
-      <DropdownItem tag={Link} key="pickup-status" to="/entity/pickup-status">
-        <FontAwesomeIcon icon="asterisk" />&nbsp; Pickup Status
-      </DropdownItem>,
       <DropdownItem tag={Link} key="awb" to="/entity/awb">
         <FontAwesomeIcon icon="asterisk" />&nbsp; Awb
       </DropdownItem>,
       <DropdownItem tag={Link} key="city" to="/entity/city">
         <FontAwesomeIcon icon="asterisk" />&nbsp; City
       </DropdownItem>,
-      <DropdownItem tag={Link} key="city-courier-tat" to="/entity/city-courier-tat">
-        <FontAwesomeIcon icon="asterisk" />&nbsp; City Courier Tat
-      </DropdownItem>,
       <DropdownItem tag={Link} key="country" to="/entity/country">
         <FontAwesomeIcon icon="asterisk" />&nbsp; Country
-      </DropdownItem>,
-      <DropdownItem tag={Link} key="courier-pickup-info" to="/entity/courier-pickup-info">
-        <FontAwesomeIcon icon="asterisk" />&nbsp; Courier Pickup Info
       </DropdownItem>,
       <DropdownItem tag={Link} key="state" to="/entity/state">
         <FontAwesomeIcon icon="asterisk" />&nbsp; State
@@ -139,9 +131,6 @@ export default class Header extends React.Component<IHeaderProps, IHeaderState> 
     ];
     /* jhipster-needle-add-element-to-menu - JHipster will add new menu items here */
     const adminMenuItems = [
-      <DropdownItem tag={Link} key="user-management" to="/admin/user-management">
-        <FontAwesomeIcon icon="user" /> User Management
-      </DropdownItem>,
       <DropdownItem tag={Link} key="metrics" to="/admin/metrics">
         <FontAwesomeIcon icon="tachometer-alt" /> Metrics
       </DropdownItem>,
@@ -175,23 +164,14 @@ export default class Header extends React.Component<IHeaderProps, IHeaderState> 
     const accountMenuItems = [];
     if (isAuthenticated) {
       accountMenuItems.push(
-        <DropdownItem tag={Link} key="settings" to="/account/settings">
-          <FontAwesomeIcon icon="wrench" /> Settings
-        </DropdownItem>,
-        <DropdownItem tag={Link} key="password" to="/account/password">
-          <FontAwesomeIcon icon="clock" /> Password
-        </DropdownItem>,
         <DropdownItem tag={Link} key="logout" to="/logout">
           <FontAwesomeIcon icon="sign-out-alt" /> Logout
         </DropdownItem>
       );
     } else {
       accountMenuItems.push(
-        <DropdownItem tag={Link} key="login" to="/login">
+        <DropdownItem tag="a" key="login" href={getLoginUrl()}>
           <FontAwesomeIcon icon="sign-in-alt" /> Login
-        </DropdownItem>,
-        <DropdownItem tag={Link} key="register" to="/register">
-          <FontAwesomeIcon icon="sign-in-alt" /> Register
         </DropdownItem>
       );
     }

@@ -38,12 +38,6 @@
         },
         {
             "relationshipType": "many-to-one",
-            "relationshipName": "productGroup",
-            "otherEntityName": "productGroup",
-            "otherEntityField": "name"
-        },
-        {
-            "relationshipType": "many-to-one",
             "relationshipName": "vendorWHCourierMapping",
             "otherEntityName": "vendorWHCourierMapping",
             "otherEntityField": "id"
@@ -55,7 +49,7 @@
             "otherEntityField": "id"
         }
     ],
-    "changelogDate": "20180606051600",
+    "changelogDate": "20180608074107",
     "entityTableName": "pincode_courier_mapping",
     "dto": "mapstruct",
     "pagination": "no",

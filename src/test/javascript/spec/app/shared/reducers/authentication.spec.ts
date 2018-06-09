@@ -6,7 +6,7 @@ import * as sinon from 'sinon';
 import configureStore from 'redux-mock-store';
 import promiseMiddleware from 'redux-promise-middleware';
 
-import authentication, { ACTION_TYPES, getSession, login } from 'app/shared/reducers/authentication';
+import authentication, { ACTION_TYPES, getSession } from 'app/shared/reducers/authentication';
 
 describe('Authentication reducer tests', () => {
   function isAccountEmpty(state): boolean {
@@ -20,37 +20,13 @@ describe('Authentication reducer tests', () => {
         loading: false,
         isAuthenticated: false,
         errorMessage: null, // Errors returned from server side
-        loginSuccess: false,
-        loginError: false, // Errors returned from server side
-        showModalLogin: false,
         redirectMessage: null
       });
       expect(isAccountEmpty(toTest));
     });
   });
 
-  describe('Requests', () => {
-    it('should detect a request', () => {
-      expect(authentication(undefined, { type: REQUEST(ACTION_TYPES.LOGIN) })).to.contain({
-        loading: true
-      });
-      expect(authentication(undefined, { type: REQUEST(ACTION_TYPES.GET_SESSION) })).to.contain({
-        loading: true
-      });
-    });
-  });
-
   describe('Success', () => {
-    it('should detect a success on login', () => {
-      const toTest = authentication(undefined, { type: SUCCESS(ACTION_TYPES.LOGIN) });
-      expect(toTest).to.contain({
-        loading: false,
-        loginError: false,
-        loginSuccess: true,
-        showModalLogin: false
-      });
-    });
-
     it('should detect a success on get session and be authenticated', () => {
       const payload = { data: { activated: true } };
       const toTest = authentication(undefined, { type: SUCCESS(ACTION_TYPES.GET_SESSION), payload });
@@ -73,18 +49,6 @@ describe('Authentication reducer tests', () => {
   });
 
   describe('Failure', () => {
-    it('should detect a failure on login', () => {
-      const payload = 'Something happened.';
-      const toTest = authentication(undefined, { type: FAILURE(ACTION_TYPES.LOGIN), payload });
-
-      expect(toTest).to.contain({
-        errorMessage: payload,
-        showModalLogin: true,
-        loginError: true
-      });
-      expect(isAccountEmpty(toTest));
-    });
-
     it('should detect a failure', () => {
       const payload = 'Something happened.';
       const toTest = authentication(undefined, { type: FAILURE(ACTION_TYPES.GET_SESSION), payload });
@@ -105,8 +69,6 @@ describe('Authentication reducer tests', () => {
       expect(toTest).to.contain({
         loading: false,
         isAuthenticated: false,
-        loginSuccess: false,
-        loginError: false,
         errorMessage: null,
         redirectMessage: null,
         showModalLogin: true
@@ -120,8 +82,6 @@ describe('Authentication reducer tests', () => {
       expect(toTest).to.contain({
         loading: false,
         isAuthenticated: false,
-        loginSuccess: false,
-        loginError: false,
         errorMessage: null,
         redirectMessage: message,
         showModalLogin: true

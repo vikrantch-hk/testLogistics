@@ -36,8 +36,10 @@ export class ProductDetail extends React.Component<IProductDetailProps> {
                 <span id="name">Name</span>
               </dt>
               <dd>{product.name}</dd>
-              <dt>Product Group</dt>
-              <dd>{product.productGroupId ? product.productGroupId : ''}</dd>
+              <dt>
+                <span id="isServiceable">Is Serviceable</span>
+              </dt>
+              <dd>{product.isServiceable ? 'true' : 'false'}</dd>
             </dl>
           </Row>
           <Button tag={Link} to="/entity/product" replace color="info">

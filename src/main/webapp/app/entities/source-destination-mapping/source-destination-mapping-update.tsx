@@ -7,6 +7,8 @@ import { AvForm, AvGroup, AvInput, AvField } from 'availity-reactstrap-validatio
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
+import { IProduct } from 'app/shared/model/product.model';
+import { getEntities as getProducts } from 'app/entities/product/product.reducer';
 import { getEntity, updateEntity, createEntity, reset } from './source-destination-mapping.reducer';
 import { ISourceDestinationMapping } from 'app/shared/model/source-destination-mapping.model';
 // tslint:disable-next-line:no-unused-variable
@@ -17,6 +19,8 @@ export interface ISourceDestinationMappingUpdateProps {
   getEntity: ICrudGetAction<ISourceDestinationMapping>;
   updateEntity: ICrudPutAction<ISourceDestinationMapping>;
   createEntity: ICrudPutAction<ISourceDestinationMapping>;
+  getProducts: ICrudGetAllAction<IProduct>;
+  products: IProduct[];
   sourceDestinationMapping: ISourceDestinationMapping;
   reset: Function;
   loading: boolean;
@@ -27,6 +31,7 @@ export interface ISourceDestinationMappingUpdateProps {
 
 export interface ISourceDestinationMappingUpdateState {
   isNew: boolean;
+  productId: number;
 }
 
 export class SourceDestinationMappingUpdate extends React.Component<
@@ -36,6 +41,7 @@ export class SourceDestinationMappingUpdate extends React.Component<
   constructor(props) {
     super(props);
     this.state = {
+      productId: 0,
       isNew: !this.props.match.params || !this.props.match.params.id
     };
   }
@@ -46,6 +52,8 @@ export class SourceDestinationMappingUpdate extends React.Component<
     } else {
       this.props.getEntity(this.props.match.params.id);
     }
+
+    this.props.getProducts();
   }
 
   saveEntity = (event, errors, values) => {
@@ -69,9 +77,26 @@ export class SourceDestinationMappingUpdate extends React.Component<
     this.props.history.push('/entity/source-destination-mapping');
   };
 
+  productUpdate = element => {
+    const name = element.target.value.toString();
+    if (name === '') {
+      this.setState({
+        productId: -1
+      });
+    } else {
+      for (const i in this.props.products) {
+        if (name === this.props.products[i].name.toString()) {
+          this.setState({
+            productId: this.props.products[i].id
+          });
+        }
+      }
+    }
+  };
+
   render() {
     const isInvalid = false;
-    const { sourceDestinationMapping, loading, updating } = this.props;
+    const { sourceDestinationMapping, products, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
@@ -117,6 +142,19 @@ export class SourceDestinationMappingUpdate extends React.Component<
                     }}
                   />
                 </AvGroup>
+                <AvGroup>
+                  <Label for="product.name">Product</Label>
+                  <AvInput type="select" className="form-control" name="productId" onChange={this.productUpdate}>
+                    <option value="" key="0" />
+                    {products
+                      ? products.map(otherEntity => (
+                          <option value={otherEntity.id} key={otherEntity.id}>
+                            {otherEntity.name}
+                          </option>
+                        ))
+                      : null}
+                  </AvInput>
+                </AvGroup>
                 <Button tag={Link} id="cancel-save" to="/entity/source-destination-mapping" replace color="info">
                   <FontAwesomeIcon icon="arrow-left" />&nbsp;
                   <span className="d-none d-md-inline">Back</span>
@@ -135,12 +173,14 @@ export class SourceDestinationMappingUpdate extends React.Component<
 }
 
 const mapStateToProps = storeState => ({
+  products: storeState.product.entities,
   sourceDestinationMapping: storeState.sourceDestinationMapping.entity,
   loading: storeState.sourceDestinationMapping.loading,
   updating: storeState.sourceDestinationMapping.updating
 });
 
 const mapDispatchToProps = {
+  getProducts,
   getEntity,
   updateEntity,
   createEntity,

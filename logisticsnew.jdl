@@ -1,15 +1,5 @@
 entity Vendor {
 	name String required,
-	shortCode String,
-    tinNo String required, 
-    creditDays Integer required,
-    createDt LocalDate required,
-    email String,
-    addressId Long required,
-    billingAddressId Long required,
-    active Boolean required,
-    gstin String,
-	// added pincode
 	pincode String required
 }
 
@@ -27,21 +17,8 @@ entity CourierGroup {
 }
 
 entity Warehouse {
-	tin String required,
-	identifier String required,
 	name String required,
-	line1 String,
-	line2 String,
-	city String required,
-	pincode String required,
-	whPhone String,
-	warehouseType Long required,
-	honoringB2COrders Boolean required,
-	active Boolean required,
-	prefixInvoiceGeneration String required,
-	fulfilmentCenterCode String,
-	storeDelivery Boolean,
-	gstin String
+	pincode String required
 }
 entity Courier{
 	name String required,
@@ -72,10 +49,12 @@ entity CourierPricingEngine {
 }
 // new entity
 entity Product {
-    name String required
+    name String required,
+	isServiceable Boolean
 }
-entity ProductGroup {
-    name String required    
+
+// new entity
+entity ProductSourceDestinationMapping {
 }
 // new entity
 entity SourceDestinationMapping {
@@ -103,9 +82,6 @@ entity VendorWHCourierMapping {
 entity AwbStatus {
 	awbStatus String
 }
-entity PickupStatus {
-	name String
-}
 entity Awb {
 	awbNumber String required,
     awbBarCode String required,
@@ -119,19 +95,9 @@ entity City {
 	name String required
 }
 
-entity CityCourierTAT {
-	turnaroundTime Long
-}
-
 entity Country {
 	name String required,
 	countryCode String required
-}
-entity CourierPickupInfo {
-	pickupConfirmationNo String,
-	trackingNo String,
-    pickupDate LocalDate required,
-    
 }
 entity State {
 	name String required,
@@ -165,8 +131,6 @@ relationship ManyToMany {
 }
 relationship OneToMany {
   //new relationship
-  ProductGroup{product(name)} to Product{productGroup},
-  //new relationship
 	Vendor{vendorWHCourierMapping} to VendorWHCourierMapping{vendor(name)},
 	//Vendor{vendorWHCourierMapping} to VendorWHCourierMapping{pincode(pincode)},
 	//new relationship
@@ -177,9 +141,7 @@ relationship OneToMany {
 }
 
 relationship ManyToOne {
-    
-	CourierPickupInfo{courier(name)} to Courier,
-    CourierPickupInfo{pickupStatus(name)} to PickupStatus,
+    SourceDestinationMapping{product(name)} to Product,
     CourierPricingEngine{courier(name)} to Courier,
     CourierPricingEngine{warehouse(name)} to Warehouse,
     CourierPricingEngine{regionType(name)} to RegionType,
@@ -190,7 +152,7 @@ relationship ManyToOne {
     PincodeCourierMapping{pincode} to Pincode,
 	//new relationship
 	PincodeCourierMapping{attributes} to CourierAttributes,
-	PincodeCourierMapping{productGroup(name)} to ProductGroup,
+	//PincodeCourierMapping{productGroup(name)} to ProductGroup,
 	PincodeCourierMapping{vendorWHCourierMapping} to VendorWHCourierMapping,
 	PincodeCourierMapping{sourceDestinationMapping} to SourceDestinationMapping,
     PincodeRegionZone{regionType(name)} to RegionType,

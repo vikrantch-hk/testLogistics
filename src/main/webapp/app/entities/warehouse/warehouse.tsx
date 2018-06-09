@@ -37,21 +37,8 @@ export class Warehouse extends React.Component<IWarehouseProps> {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Tin</th>
-                <th>Identifier</th>
                 <th>Name</th>
-                <th>Line 1</th>
-                <th>Line 2</th>
-                <th>City</th>
                 <th>Pincode</th>
-                <th>Wh Phone</th>
-                <th>Warehouse Type</th>
-                <th>Honoring B 2 C Orders</th>
-                <th>Active</th>
-                <th>Prefix Invoice Generation</th>
-                <th>Fulfilment Center Code</th>
-                <th>Store Delivery</th>
-                <th>Gstin</th>
                 <th />
               </tr>
             </thead>
@@ -63,21 +50,8 @@ export class Warehouse extends React.Component<IWarehouseProps> {
                       {warehouse.id}
                     </Button>
                   </td>
-                  <td>{warehouse.tin}</td>
-                  <td>{warehouse.identifier}</td>
                   <td>{warehouse.name}</td>
-                  <td>{warehouse.line1}</td>
-                  <td>{warehouse.line2}</td>
-                  <td>{warehouse.city}</td>
                   <td>{warehouse.pincode}</td>
-                  <td>{warehouse.whPhone}</td>
-                  <td>{warehouse.warehouseType}</td>
-                  <td>{warehouse.honoringB2COrders ? 'true' : 'false'}</td>
-                  <td>{warehouse.active ? 'true' : 'false'}</td>
-                  <td>{warehouse.prefixInvoiceGeneration}</td>
-                  <td>{warehouse.fulfilmentCenterCode}</td>
-                  <td>{warehouse.storeDelivery ? 'true' : 'false'}</td>
-                  <td>{warehouse.gstin}</td>
                   <td className="text-right">
                     <div className="btn-group flex-btn-group-container">
                       <Button tag={Link} to={`${match.url}/${warehouse.id}`} color="info" size="sm">

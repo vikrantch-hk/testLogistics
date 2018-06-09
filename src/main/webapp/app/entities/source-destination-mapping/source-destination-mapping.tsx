@@ -39,6 +39,7 @@ export class SourceDestinationMapping extends React.Component<ISourceDestination
                 <th>ID</th>
                 <th>Source Pincode</th>
                 <th>Destination Pincode</th>
+                <th>Product</th>
                 <th />
               </tr>
             </thead>
@@ -52,6 +53,13 @@ export class SourceDestinationMapping extends React.Component<ISourceDestination
                   </td>
                   <td>{sourceDestinationMapping.sourcePincode}</td>
                   <td>{sourceDestinationMapping.destinationPincode}</td>
+                  <td>
+                    {sourceDestinationMapping.productName ? (
+                      <Link to={`product/${sourceDestinationMapping.productId}`}>{sourceDestinationMapping.productName}</Link>
+                    ) : (
+                      ''
+                    )}
+                  </td>
                   <td className="text-right">
                     <div className="btn-group flex-btn-group-container">
                       <Button tag={Link} to={`${match.url}/${sourceDestinationMapping.id}`} color="info" size="sm">

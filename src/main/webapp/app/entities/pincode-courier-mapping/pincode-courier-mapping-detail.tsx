@@ -52,8 +52,6 @@ export class PincodeCourierMappingDetail extends React.Component<IPincodeCourier
               <dd>{pincodeCourierMapping.pincodeId ? pincodeCourierMapping.pincodeId : ''}</dd>
               <dt>Attributes</dt>
               <dd>{pincodeCourierMapping.attributesId ? pincodeCourierMapping.attributesId : ''}</dd>
-              <dt>Product Group</dt>
-              <dd>{pincodeCourierMapping.productGroupName ? pincodeCourierMapping.productGroupName : ''}</dd>
               <dt>Vendor WH Courier Mapping</dt>
               <dd>{pincodeCourierMapping.vendorWHCourierMappingId ? pincodeCourierMapping.vendorWHCourierMappingId : ''}</dd>
               <dt>Source Destination Mapping</dt>

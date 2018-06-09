@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Button, Col, Row, Table } from 'reactstrap';
 // tslint:disable-next-line:no-unused-variable
-import { ICrudGetAllAction, TextFormat } from 'react-jhipster';
+import { ICrudGetAllAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { getEntities } from './vendor.reducer';
@@ -38,15 +38,6 @@ export class Vendor extends React.Component<IVendorProps> {
               <tr>
                 <th>ID</th>
                 <th>Name</th>
-                <th>Short Code</th>
-                <th>Tin No</th>
-                <th>Credit Days</th>
-                <th>Create Dt</th>
-                <th>Email</th>
-                <th>Address Id</th>
-                <th>Billing Address Id</th>
-                <th>Active</th>
-                <th>Gstin</th>
                 <th>Pincode</th>
                 <th />
               </tr>
@@ -60,17 +51,6 @@ export class Vendor extends React.Component<IVendorProps> {
                     </Button>
                   </td>
                   <td>{vendor.name}</td>
-                  <td>{vendor.shortCode}</td>
-                  <td>{vendor.tinNo}</td>
-                  <td>{vendor.creditDays}</td>
-                  <td>
-                    <TextFormat type="date" value={vendor.createDt} format={APP_LOCAL_DATE_FORMAT} />
-                  </td>
-                  <td>{vendor.email}</td>
-                  <td>{vendor.addressId}</td>
-                  <td>{vendor.billingAddressId}</td>
-                  <td>{vendor.active ? 'true' : 'false'}</td>
-                  <td>{vendor.gstin}</td>
                   <td>{vendor.pincode}</td>
                   <td className="text-right">
                     <div className="btn-group flex-btn-group-container">

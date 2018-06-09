@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import { Row, Col, Alert } from 'reactstrap';
 
 import { getSession } from 'app/shared/reducers/authentication';
+import { getLoginUrl } from 'app/shared/util/url-utils';
 
 export interface IHomeProp {
   account: any;
@@ -47,9 +48,9 @@ export class Home extends React.Component<IHomeProp, IHomeState> {
             <div>
               <Alert color="warning">
                 If you want to
-                <Link to="/login" className="alert-link">
+                <a href={getLoginUrl()} className="alert-link">
                   sign in
-                </Link>
+                </a>
                 , you can try the default accounts:
                 <br />- Administrator (login=&quot;admin&quot; and password=&quot;admin&quot;)
                 <br />- User (login=&quot;user&quot; and password=&quot;user&quot;).

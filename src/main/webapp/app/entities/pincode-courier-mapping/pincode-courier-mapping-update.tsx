@@ -11,8 +11,6 @@ import { IPincode } from 'app/shared/model/pincode.model';
 import { getEntities as getPincodes } from 'app/entities/pincode/pincode.reducer';
 import { ICourierAttributes } from 'app/shared/model/courier-attributes.model';
 import { getEntities as getCourierAttributes } from 'app/entities/courier-attributes/courier-attributes.reducer';
-import { IProductGroup } from 'app/shared/model/product-group.model';
-import { getEntities as getProductGroups } from 'app/entities/product-group/product-group.reducer';
 import { IVendorWHCourierMapping } from 'app/shared/model/vendor-wh-courier-mapping.model';
 import { getEntities as getVendorWhCourierMappings } from 'app/entities/vendor-wh-courier-mapping/vendor-wh-courier-mapping.reducer';
 import { ISourceDestinationMapping } from 'app/shared/model/source-destination-mapping.model';
@@ -31,8 +29,6 @@ export interface IPincodeCourierMappingUpdateProps {
   pincodes: IPincode[];
   getCourierAttributes: ICrudGetAllAction<ICourierAttributes>;
   courierAttributes: ICourierAttributes[];
-  getProductGroups: ICrudGetAllAction<IProductGroup>;
-  productGroups: IProductGroup[];
   getVendorWhCourierMappings: ICrudGetAllAction<IVendorWHCourierMapping>;
   vendorWHCourierMappings: IVendorWHCourierMapping[];
   getSourceDestinationMappings: ICrudGetAllAction<ISourceDestinationMapping>;
@@ -49,7 +45,6 @@ export interface IPincodeCourierMappingUpdateState {
   isNew: boolean;
   pincodeId: number;
   attributesId: number;
-  productGroupId: number;
   vendorWHCourierMappingId: number;
   sourceDestinationMappingId: number;
 }
@@ -60,7 +55,6 @@ export class PincodeCourierMappingUpdate extends React.Component<IPincodeCourier
     this.state = {
       pincodeId: 0,
       attributesId: 0,
-      productGroupId: 0,
       vendorWHCourierMappingId: 0,
       sourceDestinationMappingId: 0,
       isNew: !this.props.match.params || !this.props.match.params.id
@@ -76,7 +70,6 @@ export class PincodeCourierMappingUpdate extends React.Component<IPincodeCourier
 
     this.props.getPincodes();
     this.props.getCourierAttributes();
-    this.props.getProductGroups();
     this.props.getVendorWhCourierMappings();
     this.props.getSourceDestinationMappings();
   }
@@ -136,23 +129,6 @@ export class PincodeCourierMappingUpdate extends React.Component<IPincodeCourier
     }
   };
 
-  productGroupUpdate = element => {
-    const name = element.target.value.toString();
-    if (name === '') {
-      this.setState({
-        productGroupId: -1
-      });
-    } else {
-      for (const i in this.props.productGroups) {
-        if (name === this.props.productGroups[i].name.toString()) {
-          this.setState({
-            productGroupId: this.props.productGroups[i].id
-          });
-        }
-      }
-    }
-  };
-
   vendorWHCourierMappingUpdate = element => {
     const id = element.target.value.toString();
     if (id === '') {
@@ -193,7 +169,6 @@ export class PincodeCourierMappingUpdate extends React.Component<IPincodeCourier
       pincodeCourierMapping,
       pincodes,
       courierAttributes,
-      productGroups,
       vendorWHCourierMappings,
       sourceDestinationMappings,
       loading,
@@ -271,19 +246,6 @@ export class PincodeCourierMappingUpdate extends React.Component<IPincodeCourier
                   </AvInput>
                 </AvGroup>
                 <AvGroup>
-                  <Label for="productGroup.name">Product Group</Label>
-                  <AvInput type="select" className="form-control" name="productGroupId" onChange={this.productGroupUpdate}>
-                    <option value="" key="0" />
-                    {productGroups
-                      ? productGroups.map(otherEntity => (
-                          <option value={otherEntity.id} key={otherEntity.id}>
-                            {otherEntity.name}
-                          </option>
-                        ))
-                      : null}
-                  </AvInput>
-                </AvGroup>
-                <AvGroup>
                   <Label for="vendorWHCourierMapping.id">Vendor WH Courier Mapping</Label>
                   <AvInput
                     type="select"
@@ -339,7 +301,6 @@ export class PincodeCourierMappingUpdate extends React.Component<IPincodeCourier
 const mapStateToProps = storeState => ({
   pincodes: storeState.pincode.entities,
   courierAttributes: storeState.courierAttributes.entities,
-  productGroups: storeState.productGroup.entities,
   vendorWHCourierMappings: storeState.vendorWHCourierMapping.entities,
   sourceDestinationMappings: storeState.sourceDestinationMapping.entities,
   pincodeCourierMapping: storeState.pincodeCourierMapping.entity,
@@ -350,7 +311,6 @@ const mapStateToProps = storeState => ({
 const mapDispatchToProps = {
   getPincodes,
   getCourierAttributes,
-  getProductGroups,
   getVendorWhCourierMappings,
   getSourceDestinationMappings,
   getEntity,

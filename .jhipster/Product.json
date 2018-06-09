@@ -6,17 +6,14 @@
             "fieldValidateRules": [
                 "required"
             ]
-        }
-    ],
-    "relationships": [
+        },
         {
-            "relationshipType": "many-to-one",
-            "relationshipName": "productGroup",
-            "otherEntityName": "productGroup",
-            "otherEntityField": "id"
+            "fieldName": "isServiceable",
+            "fieldType": "Boolean"
         }
     ],
-    "changelogDate": "20180606051545",
+    "relationships": [],
+    "changelogDate": "20180608074055",
     "entityTableName": "product",
     "dto": "mapstruct",
     "pagination": "no",

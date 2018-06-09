@@ -14,7 +14,7 @@
             "otherEntityRelationshipName": "courierGroup"
         }
     ],
-    "changelogDate": "20180606051540",
+    "changelogDate": "20180608074050",
     "entityTableName": "courier_group",
     "dto": "mapstruct",
     "pagination": "no",
