@@ -37,7 +37,7 @@ export class Vendor extends React.Component<IVendorProps> {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Name</th>
+                <th>Short Code</th>
                 <th>Pincode</th>
                 <th />
               </tr>
@@ -50,7 +50,7 @@ export class Vendor extends React.Component<IVendorProps> {
                       {vendor.id}
                     </Button>
                   </td>
-                  <td>{vendor.name}</td>
+                  <td>{vendor.shortCode}</td>
                   <td>{vendor.pincode}</td>
                   <td className="text-right">
                     <div className="btn-group flex-btn-group-container">

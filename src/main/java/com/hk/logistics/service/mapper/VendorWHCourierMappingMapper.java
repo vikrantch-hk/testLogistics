@@ -12,7 +12,7 @@ import org.mapstruct.*;
 public interface VendorWHCourierMappingMapper extends EntityMapper<VendorWHCourierMappingDTO, VendorWHCourierMapping> {
 
     @Mapping(source = "vendor.id", target = "vendorId")
-    @Mapping(source = "vendor.name", target = "vendorName")
+    @Mapping(source = "vendor.shortCode", target = "vendorShortCode")
     @Mapping(source = "warehouse.id", target = "warehouseId")
     @Mapping(source = "warehouse.name", target = "warehouseName")
     @Mapping(source = "courierChannel.id", target = "courierChannelId")

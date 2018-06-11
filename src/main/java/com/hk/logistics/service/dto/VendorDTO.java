@@ -12,7 +12,7 @@ public class VendorDTO implements Serializable {
     private Long id;
 
     @NotNull
-    private String name;
+    private String shortCode;
 
     @NotNull
     private String pincode;
@@ -25,12 +25,12 @@ public class VendorDTO implements Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getShortCode() {
+        return shortCode;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setShortCode(String shortCode) {
+        this.shortCode = shortCode;
     }
 
     public String getPincode() {
@@ -66,7 +66,7 @@ public class VendorDTO implements Serializable {
     public String toString() {
         return "VendorDTO{" +
             "id=" + getId() +
-            ", name='" + getName() + "'" +
+            ", shortCode='" + getShortCode() + "'" +
             ", pincode='" + getPincode() + "'" +
             "}";
     }
