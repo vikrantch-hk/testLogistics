@@ -33,9 +33,9 @@ export class VendorDetail extends React.Component<IVendorDetailProps> {
           <Row size="md">
             <dl className="jh-entity-details">
               <dt>
-                <span id="name">Name</span>
+                <span id="shortCode">Short Code</span>
               </dt>
-              <dd>{vendor.name}</dd>
+              <dd>{vendor.shortCode}</dd>
               <dt>
                 <span id="pincode">Pincode</span>
               </dt>

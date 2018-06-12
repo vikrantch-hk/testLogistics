@@ -91,12 +91,12 @@ export class VendorUpdate extends React.Component<IVendorUpdateProps, IVendorUpd
                   </AvGroup>
                 ) : null}
                 <AvGroup>
-                  <Label id="nameLabel" for="name">
-                    Name
+                  <Label id="shortCodeLabel" for="shortCode">
+                    Short Code
                   </Label>
                   <AvField
                     type="text"
-                    name="name"
+                    name="shortCode"
                     validate={{
                       required: { value: true, errorMessage: 'This field is required.' }
                     }}

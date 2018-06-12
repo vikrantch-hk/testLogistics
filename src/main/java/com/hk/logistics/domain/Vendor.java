@@ -47,17 +47,17 @@ public class Vendor implements Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getShortCode() {
+        return shortCode;
     }
 
-    public Vendor name(String name) {
-        this.name = name;
+    public Vendor shortCode(String shortCode) {
+        this.shortCode = shortCode;
         return this;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setShortCode(String shortCode) {
+        this.shortCode = shortCode;
     }
 
     public String getPincode() {
@@ -132,7 +132,7 @@ public class Vendor implements Serializable {
     public String toString() {
         return "Vendor{" +
             "id=" + getId() +
-            ", name='" + getName() + "'" +
+            ", shortCode='" + getShortCode() + "'" +
             ", pincode='" + getPincode() + "'" +
             "}";
     }

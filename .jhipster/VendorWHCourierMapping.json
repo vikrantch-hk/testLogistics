@@ -13,7 +13,7 @@
             "relationshipType": "many-to-one",
             "relationshipName": "vendor",
             "otherEntityName": "vendor",
-            "otherEntityField": "name"
+            "otherEntityField": "shortCode"
         },
         {
             "relationshipType": "many-to-one",
