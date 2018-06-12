@@ -138,6 +138,24 @@ export class CourierAttributesUpdate extends React.Component<ICourierAttributesU
                     Card On Delivery Ground
                   </Label>
                 </AvGroup>
+                <AvGroup>
+                  <Label id="hkShippingLabel" check>
+                    <AvInput type="checkbox" className="form-control" name="hkShipping" />
+                    Hk Shipping
+                  </Label>
+                </AvGroup>
+                <AvGroup>
+                  <Label id="vendorShippingLabel" check>
+                    <AvInput type="checkbox" className="form-control" name="vendorShipping" />
+                    Vendor Shipping
+                  </Label>
+                </AvGroup>
+                <AvGroup>
+                  <Label id="reversePickupLabel" check>
+                    <AvInput type="checkbox" className="form-control" name="reversePickup" />
+                    Reverse Pickup
+                  </Label>
+                </AvGroup>
                 <Button tag={Link} id="cancel-save" to="/entity/courier-attributes" replace color="info">
                   <FontAwesomeIcon icon="arrow-left" />&nbsp;
                   <span className="d-none d-md-inline">Back</span>

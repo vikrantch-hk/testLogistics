@@ -52,6 +52,18 @@ public class CourierAttributes implements Serializable {
     @Column(name = "card_on_delivery_ground", nullable = false)
     private Boolean cardOnDeliveryGround;
 
+    @NotNull
+    @Column(name = "hk_shipping", nullable = false)
+    private Boolean hkShipping;
+
+    @NotNull
+    @Column(name = "vendor_shipping", nullable = false)
+    private Boolean vendorShipping;
+
+    @NotNull
+    @Column(name = "reverse_pickup", nullable = false)
+    private Boolean reversePickup;
+
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
         return id;
@@ -164,6 +176,45 @@ public class CourierAttributes implements Serializable {
     public void setCardOnDeliveryGround(Boolean cardOnDeliveryGround) {
         this.cardOnDeliveryGround = cardOnDeliveryGround;
     }
+
+    public Boolean isHkShipping() {
+        return hkShipping;
+    }
+
+    public CourierAttributes hkShipping(Boolean hkShipping) {
+        this.hkShipping = hkShipping;
+        return this;
+    }
+
+    public void setHkShipping(Boolean hkShipping) {
+        this.hkShipping = hkShipping;
+    }
+
+    public Boolean isVendorShipping() {
+        return vendorShipping;
+    }
+
+    public CourierAttributes vendorShipping(Boolean vendorShipping) {
+        this.vendorShipping = vendorShipping;
+        return this;
+    }
+
+    public void setVendorShipping(Boolean vendorShipping) {
+        this.vendorShipping = vendorShipping;
+    }
+
+    public Boolean isReversePickup() {
+        return reversePickup;
+    }
+
+    public CourierAttributes reversePickup(Boolean reversePickup) {
+        this.reversePickup = reversePickup;
+        return this;
+    }
+
+    public void setReversePickup(Boolean reversePickup) {
+        this.reversePickup = reversePickup;
+    }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
     @Override
@@ -198,6 +249,9 @@ public class CourierAttributes implements Serializable {
             ", reverseGround='" + isReverseGround() + "'" +
             ", cardOnDeliveryAir='" + isCardOnDeliveryAir() + "'" +
             ", cardOnDeliveryGround='" + isCardOnDeliveryGround() + "'" +
+            ", hkShipping='" + isHkShipping() + "'" +
+            ", vendorShipping='" + isVendorShipping() + "'" +
+            ", reversePickup='" + isReversePickup() + "'" +
             "}";
     }
 }

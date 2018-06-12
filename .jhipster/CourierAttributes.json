@@ -55,6 +55,27 @@
             "fieldValidateRules": [
                 "required"
             ]
+        },
+        {
+            "fieldName": "hkShipping",
+            "fieldType": "Boolean",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "vendorShipping",
+            "fieldType": "Boolean",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "reversePickup",
+            "fieldType": "Boolean",
+            "fieldValidateRules": [
+                "required"
+            ]
         }
     ],
     "relationships": [],

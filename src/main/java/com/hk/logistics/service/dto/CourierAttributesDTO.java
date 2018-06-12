@@ -35,6 +35,15 @@ public class CourierAttributesDTO implements Serializable {
     @NotNull
     private Boolean cardOnDeliveryGround;
 
+    @NotNull
+    private Boolean hkShipping;
+
+    @NotNull
+    private Boolean vendorShipping;
+
+    @NotNull
+    private Boolean reversePickup;
+
     public Long getId() {
         return id;
     }
@@ -107,6 +116,30 @@ public class CourierAttributesDTO implements Serializable {
         this.cardOnDeliveryGround = cardOnDeliveryGround;
     }
 
+    public Boolean isHkShipping() {
+        return hkShipping;
+    }
+
+    public void setHkShipping(Boolean hkShipping) {
+        this.hkShipping = hkShipping;
+    }
+
+    public Boolean isVendorShipping() {
+        return vendorShipping;
+    }
+
+    public void setVendorShipping(Boolean vendorShipping) {
+        this.vendorShipping = vendorShipping;
+    }
+
+    public Boolean isReversePickup() {
+        return reversePickup;
+    }
+
+    public void setReversePickup(Boolean reversePickup) {
+        this.reversePickup = reversePickup;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -140,6 +173,9 @@ public class CourierAttributesDTO implements Serializable {
             ", reverseGround='" + isReverseGround() + "'" +
             ", cardOnDeliveryAir='" + isCardOnDeliveryAir() + "'" +
             ", cardOnDeliveryGround='" + isCardOnDeliveryGround() + "'" +
+            ", hkShipping='" + isHkShipping() + "'" +
+            ", vendorShipping='" + isVendorShipping() + "'" +
+            ", reversePickup='" + isReversePickup() + "'" +
             "}";
     }
 }
