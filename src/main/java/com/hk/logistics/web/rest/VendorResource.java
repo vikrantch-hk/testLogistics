@@ -8,15 +8,28 @@ import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.VendorDTO;
 import com.hk.logistics.service.mapper.VendorMapper;
 import io.github.jhipster.web.util.ResponseUtil;
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +52,77 @@ public class VendorResource {
         this.vendorRepository = vendorRepository;
         this.vendorMapper = vendorMapper;
     }
+    
+	@RequestMapping(value = "/upload", method = RequestMethod.POST,produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody ResponseEntity<Vendor> handleFileUpload(
+            @RequestParam(value="file", required=false) MultipartFile	 file) throws URISyntaxException {
+		
+    	Long rowCount = 0L;
+    	Vendor result = null;
+    	Vendor vendorDetail = new Vendor();
+    	List<Vendor> vendorBatch = new ArrayList<Vendor>();
+
+        try {
+        	POIFSFileSystem fileSystem = null;      
+			try {//get the excel document
+				fileSystem = new POIFSFileSystem(new ByteArrayInputStream(file.getBytes()));
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+				log.error("The file uploaded is not an excel file");
+			}
+			
+			HSSFWorkbook workBook = new HSSFWorkbook (fileSystem);
+			HSSFSheet sheet = workBook.getSheetAt (0);
+			Iterator rows = sheet.rowIterator();
+			
+			while(rows.hasNext()){	
+				HSSFRow row = (HSSFRow) rows.next();
+				log.info("Row No.: " + row.getRowNum ());
+				
+				if(row.getRowNum() > 1) {//TODO : >1
+					//HW0011 bug#1910
+					rowCount = rowCount + 1;
+					 
+					/*countryDetail.setId(1l);*/
+					vendorDetail.setId(new Long(row.getRowNum() - 1));
+					
+					Iterator cells = row.cellIterator();
+					while(cells.hasNext()) {
+						HSSFCell cell = (HSSFCell) cells.next();
+						HSSFCellStyle cellStyle = cell.getCellStyle();
+						log.info("Cell No.: " + cell.getNumericCellValue());
+						log.info("Cell type: " + cell.getCellTypeEnum());
+						
+						if(cell.getNumericCellValue() == 0){
+							vendorDetail.setShortCode(String.valueOf(cell.getStringCellValue()));
+						}
+						else if(cell.getNumericCellValue() == 1){
+							vendorDetail.setPincode(String.valueOf(cell.getStringCellValue()));
+						}
+					}					
+					vendorBatch.add(vendorDetail);						
+				}
+			}
+			
+			if(vendorBatch.size() > 0){
+				for(Vendor vendor : vendorBatch){
+					result = vendorRepository.save(vendor);
+				}
+				return ResponseEntity.created(new URI("/api/countries/"))
+			            .headers(HeaderUtil.createEntityCreationAlert("country", null))
+			            .body(result);
+			}else{
+				return ResponseEntity.badRequest()
+	            		.headers(HeaderUtil.createFailureAlert("country", "errorEmptyUpload", "File cannot be empty")).body(null);
+			}
+        }catch (RuntimeException | IOException e) {
+            log.error("Error while uploading.", e);
+            return ResponseEntity.badRequest()
+            		.headers(HeaderUtil.createFailureAlert("country", "errorUpload", "Error While Uploading")).body(null);
+        }       
+    }
+    
 
     /**
      * POST  /vendors : Create a new vendor.
