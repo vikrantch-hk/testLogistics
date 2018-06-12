@@ -100,14 +100,6 @@ public class Vendor implements Serializable {
     
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
-    public String getShortCode() {
-		return shortCode;
-	}
-
-	public void setShortCode(String shortCode) {
-		this.shortCode = shortCode;
-	}
-
 	@Override
     public boolean equals(Object o) {
         if (this == o) {

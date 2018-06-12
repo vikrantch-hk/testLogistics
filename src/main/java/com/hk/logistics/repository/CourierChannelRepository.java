@@ -2,6 +2,9 @@ package com.hk.logistics.repository;
 
 import com.hk.logistics.domain.CourierChannel;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
 import org.springframework.data.jpa.repository.*;
 
 /**
@@ -11,4 +14,5 @@ import org.springframework.data.jpa.repository.*;
 @Repository
 public interface CourierChannelRepository extends JpaRepository<CourierChannel, Long> {
 	
+	List<CourierChannel> findByName(String name);
 }

@@ -1,5 +1,6 @@
 package com.hk.logistics.repository;
 
+import com.hk.logistics.domain.CourierAttributes;
 import com.hk.logistics.domain.PincodeCourierMapping;
 import com.hk.logistics.domain.SourceDestinationMapping;
 import com.hk.logistics.domain.VendorWHCourierMapping;
@@ -17,5 +18,10 @@ import org.springframework.data.jpa.repository.*;
 @Repository
 public interface PincodeCourierMappingRepository extends JpaRepository<PincodeCourierMapping, Long> {
 
-	List<PincodeCourierMapping> findBySourceDestinationMappingAndVendorWHCourierMappingIn(SourceDestinationMapping sourceDestinationMapping,List<VendorWHCourierMapping> vendorWHCourierMapping);
+	List<PincodeCourierMapping> findBySourceDestinationMappingInAndVendorWHCourierMappingIn(List<SourceDestinationMapping> sourceDestinationMapping,
+			List<VendorWHCourierMapping> vendorWHCourierMapping);
+	
+	@Query("Select id from PincodeCourierMapping p where p.attributes.codGround=true and p.sourceDestinationMapping in :sourceDestinationMapping and p.vendorWHCourierMapping=:vendorWHCourierMapping")
+	List<PincodeCourierMapping> findBySourceDestinationMappingAndVendorWHCourierMappingInAndCourierAttributes(List<SourceDestinationMapping> sourceDestinationMapping,
+			List<VendorWHCourierMapping> vendorWHCourierMapping);
 }

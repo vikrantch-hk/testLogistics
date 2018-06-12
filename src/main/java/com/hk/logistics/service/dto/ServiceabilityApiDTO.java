@@ -11,7 +11,7 @@ public class ServiceabilityApiDTO {
 	private boolean vendorShipping;
 	private boolean vendorShippingCod;
 	private boolean groundShipped;
-	private String sourcePincode;
+	private String sourcePincodes;
 	private boolean hkFulfilled;
 	private Boolean jit;
 	private String courierChannel;//TODO add request courier channel
@@ -58,12 +58,12 @@ public class ServiceabilityApiDTO {
 		this.groundShipped = groundShipped;
 	}
 
-	public String getSourcePincode() {
-		return sourcePincode;
+	public String getSourcePincodes() {
+		return sourcePincodes;
 	}
 
-	public void setSourcePincode(String sourcePincode) {
-		this.sourcePincode = sourcePincode;
+	public void setSourcePincodes(String sourcePincodes) {
+		this.sourcePincodes = sourcePincodes;
 	}
 
 	public boolean isVendorShipping() {

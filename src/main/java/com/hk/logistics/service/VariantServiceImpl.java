@@ -1,5 +1,7 @@
 package com.hk.logistics.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +42,14 @@ public class VariantServiceImpl implements VariantService{
 	SourceDestinationMappingRepository sourceDestinationMappingRepository;
 	@Autowired
 	PincodeCourierMappingRepository pincodeCourierMappingRepository;
+	@Autowired
+	PincodeCourierService pincodeCourierService;
 
 	@Override
 	public PincodeDeliveryInfoResponse getVariantDeliveryInfoByPincode(PincodeDeliveryInfoRequest pincodeDeliveryInfoRequest) {
 
 		PincodeDeliveryInfoResponse pincodeDeliveryInfoResponse=new PincodeDeliveryInfoResponse(StoreConstants.DEFAULT_STORE_ID);
-		validate(pincodeDeliveryInfoRequest, pincodeDeliveryInfoResponse);
+		validatePincodeDeliverInfoRequest(pincodeDeliveryInfoRequest, pincodeDeliveryInfoResponse);
 		if(pincodeDeliveryInfoResponse.isException()){
 			return pincodeDeliveryInfoResponse;
 		}
@@ -54,26 +58,28 @@ public class VariantServiceImpl implements VariantService{
 		if(pincodeDeliveryInfoResponse.isException()){
 			return pincodeDeliveryInfoResponse;
 		}
-		String sourcePincode=pincodeDeliveryInfoRequest.getSvApiObj().getSourcePincode();
-
-		SourceDestinationMapping sourceDestinationMapping=sourceDestinationMappingRepository.findBySourcePincodeAndDestinationPincode(sourcePincode, destinationPincode.getPincode());
+		
+		String sourcePincodes=pincodeDeliveryInfoRequest.getSvApiObj().getSourcePincodes();
+		String[] values =sourcePincodes.split("\\s*,\\s*");
+		List<String> sourcePincodesList=new ArrayList<String>(Arrays.asList(values));
+		List<SourceDestinationMapping> sourceDestinationMapping=sourceDestinationMappingRepository.findBySourcePincodeInAndDestinationPincode(sourcePincodesList, destinationPincode.getPincode());
 		Vendor vendor=vendorRepository.findByShortCode(pincodeDeliveryInfoRequest.getSvApiObj().getVendorShortCode());
-		if(vendor!=null){
-			CourierChannel courierChannel=courierChannelRepository.findById(vendor.getId()).get();
-			if(courierChannel!=null){
-				List<VendorWHCourierMapping> vendorWHCourierMappings=vendorWhCourierMappingRepository.findByVendorAndCourierChannel(vendor, courierChannel);
-				if(vendorWHCourierMappings!=null){
-					List<PincodeCourierMapping> pincodeCourierMappings=pincodeCourierMappingRepository.findBySourceDestinationMappingAndVendorWHCourierMappingIn(sourceDestinationMapping,vendorWHCourierMappings);
-					if(pincodeCourierMappings!=null){
-						return 
-					}
-				}
-			}
+		Integer estimatedDeliveryDays=pincodeCourierService.getEstimatedDeliveryDaysInfo(pincodeDeliveryInfoRequest, pincodeDeliveryInfoResponse, sourceDestinationMapping,
+				vendor);
+		
+		if(estimatedDeliveryDays==null){
+			pincodeDeliveryInfoResponse.addMessage(MessageConstants.COURIER_SERVICE_NOT_AVAILABLE);
+			pincodeDeliveryInfoResponse.setException(true);
 		}
-
+		List<PincodeCourierMapping> pincodeCourierMappings=pincodeCourierService.getPincodeCourierMappingListForCOD(pincodeDeliveryInfoRequest, pincodeDeliveryInfoResponse, sourceDestinationMapping, vendor);
+		if(pincodeCourierMappings!=null){
+			pincodeDeliveryInfoResponse.setEstmDeliveryDays(estimatedDeliveryDays);
+		    pincodeDeliveryInfoResponse.setCodAllowed(true);
+		}
 		return null;
 	}
 
+	
 	public PincodeDeliveryInfoResponse validateDestinationPincode(PincodeDeliveryInfoResponse pincodeDeliveryInfoResponse,
 			Pincode destinationPincode) {
 		if(destinationPincode==null){
@@ -83,7 +89,7 @@ public class VariantServiceImpl implements VariantService{
 		return pincodeDeliveryInfoResponse;
 	}
 
-	public PincodeDeliveryInfoResponse validate(PincodeDeliveryInfoRequest pincodeDeliveryInfoRequest,PincodeDeliveryInfoResponse pincodeDeliveryInfoResponse){
+	public PincodeDeliveryInfoResponse validatePincodeDeliverInfoRequest(PincodeDeliveryInfoRequest pincodeDeliveryInfoRequest,PincodeDeliveryInfoResponse pincodeDeliveryInfoResponse){
 		if(pincodeDeliveryInfoRequest==null || pincodeDeliveryInfoRequest.getStoreId()==null ){
 			pincodeDeliveryInfoResponse.addMessage(MessageConstants.REQ_PARAMETERS_INVALID);
 			pincodeDeliveryInfoResponse.setException(true);
