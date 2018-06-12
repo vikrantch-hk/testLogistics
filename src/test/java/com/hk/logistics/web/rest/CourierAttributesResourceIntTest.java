@@ -66,6 +66,15 @@ public class CourierAttributesResourceIntTest {
     private static final Boolean DEFAULT_CARD_ON_DELIVERY_GROUND = false;
     private static final Boolean UPDATED_CARD_ON_DELIVERY_GROUND = true;
 
+    private static final Boolean DEFAULT_HK_SHIPPING = false;
+    private static final Boolean UPDATED_HK_SHIPPING = true;
+
+    private static final Boolean DEFAULT_VENDOR_SHIPPING = false;
+    private static final Boolean UPDATED_VENDOR_SHIPPING = true;
+
+    private static final Boolean DEFAULT_REVERSE_PICKUP = false;
+    private static final Boolean UPDATED_REVERSE_PICKUP = true;
+
     @Autowired
     private CourierAttributesRepository courierAttributesRepository;
 
@@ -115,7 +124,10 @@ public class CourierAttributesResourceIntTest {
             .reverseAir(DEFAULT_REVERSE_AIR)
             .reverseGround(DEFAULT_REVERSE_GROUND)
             .cardOnDeliveryAir(DEFAULT_CARD_ON_DELIVERY_AIR)
-            .cardOnDeliveryGround(DEFAULT_CARD_ON_DELIVERY_GROUND);
+            .cardOnDeliveryGround(DEFAULT_CARD_ON_DELIVERY_GROUND)
+            .hkShipping(DEFAULT_HK_SHIPPING)
+            .vendorShipping(DEFAULT_VENDOR_SHIPPING)
+            .reversePickup(DEFAULT_REVERSE_PICKUP);
         return courierAttributes;
     }
 
@@ -148,6 +160,9 @@ public class CourierAttributesResourceIntTest {
         assertThat(testCourierAttributes.isReverseGround()).isEqualTo(DEFAULT_REVERSE_GROUND);
         assertThat(testCourierAttributes.isCardOnDeliveryAir()).isEqualTo(DEFAULT_CARD_ON_DELIVERY_AIR);
         assertThat(testCourierAttributes.isCardOnDeliveryGround()).isEqualTo(DEFAULT_CARD_ON_DELIVERY_GROUND);
+        assertThat(testCourierAttributes.isHkShipping()).isEqualTo(DEFAULT_HK_SHIPPING);
+        assertThat(testCourierAttributes.isVendorShipping()).isEqualTo(DEFAULT_VENDOR_SHIPPING);
+        assertThat(testCourierAttributes.isReversePickup()).isEqualTo(DEFAULT_REVERSE_PICKUP);
     }
 
     @Test
@@ -324,6 +339,63 @@ public class CourierAttributesResourceIntTest {
 
     @Test
     @Transactional
+    public void checkHkShippingIsRequired() throws Exception {
+        int databaseSizeBeforeTest = courierAttributesRepository.findAll().size();
+        // set the field null
+        courierAttributes.setHkShipping(null);
+
+        // Create the CourierAttributes, which fails.
+        CourierAttributesDTO courierAttributesDTO = courierAttributesMapper.toDto(courierAttributes);
+
+        restCourierAttributesMockMvc.perform(post("/api/courier-attributes")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(courierAttributesDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<CourierAttributes> courierAttributesList = courierAttributesRepository.findAll();
+        assertThat(courierAttributesList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
+    public void checkVendorShippingIsRequired() throws Exception {
+        int databaseSizeBeforeTest = courierAttributesRepository.findAll().size();
+        // set the field null
+        courierAttributes.setVendorShipping(null);
+
+        // Create the CourierAttributes, which fails.
+        CourierAttributesDTO courierAttributesDTO = courierAttributesMapper.toDto(courierAttributes);
+
+        restCourierAttributesMockMvc.perform(post("/api/courier-attributes")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(courierAttributesDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<CourierAttributes> courierAttributesList = courierAttributesRepository.findAll();
+        assertThat(courierAttributesList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
+    public void checkReversePickupIsRequired() throws Exception {
+        int databaseSizeBeforeTest = courierAttributesRepository.findAll().size();
+        // set the field null
+        courierAttributes.setReversePickup(null);
+
+        // Create the CourierAttributes, which fails.
+        CourierAttributesDTO courierAttributesDTO = courierAttributesMapper.toDto(courierAttributes);
+
+        restCourierAttributesMockMvc.perform(post("/api/courier-attributes")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(courierAttributesDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<CourierAttributes> courierAttributesList = courierAttributesRepository.findAll();
+        assertThat(courierAttributesList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
     public void getAllCourierAttributes() throws Exception {
         // Initialize the database
         courierAttributesRepository.saveAndFlush(courierAttributes);
@@ -340,7 +412,10 @@ public class CourierAttributesResourceIntTest {
             .andExpect(jsonPath("$.[*].reverseAir").value(hasItem(DEFAULT_REVERSE_AIR.booleanValue())))
             .andExpect(jsonPath("$.[*].reverseGround").value(hasItem(DEFAULT_REVERSE_GROUND.booleanValue())))
             .andExpect(jsonPath("$.[*].cardOnDeliveryAir").value(hasItem(DEFAULT_CARD_ON_DELIVERY_AIR.booleanValue())))
-            .andExpect(jsonPath("$.[*].cardOnDeliveryGround").value(hasItem(DEFAULT_CARD_ON_DELIVERY_GROUND.booleanValue())));
+            .andExpect(jsonPath("$.[*].cardOnDeliveryGround").value(hasItem(DEFAULT_CARD_ON_DELIVERY_GROUND.booleanValue())))
+            .andExpect(jsonPath("$.[*].hkShipping").value(hasItem(DEFAULT_HK_SHIPPING.booleanValue())))
+            .andExpect(jsonPath("$.[*].vendorShipping").value(hasItem(DEFAULT_VENDOR_SHIPPING.booleanValue())))
+            .andExpect(jsonPath("$.[*].reversePickup").value(hasItem(DEFAULT_REVERSE_PICKUP.booleanValue())));
     }
     
 
@@ -362,7 +437,10 @@ public class CourierAttributesResourceIntTest {
             .andExpect(jsonPath("$.reverseAir").value(DEFAULT_REVERSE_AIR.booleanValue()))
             .andExpect(jsonPath("$.reverseGround").value(DEFAULT_REVERSE_GROUND.booleanValue()))
             .andExpect(jsonPath("$.cardOnDeliveryAir").value(DEFAULT_CARD_ON_DELIVERY_AIR.booleanValue()))
-            .andExpect(jsonPath("$.cardOnDeliveryGround").value(DEFAULT_CARD_ON_DELIVERY_GROUND.booleanValue()));
+            .andExpect(jsonPath("$.cardOnDeliveryGround").value(DEFAULT_CARD_ON_DELIVERY_GROUND.booleanValue()))
+            .andExpect(jsonPath("$.hkShipping").value(DEFAULT_HK_SHIPPING.booleanValue()))
+            .andExpect(jsonPath("$.vendorShipping").value(DEFAULT_VENDOR_SHIPPING.booleanValue()))
+            .andExpect(jsonPath("$.reversePickup").value(DEFAULT_REVERSE_PICKUP.booleanValue()));
     }
     @Test
     @Transactional
@@ -392,7 +470,10 @@ public class CourierAttributesResourceIntTest {
             .reverseAir(UPDATED_REVERSE_AIR)
             .reverseGround(UPDATED_REVERSE_GROUND)
             .cardOnDeliveryAir(UPDATED_CARD_ON_DELIVERY_AIR)
-            .cardOnDeliveryGround(UPDATED_CARD_ON_DELIVERY_GROUND);
+            .cardOnDeliveryGround(UPDATED_CARD_ON_DELIVERY_GROUND)
+            .hkShipping(UPDATED_HK_SHIPPING)
+            .vendorShipping(UPDATED_VENDOR_SHIPPING)
+            .reversePickup(UPDATED_REVERSE_PICKUP);
         CourierAttributesDTO courierAttributesDTO = courierAttributesMapper.toDto(updatedCourierAttributes);
 
         restCourierAttributesMockMvc.perform(put("/api/courier-attributes")
@@ -412,6 +493,9 @@ public class CourierAttributesResourceIntTest {
         assertThat(testCourierAttributes.isReverseGround()).isEqualTo(UPDATED_REVERSE_GROUND);
         assertThat(testCourierAttributes.isCardOnDeliveryAir()).isEqualTo(UPDATED_CARD_ON_DELIVERY_AIR);
         assertThat(testCourierAttributes.isCardOnDeliveryGround()).isEqualTo(UPDATED_CARD_ON_DELIVERY_GROUND);
+        assertThat(testCourierAttributes.isHkShipping()).isEqualTo(UPDATED_HK_SHIPPING);
+        assertThat(testCourierAttributes.isVendorShipping()).isEqualTo(UPDATED_VENDOR_SHIPPING);
+        assertThat(testCourierAttributes.isReversePickup()).isEqualTo(UPDATED_REVERSE_PICKUP);
     }
 
     @Test
