@@ -10,5 +10,5 @@ import org.springframework.data.jpa.repository.*;
 @SuppressWarnings("unused")
 @Repository
 public interface CourierChannelRepository extends JpaRepository<CourierChannel, Long> {
-
+	
 }

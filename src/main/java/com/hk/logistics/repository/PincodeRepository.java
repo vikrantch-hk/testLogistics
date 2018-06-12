@@ -1,8 +1,11 @@
 package com.hk.logistics.repository;
 
-import com.hk.logistics.domain.Pincode;
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import org.springframework.data.jpa.repository.*;
+
+import com.hk.logistics.domain.Pincode;
 
 /**
  * Spring Data JPA repository for the Pincode entity.
@@ -10,5 +13,7 @@ import org.springframework.data.jpa.repository.*;
 @SuppressWarnings("unused")
 @Repository
 public interface PincodeRepository extends JpaRepository<Pincode, Long> {
+	
+	Pincode findByPincode(String pincode);
 
 }

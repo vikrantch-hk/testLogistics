@@ -11,4 +11,6 @@ import org.springframework.data.jpa.repository.*;
 @Repository
 public interface VendorRepository extends JpaRepository<Vendor, Long> {
 
+	Vendor findByShortCode(String shortCode);
+	
 }

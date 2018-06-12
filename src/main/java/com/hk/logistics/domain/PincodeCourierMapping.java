@@ -37,7 +37,7 @@ public class PincodeCourierMapping implements Serializable {
 
     @ManyToOne
     @JsonIgnoreProperties("")
-    private Pincode pincode;
+    private Pincode pincode;//TODO :To be removed
 
     @ManyToOne
     @JsonIgnoreProperties("")
