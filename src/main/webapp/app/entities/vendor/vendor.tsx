@@ -10,6 +10,7 @@ import { getEntities } from './vendor.reducer';
 import { IVendor } from 'app/shared/model/vendor.model';
 // tslint:disable-next-line:no-unused-variable
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
+import { FileUpload } from 'file-upload-react';
 
 export interface IVendorProps {
   getEntities: ICrudGetAllAction<IVendor>;
@@ -24,6 +25,12 @@ export class Vendor extends React.Component<IVendorProps> {
 
   render() {
     const { vendorList, match } = this.props;
+    const options = {
+      baseUrl: 'http://127.0.0.1',
+      param: {
+        fid: 0
+      }
+    };
     return (
       <div>
         <h2 id="page-heading">
@@ -32,6 +39,11 @@ export class Vendor extends React.Component<IVendorProps> {
             <FontAwesomeIcon icon="plus" />&nbsp; Create new Vendor
           </Link>
         </h2>
+        <FileUpload options={options}>
+          <Link to={`${match.url}/new`} className="btn btn-primary float-right jh-create-entity" id="jh-create-entity">
+            <FontAwesomeIcon icon="plus" />&nbsp; Create new Vendor
+          </Link>
+        </FileUpload>
         <div className="table-responsive">
           <Table responsive>
             <thead>
