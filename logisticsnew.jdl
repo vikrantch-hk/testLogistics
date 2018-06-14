@@ -9,7 +9,6 @@ entity RegionType {
 }
 
 entity CourierChannel {
-	name String
 }
 
 entity CourierGroup {
@@ -46,11 +45,16 @@ entity CourierPricingEngine {
     codCutoffAmount Double,
     variableCodCharges Double,
     validUpto LocalDate
+    costParameters String
 }
 // new entity
 entity Product {
     name String required,
 	isServiceable Boolean
+}
+// new entity
+entity Channel {
+	name String required
 }
 
 // new entity
@@ -126,7 +130,7 @@ entity PincodeRegionZone {
 }
 
 relationship ManyToMany {
-	Courier{courierChannel(name)} to CourierChannel{courier(name)},
+	//Courier{courierChannel(name)} to CourierChannel{courier(name)},
     Courier{courierGroup(name)} to CourierGroup{courier(name)}
 }
 relationship OneToMany {
@@ -138,12 +142,14 @@ relationship OneToMany {
 	//Warehouse{vendorWHCourierMapping} to VendorWHCourierMapping{pincode(pincode)},
 	//new relationship
 	CourierChannel{vendorWHCourierMapping} to VendorWHCourierMapping{courierChannel(name)}
+	Channel{courierChannel} to CourierChannel{channel(name)}
+	Courier{courierChannel} to CourierChannel{courier(name)}
+	
 }
 
 relationship ManyToOne {
     SourceDestinationMapping{product(name)} to Product,
     CourierPricingEngine{courier(name)} to Courier,
-    CourierPricingEngine{warehouse(name)} to Warehouse,
     CourierPricingEngine{regionType(name)} to RegionType,
     Pincode{city(name)} to City,
     Pincode{state(name)} to State,
@@ -151,13 +157,12 @@ relationship ManyToOne {
     Pincode{hub(name)} to Hub{pinCode},
     PincodeCourierMapping{pincode} to Pincode,
 	//new relationship
-	PincodeCourierMapping{attributes} to CourierAttributes,
 	//PincodeCourierMapping{productGroup(name)} to ProductGroup,
 	PincodeCourierMapping{vendorWHCourierMapping} to VendorWHCourierMapping,
 	PincodeCourierMapping{sourceDestinationMapping} to SourceDestinationMapping,
     PincodeRegionZone{regionType(name)} to RegionType,
     PincodeRegionZone{courierGroup(name)} to CourierGroup,
-    PincodeRegionZone{vendorWHCourierMapping} to VendorWHCourierMapping
+    PincodeRegionZone{sourceDestinationMapping} to SourceDestinationMapping
 }
 
 // Set pagination options

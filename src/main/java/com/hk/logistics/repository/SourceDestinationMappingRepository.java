@@ -16,4 +16,6 @@ import org.springframework.data.jpa.repository.*;
 public interface SourceDestinationMappingRepository extends JpaRepository<SourceDestinationMapping, Long> {
 
 	List<SourceDestinationMapping> findBySourcePincodeInAndDestinationPincode(List<String> sourcePincodes,String destinationPincode);
+	
+	SourceDestinationMapping findBySourcePincodeAndDestinationPincode(String sourcePincode,String destinationPincode);
 }

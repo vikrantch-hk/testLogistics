@@ -5,8 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
+import com.hk.logistics.criteria.SearchCriteria;
 import com.hk.logistics.domain.CourierAttributes;
 import com.hk.logistics.domain.CourierChannel;
 import com.hk.logistics.domain.PincodeCourierMapping;
@@ -21,6 +24,7 @@ import com.hk.logistics.repository.WarehouseRepository;
 import com.hk.logistics.service.dto.MessageConstants;
 import com.hk.logistics.service.dto.PincodeDeliveryInfoRequest;
 import com.hk.logistics.service.dto.PincodeDeliveryInfoResponse;
+import com.hk.logistics.specification.PincodeCourierSpecification;
 
 @Service
 public class PincodeCourierServiceImpl implements PincodeCourierService{
@@ -50,11 +54,10 @@ public class PincodeCourierServiceImpl implements PincodeCourierService{
 	}
 
 	@Override
-	public Integer getEstimatedDeliveryDaysInfo(PincodeDeliveryInfoRequest pincodeDeliveryInfoRequest,
-			PincodeDeliveryInfoResponse pincodeDeliveryInfoResponse, List<SourceDestinationMapping> sourceDestinationMapping,Vendor vendor) {
-		List<PincodeCourierMapping> pincodeCourierMappings=getPincodeCourierMappingList(pincodeDeliveryInfoRequest,pincodeDeliveryInfoResponse,sourceDestinationMapping,
+	public Integer getEstimatedDeliveryDaysInfo(PincodeDeliveryInfoResponse pincodeDeliveryInfoResponse, List<SourceDestinationMapping> sourceDestinationMapping,Vendor vendor,List<Warehouse> warehouses,String courierChannel) {
+		List<PincodeCourierMapping> pincodeCourierMappings=getPincodeCourierMappingList(warehouses,courierChannel,sourceDestinationMapping,
 				vendor);
-		if(pincodeCourierMappings!=null){
+		if(pincodeCourierMappings!=null && pincodeCourierMappings.size()>0){
 			Integer estimatedDeliveryDays=pincodeCourierService.getEstimatedDeliveryDays(pincodeCourierMappings);
 			return estimatedDeliveryDays;
 		}
@@ -62,21 +65,14 @@ public class PincodeCourierServiceImpl implements PincodeCourierService{
 	}
 
 	@Override
-	public List<PincodeCourierMapping> getPincodeCourierMappingList(PincodeDeliveryInfoRequest pincodeDeliveryInfoRequest,
-			PincodeDeliveryInfoResponse pincodeDeliveryInfoResponse, List<SourceDestinationMapping> sourceDestinationMapping,
-			Vendor vendor){
+	public List<PincodeCourierMapping> getPincodeCourierMappingList(List<Warehouse> warehouses,String courierChannel,
+			List<SourceDestinationMapping> sourceDestinationMapping,Vendor vendor){
 		if(vendor!=null){
-			String courierChannel=pincodeDeliveryInfoRequest.getSvApiObj().getCourierChannel();
 			List<CourierChannel> courierChannels=courierChannelRepository.findByName(courierChannel);
 			if(courierChannels!=null){
 				List<VendorWHCourierMapping> vendorWHCourierMappings=new ArrayList<>();
-				List<Warehouse> warehouses=new ArrayList<>();
 				if(courierChannels.get(0).getName().equals("HK")){
-					List<String> locationCodes=pincodeDeliveryInfoRequest.getSvApiObj().getLocationCodes();
-					for(String locationCode:locationCodes){
-						Warehouse warehouse1=warehouseRepository.findById(Long.parseLong(locationCode)).get();
-						warehouses.add(warehouse1);
-					}
+					vendorWHCourierMappings=vendorWHCourierMappingRepository.findByWarehouseInAndCourierChannelIn(warehouses, courierChannels);
 				}
 				else{
 					vendorWHCourierMappings=vendorWHCourierMappingRepository.findByVendorAndCourierChannelInAndActive(vendor, courierChannels,true);
@@ -91,16 +87,16 @@ public class PincodeCourierServiceImpl implements PincodeCourierService{
 	}
 
 	@Override
-	public List<PincodeCourierMapping> getPincodeCourierMappingListForCOD(
-			PincodeDeliveryInfoRequest pincodeDeliveryInfoRequest,PincodeDeliveryInfoResponse pincodeDeliveryInfoResponse, List<SourceDestinationMapping> sourceDestinationMapping,Vendor vendor) {
+	public List<PincodeCourierMapping> getPincodeCourierMappingListOnShipmentServiceType(String courierChannel,List<SourceDestinationMapping> sourceDestinationMapping,Vendor vendor,String shipmentServiceType) {
 		if(vendor!=null){
-			String courierChannel=pincodeDeliveryInfoRequest.getSvApiObj().getCourierChannel();
 			List<CourierChannel> courierChannels=courierChannelRepository.findByName(courierChannel);
 			if(courierChannels!=null){
 				List<VendorWHCourierMapping> vendorWHCourierMappings=vendorWHCourierMappingRepository.findByVendorAndCourierChannelInAndActive(vendor, courierChannels,true);
 				if(vendorWHCourierMappings!=null){
-					List<PincodeCourierMapping> pincodeCourierMappings=pincodeCourierMappingRepository.findBySourceDestinationMappingAndVendorWHCourierMappingInAndCourierAttributes(
-							sourceDestinationMapping, vendorWHCourierMappings);
+					PincodeCourierSpecification pincodeCourierSpecification1=new PincodeCourierSpecification(new SearchCriteria(shipmentServiceType,":",true));
+					PincodeCourierSpecification pincodeCourierSpecification2=new PincodeCourierSpecification(new SearchCriteria("sourceDestinationMapping",":",sourceDestinationMapping));
+					PincodeCourierSpecification pincodeCourierSpecification3=new PincodeCourierSpecification(new SearchCriteria("vendorWHCourierMapping",":",vendorWHCourierMappings));
+					List<PincodeCourierMapping> pincodeCourierMappings=pincodeCourierMappingRepository.findAll(Specification.where(pincodeCourierSpecification1).and(pincodeCourierSpecification2).and(pincodeCourierSpecification3));
 					if(pincodeCourierMappings!=null){
 						return pincodeCourierMappings;
 					}

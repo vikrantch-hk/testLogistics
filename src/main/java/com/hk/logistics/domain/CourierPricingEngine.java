@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -58,6 +60,9 @@ public class CourierPricingEngine implements Serializable {
 
     @Column(name = "valid_upto")
     private LocalDate validUpto;
+    
+    @Column(name = "cost_parameter")
+    private String costParameters; 
 
     @ManyToOne
     @JsonIgnoreProperties("")
@@ -261,9 +266,18 @@ public class CourierPricingEngine implements Serializable {
     public void setRegionType(RegionType regionType) {
         this.regionType = regionType;
     }
+    
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
-    @Override
+    public String getCostParameters() {
+		return costParameters;
+	}
+
+	public void setCostParameters(String costParameters) {
+		this.costParameters = costParameters;
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

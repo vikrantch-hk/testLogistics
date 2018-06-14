@@ -93,11 +93,11 @@ public class PincodeCourierMappingResource {
      *
      * @return the ResponseEntity with status 200 (OK) and the estimated delivery days with cod allowed flag and pincode in body
      */
-    @PostMapping("/variant/delivery/days")
+   /* @PostMapping("/variant/delivery/days")
     @Timed
     public PincodeDeliveryInfoResponse getEstimatedDeliveryDate(PincodeDeliveryInfoRequest pincodeDeliveryInfoRequestDTO){
     	
-    }
+    }*/
 
     /**
      * GET  /pincode-courier-mappings : get all the pincodeCourierMappings.

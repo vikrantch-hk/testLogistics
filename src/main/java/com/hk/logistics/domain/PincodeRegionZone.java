@@ -28,9 +28,13 @@ public class PincodeRegionZone implements Serializable {
     @JsonIgnoreProperties("")
     private CourierGroup courierGroup;
 
+    /*@ManyToOne
+    @JsonIgnoreProperties("")
+    private VendorWHCourierMapping vendorWHCourierMapping;*/
+    
     @ManyToOne
     @JsonIgnoreProperties("")
-    private VendorWHCourierMapping vendorWHCourierMapping;
+    private SourceDestinationMapping sourceDestinationMapping;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -67,7 +71,7 @@ public class PincodeRegionZone implements Serializable {
         this.courierGroup = courierGroup;
     }
 
-    public VendorWHCourierMapping getVendorWHCourierMapping() {
+  /*  public VendorWHCourierMapping getVendorWHCourierMapping() {
         return vendorWHCourierMapping;
     }
 
@@ -78,10 +82,19 @@ public class PincodeRegionZone implements Serializable {
 
     public void setVendorWHCourierMapping(VendorWHCourierMapping vendorWHCourierMapping) {
         this.vendorWHCourierMapping = vendorWHCourierMapping;
-    }
+    }*/
+    
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
-    @Override
+    public SourceDestinationMapping getSourceDestinationMapping() {
+		return sourceDestinationMapping;
+	}
+
+	public void setSourceDestinationMapping(SourceDestinationMapping sourceDestinationMapping) {
+		this.sourceDestinationMapping = sourceDestinationMapping;
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

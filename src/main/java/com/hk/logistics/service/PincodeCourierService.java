@@ -17,17 +17,14 @@ public interface PincodeCourierService {
 	
 	 Integer getEstimatedDeliveryDays(List<PincodeCourierMapping> pincodeCourierMappings);
 
-	Integer getEstimatedDeliveryDaysInfo(PincodeDeliveryInfoRequest pincodeDeliveryInfoRequest,
-			PincodeDeliveryInfoResponse pincodeDeliveryInfoResponse, List<SourceDestinationMapping> sourceDestinationMapping,
-			Vendor vendor);
+	Integer getEstimatedDeliveryDaysInfo(PincodeDeliveryInfoResponse pincodeDeliveryInfoResponse, List<SourceDestinationMapping> sourceDestinationMapping,
+			Vendor vendor,List<Warehouse> warehouses,String courierChannel);
 
-	List<PincodeCourierMapping> getPincodeCourierMappingList(PincodeDeliveryInfoRequest pincodeDeliveryInfoRequest,
-			PincodeDeliveryInfoResponse pincodeDeliveryInfoResponse, List<SourceDestinationMapping> sourceDestinationMapping,
-			Vendor vendor);
- 
-	List<PincodeCourierMapping> getPincodeCourierMappingListForCOD(PincodeDeliveryInfoRequest pincodeDeliveryInfoRequest,
-			PincodeDeliveryInfoResponse pincodeDeliveryInfoResponse, List<SourceDestinationMapping> sourceDestinationMapping,
-			Vendor vendor);
+	List<PincodeCourierMapping> getPincodeCourierMappingList(List<Warehouse> warehouses,
+			String courierChannel, List<SourceDestinationMapping> sourceDestinationMapping, Vendor vendor);
+
+	List<PincodeCourierMapping> getPincodeCourierMappingListOnShipmentServiceType(String courierChannel,
+			List<SourceDestinationMapping> sourceDestinationMapping, Vendor vendor, String shipmentServiceType);
 	
 
 }

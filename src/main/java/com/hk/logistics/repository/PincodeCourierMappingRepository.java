@@ -16,12 +16,12 @@ import org.springframework.data.jpa.repository.*;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface PincodeCourierMappingRepository extends JpaRepository<PincodeCourierMapping, Long> {
+public interface PincodeCourierMappingRepository extends JpaRepository<PincodeCourierMapping, Long>,JpaSpecificationExecutor<PincodeCourierMapping> {
 
 	List<PincodeCourierMapping> findBySourceDestinationMappingInAndVendorWHCourierMappingIn(List<SourceDestinationMapping> sourceDestinationMapping,
 			List<VendorWHCourierMapping> vendorWHCourierMapping);
 	
-	@Query("Select id from PincodeCourierMapping p where p.attributes.codGround=true and p.sourceDestinationMapping in :sourceDestinationMapping and p.vendorWHCourierMapping=:vendorWHCourierMapping")
-	List<PincodeCourierMapping> findBySourceDestinationMappingAndVendorWHCourierMappingInAndCourierAttributes(List<SourceDestinationMapping> sourceDestinationMapping,
+	//@Query("select * from PincodeCourierMapping p where p.attributes.codAir=true and p.sourceDestinationMapping in :sourceDestinationMapping and p.vendorWHCourierMapping=:vendorWHCourierMapping")
+	List<PincodeCourierMapping> findBySourceDestinationMappingAndVendorWHCourierMappingIn(List<SourceDestinationMapping> sourceDestinationMapping,
 			List<VendorWHCourierMapping> vendorWHCourierMapping);
 }

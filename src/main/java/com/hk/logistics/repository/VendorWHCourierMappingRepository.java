@@ -19,5 +19,5 @@ import org.springframework.data.jpa.repository.*;
 public interface VendorWHCourierMappingRepository extends JpaRepository<VendorWHCourierMapping, Long> {
 
 	List<VendorWHCourierMapping> findByVendorAndCourierChannelInAndActive(Vendor vendor,List<CourierChannel> courierChannel,Boolean active);
-	List<VendorWHCourierMapping> findByWarehouseAndCourierChannelIn(Warehouse warehouse,List<CourierChannel> courierChannel);
+	List<VendorWHCourierMapping> findByWarehouseInAndCourierChannelIn(List<Warehouse> warehouse,List<CourierChannel> courierChannel);
 }
