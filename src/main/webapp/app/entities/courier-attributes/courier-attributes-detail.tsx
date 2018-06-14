@@ -64,18 +64,6 @@ export class CourierAttributesDetail extends React.Component<ICourierAttributesD
                 <span id="cardOnDeliveryGround">Card On Delivery Ground</span>
               </dt>
               <dd>{courierAttributes.cardOnDeliveryGround ? 'true' : 'false'}</dd>
-              <dt>
-                <span id="hkShipping">Hk Shipping</span>
-              </dt>
-              <dd>{courierAttributes.hkShipping ? 'true' : 'false'}</dd>
-              <dt>
-                <span id="vendorShipping">Vendor Shipping</span>
-              </dt>
-              <dd>{courierAttributes.vendorShipping ? 'true' : 'false'}</dd>
-              <dt>
-                <span id="reversePickup">Reverse Pickup</span>
-              </dt>
-              <dd>{courierAttributes.reversePickup ? 'true' : 'false'}</dd>
             </dl>
           </Row>
           <Button tag={Link} to="/entity/courier-attributes" replace color="info">

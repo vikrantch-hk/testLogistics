@@ -1,10 +1,5 @@
 {
-    "fields": [
-        {
-            "fieldName": "name",
-            "fieldType": "String"
-        }
-    ],
+    "fields": [],
     "relationships": [
         {
             "relationshipType": "one-to-many",
@@ -13,11 +8,16 @@
             "otherEntityRelationshipName": "courierChannel"
         },
         {
-            "relationshipType": "many-to-many",
+            "relationshipType": "many-to-one",
+            "relationshipName": "channel",
+            "otherEntityName": "channel",
+            "otherEntityField": "name"
+        },
+        {
+            "relationshipType": "many-to-one",
             "relationshipName": "courier",
             "otherEntityName": "courier",
-            "ownerSide": false,
-            "otherEntityRelationshipName": "courierChannel"
+            "otherEntityField": "name"
         }
     ],
     "changelogDate": "20180608074049",

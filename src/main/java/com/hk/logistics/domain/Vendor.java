@@ -26,10 +26,6 @@ public class Vendor implements Serializable {
     @NotNull
     @Column(name = "name", nullable = false)
     private String name;
-    
-    @NotNull
-    @Column(name="short_code",nullable = false)
-    private String shortCode;
 
     @NotNull
     @Column(name = "pincode", nullable = false)
@@ -47,17 +43,17 @@ public class Vendor implements Serializable {
         this.id = id;
     }
 
-    public String getShortCode() {
-        return shortCode;
+    public String getName() {
+        return name;
     }
 
-    public Vendor shortCode(String shortCode) {
-        this.shortCode = shortCode;
+    public Vendor name(String name) {
+        this.name = name;
         return this;
     }
 
-    public void setShortCode(String shortCode) {
-        this.shortCode = shortCode;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPincode() {
@@ -97,10 +93,9 @@ public class Vendor implements Serializable {
     public void setVendorWHCourierMappings(Set<VendorWHCourierMapping> vendorWHCourierMappings) {
         this.vendorWHCourierMappings = vendorWHCourierMappings;
     }
-    
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
-	@Override
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -124,7 +119,7 @@ public class Vendor implements Serializable {
     public String toString() {
         return "Vendor{" +
             "id=" + getId() +
-            ", shortCode='" + getShortCode() + "'" +
+            ", name='" + getName() + "'" +
             ", pincode='" + getPincode() + "'" +
             "}";
     }

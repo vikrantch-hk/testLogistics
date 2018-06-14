@@ -1,18 +1,21 @@
 import { IVendorWHCourierMapping } from './vendor-wh-courier-mapping.model';
-import { ICourier } from './courier.model';
 
 export interface ICourierChannel {
   id?: number;
-  name?: string;
   vendorWHCourierMappings?: IVendorWHCourierMapping[];
-  couriers?: ICourier[];
+  channelName?: string;
+  channelId?: number;
+  courierName?: string;
+  courierId?: number;
 }
 
 export class CourierChannel implements ICourierChannel {
   constructor(
     public id?: number,
-    public name?: string,
     public vendorWHCourierMappings?: IVendorWHCourierMapping[],
-    public couriers?: ICourier[]
+    public channelName?: string,
+    public channelId?: number,
+    public courierName?: string,
+    public courierId?: number
   ) {}
 }

@@ -36,8 +36,8 @@ export class PincodeRegionZoneDetail extends React.Component<IPincodeRegionZoneD
               <dd>{pincodeRegionZone.regionTypeName ? pincodeRegionZone.regionTypeName : ''}</dd>
               <dt>Courier Group</dt>
               <dd>{pincodeRegionZone.courierGroupName ? pincodeRegionZone.courierGroupName : ''}</dd>
-              <dt>Vendor WH Courier Mapping</dt>
-              <dd>{pincodeRegionZone.vendorWHCourierMappingId ? pincodeRegionZone.vendorWHCourierMappingId : ''}</dd>
+              <dt>Source Destination Mapping</dt>
+              <dd>{pincodeRegionZone.sourceDestinationMappingId ? pincodeRegionZone.sourceDestinationMappingId : ''}</dd>
             </dl>
           </Row>
           <Button tag={Link} to="/entity/pincode-region-zone" replace color="info">

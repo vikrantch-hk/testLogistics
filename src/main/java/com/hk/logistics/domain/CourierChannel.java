@@ -1,6 +1,7 @@
 package com.hk.logistics.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 
@@ -22,15 +23,16 @@ public class CourierChannel implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
-    private String name;
-
     @OneToMany(mappedBy = "courierChannel")
     private Set<VendorWHCourierMapping> vendorWHCourierMappings = new HashSet<>();
 
-    @ManyToMany(mappedBy = "courierChannels")
-    @JsonIgnore
-    private Set<Courier> couriers = new HashSet<>();
+    @ManyToOne
+    @JsonIgnoreProperties("courierChannels")
+    private Channel channel;
+
+    @ManyToOne
+    @JsonIgnoreProperties("courierChannels")
+    private Courier courier;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -39,19 +41,6 @@ public class CourierChannel implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public CourierChannel name(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Set<VendorWHCourierMapping> getVendorWHCourierMappings() {
@@ -79,29 +68,30 @@ public class CourierChannel implements Serializable {
         this.vendorWHCourierMappings = vendorWHCourierMappings;
     }
 
-    public Set<Courier> getCouriers() {
-        return couriers;
+    public Channel getChannel() {
+        return channel;
     }
 
-    public CourierChannel couriers(Set<Courier> couriers) {
-        this.couriers = couriers;
+    public CourierChannel channel(Channel channel) {
+        this.channel = channel;
         return this;
     }
 
-    public CourierChannel addCourier(Courier courier) {
-        this.couriers.add(courier);
-        courier.getCourierChannels().add(this);
+    public void setChannel(Channel channel) {
+        this.channel = channel;
+    }
+
+    public Courier getCourier() {
+        return courier;
+    }
+
+    public CourierChannel courier(Courier courier) {
+        this.courier = courier;
         return this;
     }
 
-    public CourierChannel removeCourier(Courier courier) {
-        this.couriers.remove(courier);
-        courier.getCourierChannels().remove(this);
-        return this;
-    }
-
-    public void setCouriers(Set<Courier> couriers) {
-        this.couriers = couriers;
+    public void setCourier(Courier courier) {
+        this.courier = courier;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
@@ -129,7 +119,6 @@ public class CourierChannel implements Serializable {
     public String toString() {
         return "CourierChannel{" +
             "id=" + getId() +
-            ", name='" + getName() + "'" +
             "}";
     }
 }

@@ -25,8 +25,6 @@ public class CourierDTO implements Serializable {
 
     private Long parentCourierId;
 
-    private Set<CourierChannelDTO> courierChannels = new HashSet<>();
-
     private Set<CourierGroupDTO> courierGroups = new HashSet<>();
 
     public Long getId() {
@@ -75,14 +73,6 @@ public class CourierDTO implements Serializable {
 
     public void setParentCourierId(Long parentCourierId) {
         this.parentCourierId = parentCourierId;
-    }
-
-    public Set<CourierChannelDTO> getCourierChannels() {
-        return courierChannels;
-    }
-
-    public void setCourierChannels(Set<CourierChannelDTO> courierChannels) {
-        this.courierChannels = courierChannels;
     }
 
     public Set<CourierGroupDTO> getCourierGroups() {

@@ -89,14 +89,14 @@ export class VendorWHCourierMappingUpdate extends React.Component<IVendorWHCouri
   };
 
   vendorUpdate = element => {
-    const shortCode = element.target.value.toString();
-    if (shortCode === '') {
+    const name = element.target.value.toString();
+    if (name === '') {
       this.setState({
         vendorId: -1
       });
     } else {
       for (const i in this.props.vendors) {
-        if (shortCode === this.props.vendors[i].shortCode.toString()) {
+        if (name === this.props.vendors[i].name.toString()) {
           this.setState({
             vendorId: this.props.vendors[i].id
           });
@@ -170,13 +170,13 @@ export class VendorWHCourierMappingUpdate extends React.Component<IVendorWHCouri
                   </Label>
                 </AvGroup>
                 <AvGroup>
-                  <Label for="vendor.shortCode">Vendor</Label>
+                  <Label for="vendor.name">Vendor</Label>
                   <AvInput type="select" className="form-control" name="vendorId" onChange={this.vendorUpdate}>
                     <option value="" key="0" />
                     {vendors
                       ? vendors.map(otherEntity => (
                           <option value={otherEntity.id} key={otherEntity.id}>
-                            {otherEntity.shortCode}
+                            {otherEntity.name}
                           </option>
                         ))
                       : null}

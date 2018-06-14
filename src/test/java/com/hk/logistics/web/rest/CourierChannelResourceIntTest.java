@@ -42,9 +42,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = TestLogisticsApp.class)
 public class CourierChannelResourceIntTest {
 
-    private static final String DEFAULT_NAME = "AAAAAAAAAA";
-    private static final String UPDATED_NAME = "BBBBBBBBBB";
-
     @Autowired
     private CourierChannelRepository courierChannelRepository;
 
@@ -86,8 +83,7 @@ public class CourierChannelResourceIntTest {
      * if they test an entity which requires the current entity.
      */
     public static CourierChannel createEntity(EntityManager em) {
-        CourierChannel courierChannel = new CourierChannel()
-            .name(DEFAULT_NAME);
+        CourierChannel courierChannel = new CourierChannel();
         return courierChannel;
     }
 
@@ -112,7 +108,6 @@ public class CourierChannelResourceIntTest {
         List<CourierChannel> courierChannelList = courierChannelRepository.findAll();
         assertThat(courierChannelList).hasSize(databaseSizeBeforeCreate + 1);
         CourierChannel testCourierChannel = courierChannelList.get(courierChannelList.size() - 1);
-        assertThat(testCourierChannel.getName()).isEqualTo(DEFAULT_NAME);
     }
 
     @Test
@@ -145,8 +140,7 @@ public class CourierChannelResourceIntTest {
         restCourierChannelMockMvc.perform(get("/api/courier-channels?sort=id,desc"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(courierChannel.getId().intValue())))
-            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())));
+            .andExpect(jsonPath("$.[*].id").value(hasItem(courierChannel.getId().intValue())));
     }
     
 
@@ -160,8 +154,7 @@ public class CourierChannelResourceIntTest {
         restCourierChannelMockMvc.perform(get("/api/courier-channels/{id}", courierChannel.getId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.id").value(courierChannel.getId().intValue()))
-            .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()));
+            .andExpect(jsonPath("$.id").value(courierChannel.getId().intValue()));
     }
     @Test
     @Transactional
@@ -183,8 +176,6 @@ public class CourierChannelResourceIntTest {
         CourierChannel updatedCourierChannel = courierChannelRepository.findById(courierChannel.getId()).get();
         // Disconnect from session so that the updates on updatedCourierChannel are not directly saved in db
         em.detach(updatedCourierChannel);
-        updatedCourierChannel
-            .name(UPDATED_NAME);
         CourierChannelDTO courierChannelDTO = courierChannelMapper.toDto(updatedCourierChannel);
 
         restCourierChannelMockMvc.perform(put("/api/courier-channels")
@@ -196,7 +187,6 @@ public class CourierChannelResourceIntTest {
         List<CourierChannel> courierChannelList = courierChannelRepository.findAll();
         assertThat(courierChannelList).hasSize(databaseSizeBeforeUpdate);
         CourierChannel testCourierChannel = courierChannelList.get(courierChannelList.size() - 1);
-        assertThat(testCourierChannel.getName()).isEqualTo(UPDATED_NAME);
     }
 
     @Test

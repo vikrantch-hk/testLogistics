@@ -28,10 +28,6 @@ public class PincodeRegionZone implements Serializable {
     @JsonIgnoreProperties("")
     private CourierGroup courierGroup;
 
-    /*@ManyToOne
-    @JsonIgnoreProperties("")
-    private VendorWHCourierMapping vendorWHCourierMapping;*/
-    
     @ManyToOne
     @JsonIgnoreProperties("")
     private SourceDestinationMapping sourceDestinationMapping;
@@ -71,30 +67,21 @@ public class PincodeRegionZone implements Serializable {
         this.courierGroup = courierGroup;
     }
 
-  /*  public VendorWHCourierMapping getVendorWHCourierMapping() {
-        return vendorWHCourierMapping;
+    public SourceDestinationMapping getSourceDestinationMapping() {
+        return sourceDestinationMapping;
     }
 
-    public PincodeRegionZone vendorWHCourierMapping(VendorWHCourierMapping vendorWHCourierMapping) {
-        this.vendorWHCourierMapping = vendorWHCourierMapping;
+    public PincodeRegionZone sourceDestinationMapping(SourceDestinationMapping sourceDestinationMapping) {
+        this.sourceDestinationMapping = sourceDestinationMapping;
         return this;
     }
 
-    public void setVendorWHCourierMapping(VendorWHCourierMapping vendorWHCourierMapping) {
-        this.vendorWHCourierMapping = vendorWHCourierMapping;
-    }*/
-    
+    public void setSourceDestinationMapping(SourceDestinationMapping sourceDestinationMapping) {
+        this.sourceDestinationMapping = sourceDestinationMapping;
+    }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
-    public SourceDestinationMapping getSourceDestinationMapping() {
-		return sourceDestinationMapping;
-	}
-
-	public void setSourceDestinationMapping(SourceDestinationMapping sourceDestinationMapping) {
-		this.sourceDestinationMapping = sourceDestinationMapping;
-	}
-
-	@Override
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

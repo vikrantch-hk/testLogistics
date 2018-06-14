@@ -48,8 +48,8 @@ export class CourierPricingEngine extends React.Component<ICourierPricingEngineP
                 <th>Cod Cutoff Amount</th>
                 <th>Variable Cod Charges</th>
                 <th>Valid Upto</th>
+                <th>Cost Parameters</th>
                 <th>Courier</th>
-                <th>Warehouse</th>
                 <th>Region Type</th>
                 <th />
               </tr>
@@ -75,16 +75,10 @@ export class CourierPricingEngine extends React.Component<ICourierPricingEngineP
                   <td>
                     <TextFormat type="date" value={courierPricingEngine.validUpto} format={APP_LOCAL_DATE_FORMAT} />
                   </td>
+                  <td>{courierPricingEngine.costParameters}</td>
                   <td>
                     {courierPricingEngine.courierName ? (
                       <Link to={`courier/${courierPricingEngine.courierId}`}>{courierPricingEngine.courierName}</Link>
-                    ) : (
-                      ''
-                    )}
-                  </td>
-                  <td>
-                    {courierPricingEngine.warehouseName ? (
-                      <Link to={`warehouse/${courierPricingEngine.warehouseId}`}>{courierPricingEngine.warehouseName}</Link>
                     ) : (
                       ''
                     )}

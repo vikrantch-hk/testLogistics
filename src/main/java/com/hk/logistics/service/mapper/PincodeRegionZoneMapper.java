@@ -8,19 +8,19 @@ import org.mapstruct.*;
 /**
  * Mapper for the entity PincodeRegionZone and its DTO PincodeRegionZoneDTO.
  */
-@Mapper(componentModel = "spring", uses = {RegionTypeMapper.class, CourierGroupMapper.class, VendorWHCourierMappingMapper.class})
+@Mapper(componentModel = "spring", uses = {RegionTypeMapper.class, CourierGroupMapper.class, SourceDestinationMappingMapper.class})
 public interface PincodeRegionZoneMapper extends EntityMapper<PincodeRegionZoneDTO, PincodeRegionZone> {
 
     @Mapping(source = "regionType.id", target = "regionTypeId")
     @Mapping(source = "regionType.name", target = "regionTypeName")
     @Mapping(source = "courierGroup.id", target = "courierGroupId")
     @Mapping(source = "courierGroup.name", target = "courierGroupName")
-    @Mapping(source = "vendorWHCourierMapping.id", target = "vendorWHCourierMappingId")
+    @Mapping(source = "sourceDestinationMapping.id", target = "sourceDestinationMappingId")
     PincodeRegionZoneDTO toDto(PincodeRegionZone pincodeRegionZone);
 
     @Mapping(source = "regionTypeId", target = "regionType")
     @Mapping(source = "courierGroupId", target = "courierGroup")
-    @Mapping(source = "vendorWHCourierMappingId", target = "vendorWHCourierMapping")
+    @Mapping(source = "sourceDestinationMappingId", target = "sourceDestinationMapping")
     PincodeRegionZone toEntity(PincodeRegionZoneDTO pincodeRegionZoneDTO);
 
     default PincodeRegionZone fromId(Long id) {

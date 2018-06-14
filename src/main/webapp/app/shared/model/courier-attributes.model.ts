@@ -8,9 +8,6 @@ export interface ICourierAttributes {
   reverseGround?: boolean;
   cardOnDeliveryAir?: boolean;
   cardOnDeliveryGround?: boolean;
-  hkShipping?: boolean;
-  vendorShipping?: boolean;
-  reversePickup?: boolean;
 }
 
 export class CourierAttributes implements ICourierAttributes {
@@ -23,10 +20,7 @@ export class CourierAttributes implements ICourierAttributes {
     public reverseAir?: boolean,
     public reverseGround?: boolean,
     public cardOnDeliveryAir?: boolean,
-    public cardOnDeliveryGround?: boolean,
-    public hkShipping?: boolean,
-    public vendorShipping?: boolean,
-    public reversePickup?: boolean
+    public cardOnDeliveryGround?: boolean
   ) {
     this.prepaidAir = false;
     this.prepaidGround = false;
@@ -36,8 +30,5 @@ export class CourierAttributes implements ICourierAttributes {
     this.reverseGround = false;
     this.cardOnDeliveryAir = false;
     this.cardOnDeliveryGround = false;
-    this.hkShipping = false;
-    this.vendorShipping = false;
-    this.reversePickup = false;
   }
 }

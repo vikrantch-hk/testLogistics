@@ -14,12 +14,6 @@
                                  referencedColumnNames="id"
                                  referencedTableName="pincode"/>
 
-        <addForeignKeyConstraint baseColumnNames="attributes_id"
-                                 baseTableName="pincode_courier_mapping"
-                                 constraintName="fk_pincode_courier_mapping_attributes_id"
-                                 referencedColumnNames="id"
-                                 referencedTableName="courier_attributes"/>
-
         <addForeignKeyConstraint baseColumnNames="vendorwhcourier_mapping_id"
                                  baseTableName="pincode_courier_mapping"
                                  constraintName="fk_pincode_courier_mapping_vendorwhcourier_mapping_id"

@@ -37,51 +37,7 @@ public class PincodeCourierMapping implements Serializable {
 
     @ManyToOne
     @JsonIgnoreProperties("")
-    private Pincode pincode;//TODO :To be removed
-
-    @NotNull
-    @Column(name = "prepaid_air", nullable = false)
-    private Boolean prepaidAir;
-
-    @NotNull
-    @Column(name = "prepaid_ground", nullable = false)
-    private Boolean prepaidGround;
-
-    @NotNull
-    @Column(name = "cod_air", nullable = false)
-    private Boolean codAir;
-
-    @NotNull
-    @Column(name = "cod_ground", nullable = false)
-    private Boolean codGround;
-
-    @NotNull
-    @Column(name = "reverse_air", nullable = false)
-    private Boolean reverseAir;
-
-    @NotNull
-    @Column(name = "reverse_ground", nullable = false)
-    private Boolean reverseGround;
-
-    @NotNull
-    @Column(name = "card_on_delivery_air", nullable = false)
-    private Boolean cardOnDeliveryAir;
-
-    @NotNull
-    @Column(name = "card_on_delivery_ground", nullable = false)
-    private Boolean cardOnDeliveryGround;
-
-    @NotNull
-    @Column(name = "hk_shipping", nullable = false)
-    private Boolean hkShipping;
-
-    @NotNull
-    @Column(name = "vendor_shipping", nullable = false)
-    private Boolean vendorShipping;
-
-    @NotNull
-    @Column(name = "reverse_pickup", nullable = false)
-    private Boolean reversePickup;
+    private Pincode pincode;
 
     @ManyToOne
     @JsonIgnoreProperties("")
@@ -190,107 +146,9 @@ public class PincodeCourierMapping implements Serializable {
     public void setSourceDestinationMapping(SourceDestinationMapping sourceDestinationMapping) {
         this.sourceDestinationMapping = sourceDestinationMapping;
     }
-    
-    
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
-    public Boolean getPrepaidAir() {
-		return prepaidAir;
-	}
-
-	public void setPrepaidAir(Boolean prepaidAir) {
-		this.prepaidAir = prepaidAir;
-	}
-
-	public Boolean getPrepaidGround() {
-		return prepaidGround;
-	}
-
-	public void setPrepaidGround(Boolean prepaidGround) {
-		this.prepaidGround = prepaidGround;
-	}
-
-	public Boolean getCodAir() {
-		return codAir;
-	}
-
-	public void setCodAir(Boolean codAir) {
-		this.codAir = codAir;
-	}
-
-	public Boolean getCodGround() {
-		return codGround;
-	}
-
-	public void setCodGround(Boolean codGround) {
-		this.codGround = codGround;
-	}
-
-	public Boolean getReverseAir() {
-		return reverseAir;
-	}
-
-	public void setReverseAir(Boolean reverseAir) {
-		this.reverseAir = reverseAir;
-	}
-
-	public Boolean getReverseGround() {
-		return reverseGround;
-	}
-
-	public void setReverseGround(Boolean reverseGround) {
-		this.reverseGround = reverseGround;
-	}
-
-	public Boolean getCardOnDeliveryAir() {
-		return cardOnDeliveryAir;
-	}
-
-	public void setCardOnDeliveryAir(Boolean cardOnDeliveryAir) {
-		this.cardOnDeliveryAir = cardOnDeliveryAir;
-	}
-
-	public Boolean getCardOnDeliveryGround() {
-		return cardOnDeliveryGround;
-	}
-
-	public void setCardOnDeliveryGround(Boolean cardOnDeliveryGround) {
-		this.cardOnDeliveryGround = cardOnDeliveryGround;
-	}
-
-	public Boolean getHkShipping() {
-		return hkShipping;
-	}
-
-	public void setHkShipping(Boolean hkShipping) {
-		this.hkShipping = hkShipping;
-	}
-
-	public Boolean getVendorShipping() {
-		return vendorShipping;
-	}
-
-	public void setVendorShipping(Boolean vendorShipping) {
-		this.vendorShipping = vendorShipping;
-	}
-
-	public Boolean getReversePickup() {
-		return reversePickup;
-	}
-
-	public void setReversePickup(Boolean reversePickup) {
-		this.reversePickup = reversePickup;
-	}
-
-	public Boolean getApplicableForCheapestCourier() {
-		return applicableForCheapestCourier;
-	}
-
-	public Boolean getPickupAvailable() {
-		return pickupAvailable;
-	}
-
-	@Override
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

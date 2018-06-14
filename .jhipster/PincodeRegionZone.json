@@ -15,8 +15,8 @@
         },
         {
             "relationshipType": "many-to-one",
-            "relationshipName": "vendorWHCourierMapping",
-            "otherEntityName": "vendorWHCourierMapping",
+            "relationshipName": "sourceDestinationMapping",
+            "otherEntityName": "sourceDestinationMapping",
             "otherEntityField": "id"
         }
     ],

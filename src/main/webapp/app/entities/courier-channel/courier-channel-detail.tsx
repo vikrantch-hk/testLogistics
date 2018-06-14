@@ -32,10 +32,10 @@ export class CourierChannelDetail extends React.Component<ICourierChannelDetailP
           </h2>
           <Row size="md">
             <dl className="jh-entity-details">
-              <dt>
-                <span id="name">Name</span>
-              </dt>
-              <dd>{courierChannel.name}</dd>
+              <dt>Channel</dt>
+              <dd>{courierChannel.channelName ? courierChannel.channelName : ''}</dd>
+              <dt>Courier</dt>
+              <dd>{courierChannel.courierName ? courierChannel.courierName : ''}</dd>
             </dl>
           </Row>
           <Button tag={Link} to="/entity/courier-channel" replace color="info">

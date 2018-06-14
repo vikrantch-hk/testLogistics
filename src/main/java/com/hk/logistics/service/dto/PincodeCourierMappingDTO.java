@@ -23,8 +23,6 @@ public class PincodeCourierMappingDTO implements Serializable {
 
     private Long pincodeId;
 
-    private Long attributesId;
-
     private Long vendorWHCourierMappingId;
 
     private Long sourceDestinationMappingId;
@@ -77,14 +75,6 @@ public class PincodeCourierMappingDTO implements Serializable {
         this.pincodeId = pincodeId;
     }
 
-    public Long getAttributesId() {
-        return attributesId;
-    }
-
-    public void setAttributesId(Long courierAttributesId) {
-        this.attributesId = courierAttributesId;
-    }
-
     public Long getVendorWHCourierMappingId() {
         return vendorWHCourierMappingId;
     }
@@ -131,7 +121,6 @@ public class PincodeCourierMappingDTO implements Serializable {
             ", estimatedDeliveryDays=" + getEstimatedDeliveryDays() +
             ", pickupAvailable='" + isPickupAvailable() + "'" +
             ", pincode=" + getPincodeId() +
-            ", attributes=" + getAttributesId() +
             ", vendorWHCourierMapping=" + getVendorWHCourierMappingId() +
             ", sourceDestinationMapping=" + getSourceDestinationMappingId() +
             "}";

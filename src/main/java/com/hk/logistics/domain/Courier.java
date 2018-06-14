@@ -1,5 +1,6 @@
 package com.hk.logistics.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
@@ -39,10 +40,7 @@ public class Courier implements Serializable {
     @Column(name = "parent_courier_id")
     private Long parentCourierId;
 
-    @ManyToMany
-    @JoinTable(name = "courier_courier_channel",
-               joinColumns = @JoinColumn(name = "couriers_id", referencedColumnName = "id"),
-               inverseJoinColumns = @JoinColumn(name = "courier_channels_id", referencedColumnName = "id"))
+    @OneToMany(mappedBy = "courier")
     private Set<CourierChannel> courierChannels = new HashSet<>();
 
     @ManyToMany
@@ -136,13 +134,13 @@ public class Courier implements Serializable {
 
     public Courier addCourierChannel(CourierChannel courierChannel) {
         this.courierChannels.add(courierChannel);
-        courierChannel.getCouriers().add(this);
+        courierChannel.setCourier(this);
         return this;
     }
 
     public Courier removeCourierChannel(CourierChannel courierChannel) {
         this.courierChannels.remove(courierChannel);
-        courierChannel.getCouriers().remove(this);
+        courierChannel.setCourier(null);
         return this;
     }
 

@@ -78,10 +78,12 @@ export class CourierPricingEngineDetail extends React.Component<ICourierPricingE
               <dd>
                 <TextFormat value={courierPricingEngine.validUpto} type="date" format={APP_LOCAL_DATE_FORMAT} />
               </dd>
+              <dt>
+                <span id="costParameters">Cost Parameters</span>
+              </dt>
+              <dd>{courierPricingEngine.costParameters}</dd>
               <dt>Courier</dt>
               <dd>{courierPricingEngine.courierName ? courierPricingEngine.courierName : ''}</dd>
-              <dt>Warehouse</dt>
-              <dd>{courierPricingEngine.warehouseName ? courierPricingEngine.warehouseName : ''}</dd>
               <dt>Region Type</dt>
               <dd>{courierPricingEngine.regionTypeName ? courierPricingEngine.regionTypeName : ''}</dd>
             </dl>

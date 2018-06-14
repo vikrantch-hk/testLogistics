@@ -1,0 +1,28 @@
+{
+    "fields": [
+        {
+            "fieldName": "name",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        }
+    ],
+    "relationships": [
+        {
+            "relationshipType": "one-to-many",
+            "relationshipName": "courierChannel",
+            "otherEntityName": "courierChannel",
+            "otherEntityRelationshipName": "channel"
+        }
+    ],
+    "changelogDate": "20180614072140",
+    "entityTableName": "channel",
+    "dto": "mapstruct",
+    "pagination": "no",
+    "service": "no",
+    "jpaMetamodelFiltering": false,
+    "fluentMethods": true,
+    "clientRootFolder": "",
+    "applications": "*"
+}

@@ -52,17 +52,6 @@ export class CourierDetail extends React.Component<ICourierDetailProps> {
                 <span id="parentCourierId">Parent Courier Id</span>
               </dt>
               <dd>{courier.parentCourierId}</dd>
-              <dt>Courier Channel</dt>
-              <dd>
-                {courier.courierChannels
-                  ? courier.courierChannels.map((val, i) => (
-                      <span key={val.id}>
-                        <a>{val.name}</a>
-                        {i === courier.courierChannels.length - 1 ? '' : ', '}
-                      </span>
-                    ))
-                  : null}
-              </dd>
               <dt>Courier Group</dt>
               <dd>
                 {courier.courierGroups

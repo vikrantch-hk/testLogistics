@@ -42,8 +42,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = TestLogisticsApp.class)
 public class VendorResourceIntTest {
 
-    private static final String DEFAULT_SHORT_CODE = "AAAAAAAAAA";
-    private static final String UPDATED_SHORT_CODE = "BBBBBBBBBB";
+    private static final String DEFAULT_NAME = "AAAAAAAAAA";
+    private static final String UPDATED_NAME = "BBBBBBBBBB";
 
     private static final String DEFAULT_PINCODE = "AAAAAAAAAA";
     private static final String UPDATED_PINCODE = "BBBBBBBBBB";
@@ -90,7 +90,7 @@ public class VendorResourceIntTest {
      */
     public static Vendor createEntity(EntityManager em) {
         Vendor vendor = new Vendor()
-            .shortCode(DEFAULT_SHORT_CODE)
+            .name(DEFAULT_NAME)
             .pincode(DEFAULT_PINCODE);
         return vendor;
     }
@@ -116,7 +116,7 @@ public class VendorResourceIntTest {
         List<Vendor> vendorList = vendorRepository.findAll();
         assertThat(vendorList).hasSize(databaseSizeBeforeCreate + 1);
         Vendor testVendor = vendorList.get(vendorList.size() - 1);
-        assertThat(testVendor.getShortCode()).isEqualTo(DEFAULT_SHORT_CODE);
+        assertThat(testVendor.getName()).isEqualTo(DEFAULT_NAME);
         assertThat(testVendor.getPincode()).isEqualTo(DEFAULT_PINCODE);
     }
 
@@ -142,10 +142,10 @@ public class VendorResourceIntTest {
 
     @Test
     @Transactional
-    public void checkShortCodeIsRequired() throws Exception {
+    public void checkNameIsRequired() throws Exception {
         int databaseSizeBeforeTest = vendorRepository.findAll().size();
         // set the field null
-        vendor.setShortCode(null);
+        vendor.setName(null);
 
         // Create the Vendor, which fails.
         VendorDTO vendorDTO = vendorMapper.toDto(vendor);
@@ -189,7 +189,7 @@ public class VendorResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(vendor.getId().intValue())))
-            .andExpect(jsonPath("$.[*].shortCode").value(hasItem(DEFAULT_SHORT_CODE.toString())))
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
             .andExpect(jsonPath("$.[*].pincode").value(hasItem(DEFAULT_PINCODE.toString())));
     }
     
@@ -205,7 +205,7 @@ public class VendorResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(vendor.getId().intValue()))
-            .andExpect(jsonPath("$.shortCode").value(DEFAULT_SHORT_CODE.toString()))
+            .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()))
             .andExpect(jsonPath("$.pincode").value(DEFAULT_PINCODE.toString()));
     }
     @Test
@@ -229,7 +229,7 @@ public class VendorResourceIntTest {
         // Disconnect from session so that the updates on updatedVendor are not directly saved in db
         em.detach(updatedVendor);
         updatedVendor
-            .shortCode(UPDATED_SHORT_CODE)
+            .name(UPDATED_NAME)
             .pincode(UPDATED_PINCODE);
         VendorDTO vendorDTO = vendorMapper.toDto(updatedVendor);
 
@@ -242,7 +242,7 @@ public class VendorResourceIntTest {
         List<Vendor> vendorList = vendorRepository.findAll();
         assertThat(vendorList).hasSize(databaseSizeBeforeUpdate);
         Vendor testVendor = vendorList.get(vendorList.size() - 1);
-        assertThat(testVendor.getShortCode()).isEqualTo(UPDATED_SHORT_CODE);
+        assertThat(testVendor.getName()).isEqualTo(UPDATED_NAME);
         assertThat(testVendor.getPincode()).isEqualTo(UPDATED_PINCODE);
     }
 

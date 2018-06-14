@@ -29,12 +29,10 @@
     ],
     "relationships": [
         {
-            "relationshipType": "many-to-many",
-            "otherEntityRelationshipName": "courier",
+            "relationshipType": "one-to-many",
             "relationshipName": "courierChannel",
             "otherEntityName": "courierChannel",
-            "otherEntityField": "name",
-            "ownerSide": true
+            "otherEntityRelationshipName": "courier"
         },
         {
             "relationshipType": "many-to-many",

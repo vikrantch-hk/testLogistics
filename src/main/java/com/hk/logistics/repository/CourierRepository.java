@@ -16,14 +16,14 @@ import java.util.Optional;
 @Repository
 public interface CourierRepository extends JpaRepository<Courier, Long> {
 
-    @Query(value = "select distinct courier from Courier courier left join fetch courier.courierChannels left join fetch courier.courierGroups",
+    @Query(value = "select distinct courier from Courier courier left join fetch courier.courierGroups",
         countQuery = "select count(distinct courier) from Courier courier")
     Page<Courier> findAllWithEagerRelationships(Pageable pageable);
 
-    @Query(value = "select distinct courier from Courier courier left join fetch courier.courierChannels left join fetch courier.courierGroups")
+    @Query(value = "select distinct courier from Courier courier left join fetch courier.courierGroups")
     List<Courier> findAllWithEagerRelationships();
 
-    @Query("select courier from Courier courier left join fetch courier.courierChannels left join fetch courier.courierGroups where courier.id =:id")
+    @Query("select courier from Courier courier left join fetch courier.courierGroups where courier.id =:id")
     Optional<Courier> findOneWithEagerRelationships(@Param("id") Long id);
 
 }

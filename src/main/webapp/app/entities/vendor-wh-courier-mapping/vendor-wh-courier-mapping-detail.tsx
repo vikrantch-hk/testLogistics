@@ -37,7 +37,7 @@ export class VendorWHCourierMappingDetail extends React.Component<IVendorWHCouri
               </dt>
               <dd>{vendorWHCourierMapping.active ? 'true' : 'false'}</dd>
               <dt>Vendor</dt>
-              <dd>{vendorWHCourierMapping.vendorShortCode ? vendorWHCourierMapping.vendorShortCode : ''}</dd>
+              <dd>{vendorWHCourierMapping.vendorName ? vendorWHCourierMapping.vendorName : ''}</dd>
               <dt>Warehouse</dt>
               <dd>{vendorWHCourierMapping.warehouseName ? vendorWHCourierMapping.warehouseName : ''}</dd>
               <dt>Courier Channel</dt>

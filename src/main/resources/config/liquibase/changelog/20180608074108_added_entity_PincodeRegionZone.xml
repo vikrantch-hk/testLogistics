@@ -30,7 +30,7 @@
                 <constraints nullable="true" />
             </column>
 
-            <column name="vendorwhcourier_mapping_id" type="bigint">
+            <column name="source_destination_mapping_id" type="bigint">
                 <constraints nullable="true" />
             </column>
 

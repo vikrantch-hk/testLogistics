@@ -21,16 +21,36 @@ public class CourierAttributes implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(name = "hk_shipping", nullable = false)
-    private Boolean hkShipping;
+    @Column(name = "prepaid_air", nullable = false)
+    private Boolean prepaidAir;
 
     @NotNull
-    @Column(name = "vendor_shipping", nullable = false)
-    private Boolean vendorShipping;
+    @Column(name = "prepaid_ground", nullable = false)
+    private Boolean prepaidGround;
 
     @NotNull
-    @Column(name = "reverse_pickup", nullable = false)
-    private Boolean reversePickup;
+    @Column(name = "cod_air", nullable = false)
+    private Boolean codAir;
+
+    @NotNull
+    @Column(name = "cod_ground", nullable = false)
+    private Boolean codGround;
+
+    @NotNull
+    @Column(name = "reverse_air", nullable = false)
+    private Boolean reverseAir;
+
+    @NotNull
+    @Column(name = "reverse_ground", nullable = false)
+    private Boolean reverseGround;
+
+    @NotNull
+    @Column(name = "card_on_delivery_air", nullable = false)
+    private Boolean cardOnDeliveryAir;
+
+    @NotNull
+    @Column(name = "card_on_delivery_ground", nullable = false)
+    private Boolean cardOnDeliveryGround;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -41,43 +61,108 @@ public class CourierAttributes implements Serializable {
         this.id = id;
     }
 
-    public Boolean isHkShipping() {
-        return hkShipping;
+    public Boolean isPrepaidAir() {
+        return prepaidAir;
     }
 
-    public CourierAttributes hkShipping(Boolean hkShipping) {
-        this.hkShipping = hkShipping;
+    public CourierAttributes prepaidAir(Boolean prepaidAir) {
+        this.prepaidAir = prepaidAir;
         return this;
     }
 
-    public void setHkShipping(Boolean hkShipping) {
-        this.hkShipping = hkShipping;
+    public void setPrepaidAir(Boolean prepaidAir) {
+        this.prepaidAir = prepaidAir;
     }
 
-    public Boolean isVendorShipping() {
-        return vendorShipping;
+    public Boolean isPrepaidGround() {
+        return prepaidGround;
     }
 
-    public CourierAttributes vendorShipping(Boolean vendorShipping) {
-        this.vendorShipping = vendorShipping;
+    public CourierAttributes prepaidGround(Boolean prepaidGround) {
+        this.prepaidGround = prepaidGround;
         return this;
     }
 
-    public void setVendorShipping(Boolean vendorShipping) {
-        this.vendorShipping = vendorShipping;
+    public void setPrepaidGround(Boolean prepaidGround) {
+        this.prepaidGround = prepaidGround;
     }
 
-    public Boolean isReversePickup() {
-        return reversePickup;
+    public Boolean isCodAir() {
+        return codAir;
     }
 
-    public CourierAttributes reversePickup(Boolean reversePickup) {
-        this.reversePickup = reversePickup;
+    public CourierAttributes codAir(Boolean codAir) {
+        this.codAir = codAir;
         return this;
     }
 
-    public void setReversePickup(Boolean reversePickup) {
-        this.reversePickup = reversePickup;
+    public void setCodAir(Boolean codAir) {
+        this.codAir = codAir;
+    }
+
+    public Boolean isCodGround() {
+        return codGround;
+    }
+
+    public CourierAttributes codGround(Boolean codGround) {
+        this.codGround = codGround;
+        return this;
+    }
+
+    public void setCodGround(Boolean codGround) {
+        this.codGround = codGround;
+    }
+
+    public Boolean isReverseAir() {
+        return reverseAir;
+    }
+
+    public CourierAttributes reverseAir(Boolean reverseAir) {
+        this.reverseAir = reverseAir;
+        return this;
+    }
+
+    public void setReverseAir(Boolean reverseAir) {
+        this.reverseAir = reverseAir;
+    }
+
+    public Boolean isReverseGround() {
+        return reverseGround;
+    }
+
+    public CourierAttributes reverseGround(Boolean reverseGround) {
+        this.reverseGround = reverseGround;
+        return this;
+    }
+
+    public void setReverseGround(Boolean reverseGround) {
+        this.reverseGround = reverseGround;
+    }
+
+    public Boolean isCardOnDeliveryAir() {
+        return cardOnDeliveryAir;
+    }
+
+    public CourierAttributes cardOnDeliveryAir(Boolean cardOnDeliveryAir) {
+        this.cardOnDeliveryAir = cardOnDeliveryAir;
+        return this;
+    }
+
+    public void setCardOnDeliveryAir(Boolean cardOnDeliveryAir) {
+        this.cardOnDeliveryAir = cardOnDeliveryAir;
+    }
+
+    public Boolean isCardOnDeliveryGround() {
+        return cardOnDeliveryGround;
+    }
+
+    public CourierAttributes cardOnDeliveryGround(Boolean cardOnDeliveryGround) {
+        this.cardOnDeliveryGround = cardOnDeliveryGround;
+        return this;
+    }
+
+    public void setCardOnDeliveryGround(Boolean cardOnDeliveryGround) {
+        this.cardOnDeliveryGround = cardOnDeliveryGround;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
@@ -105,9 +190,14 @@ public class CourierAttributes implements Serializable {
     public String toString() {
         return "CourierAttributes{" +
             "id=" + getId() +
-            ", hkShipping='" + isHkShipping() + "'" +
-            ", vendorShipping='" + isVendorShipping() + "'" +
-            ", reversePickup='" + isReversePickup() + "'" +
+            ", prepaidAir='" + isPrepaidAir() + "'" +
+            ", prepaidGround='" + isPrepaidGround() + "'" +
+            ", codAir='" + isCodAir() + "'" +
+            ", codGround='" + isCodGround() + "'" +
+            ", reverseAir='" + isReverseAir() + "'" +
+            ", reverseGround='" + isReverseGround() + "'" +
+            ", cardOnDeliveryAir='" + isCardOnDeliveryAir() + "'" +
+            ", cardOnDeliveryGround='" + isCardOnDeliveryGround() + "'" +
             "}";
     }
 }

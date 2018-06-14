@@ -9,8 +9,6 @@ import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { ICourier } from 'app/shared/model/courier.model';
 import { getEntities as getCouriers } from 'app/entities/courier/courier.reducer';
-import { IWarehouse } from 'app/shared/model/warehouse.model';
-import { getEntities as getWarehouses } from 'app/entities/warehouse/warehouse.reducer';
 import { IRegionType } from 'app/shared/model/region-type.model';
 import { getEntities as getRegionTypes } from 'app/entities/region-type/region-type.reducer';
 import { getEntity, updateEntity, createEntity, reset } from './courier-pricing-engine.reducer';
@@ -25,8 +23,6 @@ export interface ICourierPricingEngineUpdateProps {
   createEntity: ICrudPutAction<ICourierPricingEngine>;
   getCouriers: ICrudGetAllAction<ICourier>;
   couriers: ICourier[];
-  getWarehouses: ICrudGetAllAction<IWarehouse>;
-  warehouses: IWarehouse[];
   getRegionTypes: ICrudGetAllAction<IRegionType>;
   regionTypes: IRegionType[];
   courierPricingEngine: ICourierPricingEngine;
@@ -40,7 +36,6 @@ export interface ICourierPricingEngineUpdateProps {
 export interface ICourierPricingEngineUpdateState {
   isNew: boolean;
   courierId: number;
-  warehouseId: number;
   regionTypeId: number;
 }
 
@@ -49,7 +44,6 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
     super(props);
     this.state = {
       courierId: 0,
-      warehouseId: 0,
       regionTypeId: 0,
       isNew: !this.props.match.params || !this.props.match.params.id
     };
@@ -63,7 +57,6 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
     }
 
     this.props.getCouriers();
-    this.props.getWarehouses();
     this.props.getRegionTypes();
   }
 
@@ -105,23 +98,6 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
     }
   };
 
-  warehouseUpdate = element => {
-    const name = element.target.value.toString();
-    if (name === '') {
-      this.setState({
-        warehouseId: -1
-      });
-    } else {
-      for (const i in this.props.warehouses) {
-        if (name === this.props.warehouses[i].name.toString()) {
-          this.setState({
-            warehouseId: this.props.warehouses[i].id
-          });
-        }
-      }
-    }
-  };
-
   regionTypeUpdate = element => {
     const name = element.target.value.toString();
     if (name === '') {
@@ -141,7 +117,7 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
 
   render() {
     const isInvalid = false;
-    const { courierPricingEngine, couriers, warehouses, regionTypes, loading, updating } = this.props;
+    const { courierPricingEngine, couriers, regionTypes, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
@@ -262,24 +238,17 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
                   <AvField type="date" className="form-control" name="validUpto" />
                 </AvGroup>
                 <AvGroup>
+                  <Label id="costParametersLabel" for="costParameters">
+                    Cost Parameters
+                  </Label>
+                  <AvField type="text" name="costParameters" />
+                </AvGroup>
+                <AvGroup>
                   <Label for="courier.name">Courier</Label>
                   <AvInput type="select" className="form-control" name="courierId" onChange={this.courierUpdate}>
                     <option value="" key="0" />
                     {couriers
                       ? couriers.map(otherEntity => (
-                          <option value={otherEntity.id} key={otherEntity.id}>
-                            {otherEntity.name}
-                          </option>
-                        ))
-                      : null}
-                  </AvInput>
-                </AvGroup>
-                <AvGroup>
-                  <Label for="warehouse.name">Warehouse</Label>
-                  <AvInput type="select" className="form-control" name="warehouseId" onChange={this.warehouseUpdate}>
-                    <option value="" key="0" />
-                    {warehouses
-                      ? warehouses.map(otherEntity => (
                           <option value={otherEntity.id} key={otherEntity.id}>
                             {otherEntity.name}
                           </option>
@@ -319,7 +288,6 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
 
 const mapStateToProps = storeState => ({
   couriers: storeState.courier.entities,
-  warehouses: storeState.warehouse.entities,
   regionTypes: storeState.regionType.entities,
   courierPricingEngine: storeState.courierPricingEngine.entity,
   loading: storeState.courierPricingEngine.loading,
@@ -328,7 +296,6 @@ const mapStateToProps = storeState => ({
 
 const mapDispatchToProps = {
   getCouriers,
-  getWarehouses,
   getRegionTypes,
   getEntity,
   updateEntity,

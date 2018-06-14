@@ -13,10 +13,9 @@ export interface ICourierPricingEngine {
   codCutoffAmount?: number;
   variableCodCharges?: number;
   validUpto?: Moment;
+  costParameters?: string;
   courierName?: string;
   courierId?: number;
-  warehouseName?: string;
-  warehouseId?: number;
   regionTypeName?: string;
   regionTypeId?: number;
 }
@@ -35,10 +34,9 @@ export class CourierPricingEngine implements ICourierPricingEngine {
     public codCutoffAmount?: number,
     public variableCodCharges?: number,
     public validUpto?: Moment,
+    public costParameters?: string,
     public courierName?: string,
     public courierId?: number,
-    public warehouseName?: string,
-    public warehouseId?: number,
     public regionTypeName?: string,
     public regionTypeId?: number
   ) {}

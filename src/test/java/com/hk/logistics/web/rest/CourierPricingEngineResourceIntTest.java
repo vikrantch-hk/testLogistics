@@ -77,6 +77,9 @@ public class CourierPricingEngineResourceIntTest {
     private static final LocalDate DEFAULT_VALID_UPTO = LocalDate.ofEpochDay(0L);
     private static final LocalDate UPDATED_VALID_UPTO = LocalDate.now(ZoneId.systemDefault());
 
+    private static final String DEFAULT_COST_PARAMETERS = "AAAAAAAAAA";
+    private static final String UPDATED_COST_PARAMETERS = "BBBBBBBBBB";
+
     @Autowired
     private CourierPricingEngineRepository courierPricingEngineRepository;
 
@@ -129,7 +132,8 @@ public class CourierPricingEngineResourceIntTest {
             .minCodCharges(DEFAULT_MIN_COD_CHARGES)
             .codCutoffAmount(DEFAULT_COD_CUTOFF_AMOUNT)
             .variableCodCharges(DEFAULT_VARIABLE_COD_CHARGES)
-            .validUpto(DEFAULT_VALID_UPTO);
+            .validUpto(DEFAULT_VALID_UPTO)
+            .costParameters(DEFAULT_COST_PARAMETERS);
         return courierPricingEngine;
     }
 
@@ -165,6 +169,7 @@ public class CourierPricingEngineResourceIntTest {
         assertThat(testCourierPricingEngine.getCodCutoffAmount()).isEqualTo(DEFAULT_COD_CUTOFF_AMOUNT);
         assertThat(testCourierPricingEngine.getVariableCodCharges()).isEqualTo(DEFAULT_VARIABLE_COD_CHARGES);
         assertThat(testCourierPricingEngine.getValidUpto()).isEqualTo(DEFAULT_VALID_UPTO);
+        assertThat(testCourierPricingEngine.getCostParameters()).isEqualTo(DEFAULT_COST_PARAMETERS);
     }
 
     @Test
@@ -284,7 +289,8 @@ public class CourierPricingEngineResourceIntTest {
             .andExpect(jsonPath("$.[*].minCodCharges").value(hasItem(DEFAULT_MIN_COD_CHARGES.doubleValue())))
             .andExpect(jsonPath("$.[*].codCutoffAmount").value(hasItem(DEFAULT_COD_CUTOFF_AMOUNT.doubleValue())))
             .andExpect(jsonPath("$.[*].variableCodCharges").value(hasItem(DEFAULT_VARIABLE_COD_CHARGES.doubleValue())))
-            .andExpect(jsonPath("$.[*].validUpto").value(hasItem(DEFAULT_VALID_UPTO.toString())));
+            .andExpect(jsonPath("$.[*].validUpto").value(hasItem(DEFAULT_VALID_UPTO.toString())))
+            .andExpect(jsonPath("$.[*].costParameters").value(hasItem(DEFAULT_COST_PARAMETERS.toString())));
     }
     
 
@@ -309,7 +315,8 @@ public class CourierPricingEngineResourceIntTest {
             .andExpect(jsonPath("$.minCodCharges").value(DEFAULT_MIN_COD_CHARGES.doubleValue()))
             .andExpect(jsonPath("$.codCutoffAmount").value(DEFAULT_COD_CUTOFF_AMOUNT.doubleValue()))
             .andExpect(jsonPath("$.variableCodCharges").value(DEFAULT_VARIABLE_COD_CHARGES.doubleValue()))
-            .andExpect(jsonPath("$.validUpto").value(DEFAULT_VALID_UPTO.toString()));
+            .andExpect(jsonPath("$.validUpto").value(DEFAULT_VALID_UPTO.toString()))
+            .andExpect(jsonPath("$.costParameters").value(DEFAULT_COST_PARAMETERS.toString()));
     }
     @Test
     @Transactional
@@ -342,7 +349,8 @@ public class CourierPricingEngineResourceIntTest {
             .minCodCharges(UPDATED_MIN_COD_CHARGES)
             .codCutoffAmount(UPDATED_COD_CUTOFF_AMOUNT)
             .variableCodCharges(UPDATED_VARIABLE_COD_CHARGES)
-            .validUpto(UPDATED_VALID_UPTO);
+            .validUpto(UPDATED_VALID_UPTO)
+            .costParameters(UPDATED_COST_PARAMETERS);
         CourierPricingEngineDTO courierPricingEngineDTO = courierPricingEngineMapper.toDto(updatedCourierPricingEngine);
 
         restCourierPricingEngineMockMvc.perform(put("/api/courier-pricing-engines")
@@ -365,6 +373,7 @@ public class CourierPricingEngineResourceIntTest {
         assertThat(testCourierPricingEngine.getCodCutoffAmount()).isEqualTo(UPDATED_COD_CUTOFF_AMOUNT);
         assertThat(testCourierPricingEngine.getVariableCodCharges()).isEqualTo(UPDATED_VARIABLE_COD_CHARGES);
         assertThat(testCourierPricingEngine.getValidUpto()).isEqualTo(UPDATED_VALID_UPTO);
+        assertThat(testCourierPricingEngine.getCostParameters()).isEqualTo(UPDATED_COST_PARAMETERS);
     }
 
     @Test

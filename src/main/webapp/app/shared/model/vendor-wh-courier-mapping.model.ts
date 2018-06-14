@@ -1,7 +1,7 @@
 export interface IVendorWHCourierMapping {
   id?: number;
   active?: boolean;
-  vendorShortCode?: string;
+  vendorName?: string;
   vendorId?: number;
   warehouseName?: string;
   warehouseId?: number;
@@ -13,7 +13,7 @@ export class VendorWHCourierMapping implements IVendorWHCourierMapping {
   constructor(
     public id?: number,
     public active?: boolean,
-    public vendorShortCode?: string,
+    public vendorName?: string,
     public vendorId?: number,
     public warehouseName?: string,
     public warehouseId?: number,

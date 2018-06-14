@@ -45,17 +45,6 @@
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here, do not remove-->
         </createTable>
         
-        <createTable tableName="courier_courier_channel">
-            <column name="courier_channels_id" type="bigint">
-                <constraints nullable="false"/>
-            </column>
-            <column name="couriers_id" type="bigint">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-
-        <addPrimaryKey columnNames="couriers_id, courier_channels_id" tableName="courier_courier_channel"/>
-        
         <createTable tableName="courier_courier_group">
             <column name="courier_groups_id" type="bigint">
                 <constraints nullable="false"/>

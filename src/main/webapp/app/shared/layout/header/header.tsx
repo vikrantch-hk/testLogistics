@@ -126,6 +126,33 @@ export default class Header extends React.Component<IHeaderProps, IHeaderState> 
       <DropdownItem tag={Link} key="pincode-region-zone" to="/entity/pincode-region-zone">
         <FontAwesomeIcon icon="asterisk" />&nbsp; Pincode Region Zone
       </DropdownItem>,
+      <DropdownItem tag={Link} key="vendor" to="/entity/vendor">
+        <FontAwesomeIcon icon="asterisk" />&nbsp; Vendor
+      </DropdownItem>,
+      <DropdownItem tag={Link} key="courier-channel" to="/entity/courier-channel">
+        <FontAwesomeIcon icon="asterisk" />&nbsp; Courier Channel
+      </DropdownItem>,
+      <DropdownItem tag={Link} key="courier" to="/entity/courier">
+        <FontAwesomeIcon icon="asterisk" />&nbsp; Courier
+      </DropdownItem>,
+      <DropdownItem tag={Link} key="courier-pricing-engine" to="/entity/courier-pricing-engine">
+        <FontAwesomeIcon icon="asterisk" />&nbsp; Courier Pricing Engine
+      </DropdownItem>,
+      <DropdownItem tag={Link} key="courier-attributes" to="/entity/courier-attributes">
+        <FontAwesomeIcon icon="asterisk" />&nbsp; Courier Attributes
+      </DropdownItem>,
+      <DropdownItem tag={Link} key="vendor-wh-courier-mapping" to="/entity/vendor-wh-courier-mapping">
+        <FontAwesomeIcon icon="asterisk" />&nbsp; Vendor Wh Courier Mapping
+      </DropdownItem>,
+      <DropdownItem tag={Link} key="pincode-courier-mapping" to="/entity/pincode-courier-mapping">
+        <FontAwesomeIcon icon="asterisk" />&nbsp; Pincode Courier Mapping
+      </DropdownItem>,
+      <DropdownItem tag={Link} key="pincode-region-zone" to="/entity/pincode-region-zone">
+        <FontAwesomeIcon icon="asterisk" />&nbsp; Pincode Region Zone
+      </DropdownItem>,
+      <DropdownItem tag={Link} key="channel" to="/entity/channel">
+        <FontAwesomeIcon icon="asterisk" />&nbsp; Channel
+      </DropdownItem>,
       /* jhipster-needle-add-entity-to-menu - JHipster will add entities to the menu here */
       <span key="dummy-placeholder" /> /* workaround to avoid error when there are no entities */
     ];

@@ -39,7 +39,7 @@ export class PincodeRegionZone extends React.Component<IPincodeRegionZoneProps> 
                 <th>ID</th>
                 <th>Region Type</th>
                 <th>Courier Group</th>
-                <th>Vendor WH Courier Mapping</th>
+                <th>Source Destination Mapping</th>
                 <th />
               </tr>
             </thead>
@@ -66,9 +66,9 @@ export class PincodeRegionZone extends React.Component<IPincodeRegionZoneProps> 
                     )}
                   </td>
                   <td>
-                    {pincodeRegionZone.vendorWHCourierMappingId ? (
-                      <Link to={`vendorWHCourierMapping/${pincodeRegionZone.vendorWHCourierMappingId}`}>
-                        {pincodeRegionZone.vendorWHCourierMappingId}
+                    {pincodeRegionZone.sourceDestinationMappingId ? (
+                      <Link to={`sourceDestinationMapping/${pincodeRegionZone.sourceDestinationMappingId}`}>
+                        {pincodeRegionZone.sourceDestinationMappingId}
                       </Link>
                     ) : (
                       ''

@@ -24,6 +24,7 @@ import Zone from './zone';
 import Hub from './hub';
 import PincodeCourierMapping from './pincode-courier-mapping';
 import PincodeRegionZone from './pincode-region-zone';
+import Channel from './channel';
 /* jhipster-needle-add-route-import - JHipster will add routes here */
 
 const Routes = ({ match }) => (
@@ -52,6 +53,7 @@ const Routes = ({ match }) => (
       <Route path={`${match.url}/hub`} component={Hub} />
       <Route path={`${match.url}/pincode-courier-mapping`} component={PincodeCourierMapping} />
       <Route path={`${match.url}/pincode-region-zone`} component={PincodeRegionZone} />
+      <Route path={`${match.url}/channel`} component={Channel} />
       {/* jhipster-needle-add-route-path - JHipster will routes here */}
     </Switch>
   </div>

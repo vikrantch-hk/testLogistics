@@ -45,9 +45,6 @@ export class CourierAttributes extends React.Component<ICourierAttributesProps> 
                 <th>Reverse Ground</th>
                 <th>Card On Delivery Air</th>
                 <th>Card On Delivery Ground</th>
-                <th>Hk Shipping</th>
-                <th>Vendor Shipping</th>
-                <th>Reverse Pickup</th>
                 <th />
               </tr>
             </thead>
@@ -67,9 +64,6 @@ export class CourierAttributes extends React.Component<ICourierAttributesProps> 
                   <td>{courierAttributes.reverseGround ? 'true' : 'false'}</td>
                   <td>{courierAttributes.cardOnDeliveryAir ? 'true' : 'false'}</td>
                   <td>{courierAttributes.cardOnDeliveryGround ? 'true' : 'false'}</td>
-                  <td>{courierAttributes.hkShipping ? 'true' : 'false'}</td>
-                  <td>{courierAttributes.vendorShipping ? 'true' : 'false'}</td>
-                  <td>{courierAttributes.reversePickup ? 'true' : 'false'}</td>
                   <td className="text-right">
                     <div className="btn-group flex-btn-group-container">
                       <Button tag={Link} to={`${match.url}/${courierAttributes.id}`} color="info" size="sm">

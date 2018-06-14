@@ -37,7 +37,8 @@ export class CourierChannel extends React.Component<ICourierChannelProps> {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Name</th>
+                <th>Channel</th>
+                <th>Courier</th>
                 <th />
               </tr>
             </thead>
@@ -49,7 +50,12 @@ export class CourierChannel extends React.Component<ICourierChannelProps> {
                       {courierChannel.id}
                     </Button>
                   </td>
-                  <td>{courierChannel.name}</td>
+                  <td>
+                    {courierChannel.channelName ? <Link to={`channel/${courierChannel.channelId}`}>{courierChannel.channelName}</Link> : ''}
+                  </td>
+                  <td>
+                    {courierChannel.courierName ? <Link to={`courier/${courierChannel.courierId}`}>{courierChannel.courierName}</Link> : ''}
+                  </td>
                   <td className="text-right">
                     <div className="btn-group flex-btn-group-container">
                       <Button tag={Link} to={`${match.url}/${courierChannel.id}`} color="info" size="sm">

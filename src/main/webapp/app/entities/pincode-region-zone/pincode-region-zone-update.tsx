@@ -11,8 +11,8 @@ import { IRegionType } from 'app/shared/model/region-type.model';
 import { getEntities as getRegionTypes } from 'app/entities/region-type/region-type.reducer';
 import { ICourierGroup } from 'app/shared/model/courier-group.model';
 import { getEntities as getCourierGroups } from 'app/entities/courier-group/courier-group.reducer';
-import { IVendorWHCourierMapping } from 'app/shared/model/vendor-wh-courier-mapping.model';
-import { getEntities as getVendorWhCourierMappings } from 'app/entities/vendor-wh-courier-mapping/vendor-wh-courier-mapping.reducer';
+import { ISourceDestinationMapping } from 'app/shared/model/source-destination-mapping.model';
+import { getEntities as getSourceDestinationMappings } from 'app/entities/source-destination-mapping/source-destination-mapping.reducer';
 import { getEntity, updateEntity, createEntity, reset } from './pincode-region-zone.reducer';
 import { IPincodeRegionZone } from 'app/shared/model/pincode-region-zone.model';
 // tslint:disable-next-line:no-unused-variable
@@ -27,8 +27,8 @@ export interface IPincodeRegionZoneUpdateProps {
   regionTypes: IRegionType[];
   getCourierGroups: ICrudGetAllAction<ICourierGroup>;
   courierGroups: ICourierGroup[];
-  getVendorWhCourierMappings: ICrudGetAllAction<IVendorWHCourierMapping>;
-  vendorWHCourierMappings: IVendorWHCourierMapping[];
+  getSourceDestinationMappings: ICrudGetAllAction<ISourceDestinationMapping>;
+  sourceDestinationMappings: ISourceDestinationMapping[];
   pincodeRegionZone: IPincodeRegionZone;
   reset: Function;
   loading: boolean;
@@ -41,7 +41,7 @@ export interface IPincodeRegionZoneUpdateState {
   isNew: boolean;
   regionTypeId: number;
   courierGroupId: number;
-  vendorWHCourierMappingId: number;
+  sourceDestinationMappingId: number;
 }
 
 export class PincodeRegionZoneUpdate extends React.Component<IPincodeRegionZoneUpdateProps, IPincodeRegionZoneUpdateState> {
@@ -50,7 +50,7 @@ export class PincodeRegionZoneUpdate extends React.Component<IPincodeRegionZoneU
     this.state = {
       regionTypeId: 0,
       courierGroupId: 0,
-      vendorWHCourierMappingId: 0,
+      sourceDestinationMappingId: 0,
       isNew: !this.props.match.params || !this.props.match.params.id
     };
   }
@@ -64,7 +64,7 @@ export class PincodeRegionZoneUpdate extends React.Component<IPincodeRegionZoneU
 
     this.props.getRegionTypes();
     this.props.getCourierGroups();
-    this.props.getVendorWhCourierMappings();
+    this.props.getSourceDestinationMappings();
   }
 
   saveEntity = (event, errors, values) => {
@@ -122,17 +122,17 @@ export class PincodeRegionZoneUpdate extends React.Component<IPincodeRegionZoneU
     }
   };
 
-  vendorWHCourierMappingUpdate = element => {
+  sourceDestinationMappingUpdate = element => {
     const id = element.target.value.toString();
     if (id === '') {
       this.setState({
-        vendorWHCourierMappingId: -1
+        sourceDestinationMappingId: -1
       });
     } else {
-      for (const i in this.props.vendorWHCourierMappings) {
-        if (id === this.props.vendorWHCourierMappings[i].id.toString()) {
+      for (const i in this.props.sourceDestinationMappings) {
+        if (id === this.props.sourceDestinationMappings[i].id.toString()) {
           this.setState({
-            vendorWHCourierMappingId: this.props.vendorWHCourierMappings[i].id
+            sourceDestinationMappingId: this.props.sourceDestinationMappings[i].id
           });
         }
       }
@@ -141,7 +141,7 @@ export class PincodeRegionZoneUpdate extends React.Component<IPincodeRegionZoneU
 
   render() {
     const isInvalid = false;
-    const { pincodeRegionZone, regionTypes, courierGroups, vendorWHCourierMappings, loading, updating } = this.props;
+    const { pincodeRegionZone, regionTypes, courierGroups, sourceDestinationMappings, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
@@ -190,16 +190,16 @@ export class PincodeRegionZoneUpdate extends React.Component<IPincodeRegionZoneU
                   </AvInput>
                 </AvGroup>
                 <AvGroup>
-                  <Label for="vendorWHCourierMapping.id">Vendor WH Courier Mapping</Label>
+                  <Label for="sourceDestinationMapping.id">Source Destination Mapping</Label>
                   <AvInput
                     type="select"
                     className="form-control"
-                    name="vendorWHCourierMappingId"
-                    onChange={this.vendorWHCourierMappingUpdate}
+                    name="sourceDestinationMappingId"
+                    onChange={this.sourceDestinationMappingUpdate}
                   >
                     <option value="" key="0" />
-                    {vendorWHCourierMappings
-                      ? vendorWHCourierMappings.map(otherEntity => (
+                    {sourceDestinationMappings
+                      ? sourceDestinationMappings.map(otherEntity => (
                           <option value={otherEntity.id} key={otherEntity.id}>
                             {otherEntity.id}
                           </option>
@@ -227,7 +227,7 @@ export class PincodeRegionZoneUpdate extends React.Component<IPincodeRegionZoneU
 const mapStateToProps = storeState => ({
   regionTypes: storeState.regionType.entities,
   courierGroups: storeState.courierGroup.entities,
-  vendorWHCourierMappings: storeState.vendorWHCourierMapping.entities,
+  sourceDestinationMappings: storeState.sourceDestinationMapping.entities,
   pincodeRegionZone: storeState.pincodeRegionZone.entity,
   loading: storeState.pincodeRegionZone.loading,
   updating: storeState.pincodeRegionZone.updating
@@ -236,7 +236,7 @@ const mapStateToProps = storeState => ({
 const mapDispatchToProps = {
   getRegionTypes,
   getCourierGroups,
-  getVendorWhCourierMappings,
+  getSourceDestinationMappings,
   getEntity,
   updateEntity,
   createEntity,

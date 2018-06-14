@@ -6,8 +6,6 @@ import com.hk.logistics.repository.PincodeCourierMappingRepository;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.PincodeCourierMappingDTO;
-import com.hk.logistics.service.dto.PincodeDeliveryInfoRequest;
-import com.hk.logistics.service.dto.PincodeDeliveryInfoResponse;
 import com.hk.logistics.service.mapper.PincodeCourierMappingMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
@@ -87,17 +85,6 @@ public class PincodeCourierMappingResource {
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, pincodeCourierMappingDTO.getId().toString()))
             .body(result);
     }
-    
-    /**
-     * GET  /variant/delivery/days : gets the estimated delivery days for product.
-     *
-     * @return the ResponseEntity with status 200 (OK) and the estimated delivery days with cod allowed flag and pincode in body
-     */
-   /* @PostMapping("/variant/delivery/days")
-    @Timed
-    public PincodeDeliveryInfoResponse getEstimatedDeliveryDate(PincodeDeliveryInfoRequest pincodeDeliveryInfoRequestDTO){
-    	
-    }*/
 
     /**
      * GET  /pincode-courier-mappings : get all the pincodeCourierMappings.

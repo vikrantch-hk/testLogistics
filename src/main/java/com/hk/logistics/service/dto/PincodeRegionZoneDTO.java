@@ -18,7 +18,7 @@ public class PincodeRegionZoneDTO implements Serializable {
 
     private String courierGroupName;
 
-    private Long vendorWHCourierMappingId;
+    private Long sourceDestinationMappingId;
 
     public Long getId() {
         return id;
@@ -60,12 +60,12 @@ public class PincodeRegionZoneDTO implements Serializable {
         this.courierGroupName = courierGroupName;
     }
 
-    public Long getVendorWHCourierMappingId() {
-        return vendorWHCourierMappingId;
+    public Long getSourceDestinationMappingId() {
+        return sourceDestinationMappingId;
     }
 
-    public void setVendorWHCourierMappingId(Long vendorWHCourierMappingId) {
-        this.vendorWHCourierMappingId = vendorWHCourierMappingId;
+    public void setSourceDestinationMappingId(Long sourceDestinationMappingId) {
+        this.sourceDestinationMappingId = sourceDestinationMappingId;
     }
 
     @Override
@@ -97,7 +97,7 @@ public class PincodeRegionZoneDTO implements Serializable {
             ", regionType='" + getRegionTypeName() + "'" +
             ", courierGroup=" + getCourierGroupId() +
             ", courierGroup='" + getCourierGroupName() + "'" +
-            ", vendorWHCourierMapping=" + getVendorWHCourierMappingId() +
+            ", sourceDestinationMapping=" + getSourceDestinationMappingId() +
             "}";
     }
 }

@@ -2,7 +2,7 @@ import { IVendorWHCourierMapping } from './vendor-wh-courier-mapping.model';
 
 export interface IVendor {
   id?: number;
-  shortCode?: string;
+  name?: string;
   pincode?: string;
   vendorWHCourierMappings?: IVendorWHCourierMapping[];
 }
@@ -10,7 +10,7 @@ export interface IVendor {
 export class Vendor implements IVendor {
   constructor(
     public id?: number,
-    public shortCode?: string,
+    public name?: string,
     public pincode?: string,
     public vendorWHCourierMappings?: IVendorWHCourierMapping[]
   ) {}

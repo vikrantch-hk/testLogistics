@@ -7,8 +7,6 @@ import { AvForm, AvGroup, AvInput, AvField } from 'availity-reactstrap-validatio
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
-import { ICourierChannel } from 'app/shared/model/courier-channel.model';
-import { getEntities as getCourierChannels } from 'app/entities/courier-channel/courier-channel.reducer';
 import { ICourierGroup } from 'app/shared/model/courier-group.model';
 import { getEntities as getCourierGroups } from 'app/entities/courier-group/courier-group.reducer';
 import { getEntity, updateEntity, createEntity, reset } from './courier.reducer';
@@ -21,8 +19,6 @@ export interface ICourierUpdateProps {
   getEntity: ICrudGetAction<ICourier>;
   updateEntity: ICrudPutAction<ICourier>;
   createEntity: ICrudPutAction<ICourier>;
-  getCourierChannels: ICrudGetAllAction<ICourierChannel>;
-  courierChannels: ICourierChannel[];
   getCourierGroups: ICrudGetAllAction<ICourierGroup>;
   courierGroups: ICourierGroup[];
   courier: ICourier;
@@ -35,7 +31,6 @@ export interface ICourierUpdateProps {
 
 export interface ICourierUpdateState {
   isNew: boolean;
-  idscourierChannel: any[];
   idscourierGroup: any[];
 }
 
@@ -43,7 +38,6 @@ export class CourierUpdate extends React.Component<ICourierUpdateProps, ICourier
   constructor(props) {
     super(props);
     this.state = {
-      idscourierChannel: [],
       idscourierGroup: [],
       isNew: !this.props.match.params || !this.props.match.params.id
     };
@@ -56,7 +50,6 @@ export class CourierUpdate extends React.Component<ICourierUpdateProps, ICourier
       this.props.getEntity(this.props.match.params.id);
     }
 
-    this.props.getCourierChannels();
     this.props.getCourierGroups();
   }
 
@@ -81,44 +74,12 @@ export class CourierUpdate extends React.Component<ICourierUpdateProps, ICourier
     this.props.history.push('/entity/courier');
   };
 
-  courierChannelUpdate = element => {
-    const selected = Array.from(element.target.selectedOptions).map((e: any) => e.value);
-    this.setState({
-      idscourierChannel: keysToValues(selected, this.props.courierChannels, 'name')
-    });
-  };
-
   courierGroupUpdate = element => {
     const selected = Array.from(element.target.selectedOptions).map((e: any) => e.value);
     this.setState({
       idscourierGroup: keysToValues(selected, this.props.courierGroups, 'name')
     });
   };
-
-  displaycourierChannel(value: any) {
-    if (this.state.idscourierChannel && this.state.idscourierChannel.length !== 0) {
-      const list = [];
-      for (const i in this.state.idscourierChannel) {
-        if (this.state.idscourierChannel[i]) {
-          list.push(this.state.idscourierChannel[i].name);
-        }
-      }
-      return list;
-    }
-    if (value.courierChannels && value.courierChannels.length !== 0) {
-      const list = [];
-      for (const i in value.courierChannels) {
-        if (value.courierChannels[i]) {
-          list.push(value.courierChannels[i].name);
-        }
-      }
-      this.setState({
-        idscourierChannel: keysToValues(list, this.props.courierChannels, 'name')
-      });
-      return list;
-    }
-    return null;
-  }
 
   displaycourierGroup(value: any) {
     if (this.state.idscourierGroup && this.state.idscourierGroup.length !== 0) {
@@ -147,7 +108,7 @@ export class CourierUpdate extends React.Component<ICourierUpdateProps, ICourier
 
   render() {
     const isInvalid = false;
-    const { courier, courierChannels, courierGroups, loading, updating } = this.props;
+    const { courier, courierGroups, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
@@ -206,27 +167,6 @@ export class CourierUpdate extends React.Component<ICourierUpdateProps, ICourier
                   <AvField type="number" className="form-control" name="parentCourierId" />
                 </AvGroup>
                 <AvGroup>
-                  <Label for="courierChannels">Courier Channel</Label>
-                  <AvInput
-                    type="select"
-                    multiple
-                    className="form-control"
-                    name="fakecourierChannels"
-                    value={this.displaycourierChannel(courier)}
-                    onChange={this.courierChannelUpdate}
-                  >
-                    <option value="" key="0" />
-                    {courierChannels
-                      ? courierChannels.map(otherEntity => (
-                          <option value={otherEntity.name} key={otherEntity.id}>
-                            {otherEntity.name}
-                          </option>
-                        ))
-                      : null}
-                  </AvInput>
-                  <AvInput type="hidden" name="courierChannels" value={this.state.idscourierChannel} />
-                </AvGroup>
-                <AvGroup>
                   <Label for="courierGroups">Courier Group</Label>
                   <AvInput
                     type="select"
@@ -238,7 +178,7 @@ export class CourierUpdate extends React.Component<ICourierUpdateProps, ICourier
                   >
                     <option value="" key="0" />
                     {courierGroups
-                      ? courierGroups.map(otherEntity => (
+                      ? couriergroups.map(otherEntity => (
                           <option value={otherEntity.name} key={otherEntity.id}>
                             {otherEntity.name}
                           </option>
@@ -265,7 +205,6 @@ export class CourierUpdate extends React.Component<ICourierUpdateProps, ICourier
 }
 
 const mapStateToProps = storeState => ({
-  courierChannels: storeState.courierChannel.entities,
   courierGroups: storeState.courierGroup.entities,
   courier: storeState.courier.entity,
   loading: storeState.courier.loading,
@@ -273,7 +212,6 @@ const mapStateToProps = storeState => ({
 });
 
 const mapDispatchToProps = {
-  getCourierChannels,
   getCourierGroups,
   getEntity,
   updateEntity,

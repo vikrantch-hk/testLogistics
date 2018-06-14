@@ -5,7 +5,6 @@ export interface IPincodeCourierMapping {
   estimatedDeliveryDays?: number;
   pickupAvailable?: boolean;
   pincodeId?: number;
-  attributesId?: number;
   vendorWHCourierMappingId?: number;
   sourceDestinationMappingId?: number;
 }
@@ -18,7 +17,6 @@ export class PincodeCourierMapping implements IPincodeCourierMapping {
     public estimatedDeliveryDays?: number,
     public pickupAvailable?: boolean,
     public pincodeId?: number,
-    public attributesId?: number,
     public vendorWHCourierMappingId?: number,
     public sourceDestinationMappingId?: number
   ) {

@@ -54,8 +54,8 @@ export class VendorWHCourierMapping extends React.Component<IVendorWHCourierMapp
                   </td>
                   <td>{vendorWHCourierMapping.active ? 'true' : 'false'}</td>
                   <td>
-                    {vendorWHCourierMapping.vendorShortCode ? (
-                      <Link to={`vendor/${vendorWHCourierMapping.vendorId}`}>{vendorWHCourierMapping.vendorShortCode}</Link>
+                    {vendorWHCourierMapping.vendorName ? (
+                      <Link to={`vendor/${vendorWHCourierMapping.vendorId}`}>{vendorWHCourierMapping.vendorName}</Link>
                     ) : (
                       ''
                     )}

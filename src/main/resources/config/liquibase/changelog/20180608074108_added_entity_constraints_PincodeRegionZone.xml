@@ -20,11 +20,11 @@
                                  referencedColumnNames="id"
                                  referencedTableName="courier_group"/>
 
-        <addForeignKeyConstraint baseColumnNames="vendorwhcourier_mapping_id"
+        <addForeignKeyConstraint baseColumnNames="source_destination_mapping_id"
                                  baseTableName="pincode_region_zone"
-                                 constraintName="fk_pincode_region_zone_vendorwhcourier_mapping_id"
+                                 constraintName="fk_pincode_region_zone_source_destination_mapping_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="vendor_wh_courier_mapping"/>
+                                 referencedTableName="source_destination_mapping"/>
 
     </changeSet>
 </databaseChangeLog>

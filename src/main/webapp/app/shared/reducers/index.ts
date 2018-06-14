@@ -28,6 +28,7 @@ import zone from 'app/entities/zone/zone.reducer';
 import hub from 'app/entities/hub/hub.reducer';
 import pincodeCourierMapping from 'app/entities/pincode-courier-mapping/pincode-courier-mapping.reducer';
 import pincodeRegionZone from 'app/entities/pincode-region-zone/pincode-region-zone.reducer';
+import channel from 'app/entities/channel/channel.reducer';
 /* jhipster-needle-add-reducer-import - JHipster will add reducer here */
 
 export default combineReducers({
@@ -57,6 +58,7 @@ export default combineReducers({
   hub,
   pincodeCourierMapping,
   pincodeRegionZone,
+  channel,
   /* jhipster-needle-add-reducer-combine - JHipster will add reducer here */
   loadingBar
 });

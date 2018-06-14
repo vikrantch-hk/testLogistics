@@ -4,7 +4,7 @@ export interface IPincodeRegionZone {
   regionTypeId?: number;
   courierGroupName?: string;
   courierGroupId?: number;
-  vendorWHCourierMappingId?: number;
+  sourceDestinationMappingId?: number;
 }
 
 export class PincodeRegionZone implements IPincodeRegionZone {
@@ -14,6 +14,6 @@ export class PincodeRegionZone implements IPincodeRegionZone {
     public regionTypeId?: number,
     public courierGroupName?: string,
     public courierGroupId?: number,
-    public vendorWHCourierMappingId?: number
+    public sourceDestinationMappingId?: number
   ) {}
 }

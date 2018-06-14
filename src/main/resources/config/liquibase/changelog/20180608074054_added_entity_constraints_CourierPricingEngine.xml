@@ -14,12 +14,6 @@
                                  referencedColumnNames="id"
                                  referencedTableName="courier"/>
 
-        <addForeignKeyConstraint baseColumnNames="warehouse_id"
-                                 baseTableName="courier_pricing_engine"
-                                 constraintName="fk_courier_pricing_engine_warehouse_id"
-                                 referencedColumnNames="id"
-                                 referencedTableName="warehouse"/>
-
         <addForeignKeyConstraint baseColumnNames="region_type_id"
                                  baseTableName="courier_pricing_engine"
                                  constraintName="fk_courier_pricing_engine_region_type_id"

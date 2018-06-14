@@ -8,19 +8,16 @@ import org.mapstruct.*;
 /**
  * Mapper for the entity CourierPricingEngine and its DTO CourierPricingEngineDTO.
  */
-@Mapper(componentModel = "spring", uses = {CourierMapper.class, WarehouseMapper.class, RegionTypeMapper.class})
+@Mapper(componentModel = "spring", uses = {CourierMapper.class, RegionTypeMapper.class})
 public interface CourierPricingEngineMapper extends EntityMapper<CourierPricingEngineDTO, CourierPricingEngine> {
 
     @Mapping(source = "courier.id", target = "courierId")
     @Mapping(source = "courier.name", target = "courierName")
-    @Mapping(source = "warehouse.id", target = "warehouseId")
-    @Mapping(source = "warehouse.name", target = "warehouseName")
     @Mapping(source = "regionType.id", target = "regionTypeId")
     @Mapping(source = "regionType.name", target = "regionTypeName")
     CourierPricingEngineDTO toDto(CourierPricingEngine courierPricingEngine);
 
     @Mapping(source = "courierId", target = "courier")
-    @Mapping(source = "warehouseId", target = "warehouse")
     @Mapping(source = "regionTypeId", target = "regionType")
     CourierPricingEngine toEntity(CourierPricingEngineDTO courierPricingEngineDTO);
 

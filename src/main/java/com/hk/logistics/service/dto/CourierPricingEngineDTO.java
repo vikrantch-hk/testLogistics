@@ -38,13 +38,11 @@ public class CourierPricingEngineDTO implements Serializable {
 
     private LocalDate validUpto;
 
+    private String costParameters;
+
     private Long courierId;
 
     private String courierName;
-
-    private Long warehouseId;
-
-    private String warehouseName;
 
     private Long regionTypeId;
 
@@ -146,6 +144,14 @@ public class CourierPricingEngineDTO implements Serializable {
         this.validUpto = validUpto;
     }
 
+    public String getCostParameters() {
+        return costParameters;
+    }
+
+    public void setCostParameters(String costParameters) {
+        this.costParameters = costParameters;
+    }
+
     public Long getCourierId() {
         return courierId;
     }
@@ -160,22 +166,6 @@ public class CourierPricingEngineDTO implements Serializable {
 
     public void setCourierName(String courierName) {
         this.courierName = courierName;
-    }
-
-    public Long getWarehouseId() {
-        return warehouseId;
-    }
-
-    public void setWarehouseId(Long warehouseId) {
-        this.warehouseId = warehouseId;
-    }
-
-    public String getWarehouseName() {
-        return warehouseName;
-    }
-
-    public void setWarehouseName(String warehouseName) {
-        this.warehouseName = warehouseName;
     }
 
     public Long getRegionTypeId() {
@@ -230,10 +220,9 @@ public class CourierPricingEngineDTO implements Serializable {
             ", codCutoffAmount=" + getCodCutoffAmount() +
             ", variableCodCharges=" + getVariableCodCharges() +
             ", validUpto='" + getValidUpto() + "'" +
+            ", costParameters='" + getCostParameters() + "'" +
             ", courier=" + getCourierId() +
             ", courier='" + getCourierName() + "'" +
-            ", warehouse=" + getWarehouseId() +
-            ", warehouse='" + getWarehouseName() + "'" +
             ", regionType=" + getRegionTypeId() +
             ", regionType='" + getRegionTypeName() + "'" +
             "}";

@@ -9,17 +9,6 @@
     <changeSet id="20180608074052-2" author="jhipster">
         
         <addForeignKeyConstraint baseColumnNames="couriers_id"
-                                 baseTableName="courier_courier_channel"
-                                 constraintName="fk_courier_courier_channel_couriers_id"
-                                 referencedColumnNames="id"
-                                 referencedTableName="courier"/>
-        <addForeignKeyConstraint baseColumnNames="courier_channels_id"
-                                 baseTableName="courier_courier_channel"
-                                 constraintName="fk_courier_courier_channel_courier_channels_id"
-                                 referencedColumnNames="id"
-                                 referencedTableName="courier_channel"/>
-        
-        <addForeignKeyConstraint baseColumnNames="couriers_id"
                                  baseTableName="courier_courier_group"
                                  constraintName="fk_courier_courier_group_couriers_id"
                                  referencedColumnNames="id"

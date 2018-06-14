@@ -8,17 +8,15 @@ import org.mapstruct.*;
 /**
  * Mapper for the entity PincodeCourierMapping and its DTO PincodeCourierMappingDTO.
  */
-@Mapper(componentModel = "spring", uses = {PincodeMapper.class, CourierAttributesMapper.class, VendorWHCourierMappingMapper.class, SourceDestinationMappingMapper.class})
+@Mapper(componentModel = "spring", uses = {PincodeMapper.class, VendorWHCourierMappingMapper.class, SourceDestinationMappingMapper.class})
 public interface PincodeCourierMappingMapper extends EntityMapper<PincodeCourierMappingDTO, PincodeCourierMapping> {
 
     @Mapping(source = "pincode.id", target = "pincodeId")
-    @Mapping(source = "attributes.id", target = "attributesId")
     @Mapping(source = "vendorWHCourierMapping.id", target = "vendorWHCourierMappingId")
     @Mapping(source = "sourceDestinationMapping.id", target = "sourceDestinationMappingId")
     PincodeCourierMappingDTO toDto(PincodeCourierMapping pincodeCourierMapping);
 
     @Mapping(source = "pincodeId", target = "pincode")
-    @Mapping(source = "attributesId", target = "attributes")
     @Mapping(source = "vendorWHCourierMappingId", target = "vendorWHCourierMapping")
     @Mapping(source = "sourceDestinationMappingId", target = "sourceDestinationMapping")
     PincodeCourierMapping toEntity(PincodeCourierMappingDTO pincodeCourierMappingDTO);
