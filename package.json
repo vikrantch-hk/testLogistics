@@ -21,7 +21,9 @@
     "react": "16.3.0",
     "react-addons-css-transition-group": "16.0.0-alpha.3",
     "react-addons-transition-group": "16.0.0-alpha.3",
+    "react-data-export": "^0.4.2",
     "react-dom": "16.3.0",
+    "react-file-reader": "^1.1.4",
     "react-file-uploader": "^1.0.0",
     "react-hot-loader": "3.1.1",
     "react-jhipster": "0.4.13",
@@ -30,6 +32,7 @@
     "react-router-dom": "4.2.2",
     "react-toastify": "3.4.3",
     "react-transition-group": "2.3.0",
+    "react-upload-file": "^2.0.0-beta.6",
     "reactstrap": "5.0.0",
     "redux": "3.7.2",
     "redux-devtools": "3.4.1",
@@ -38,7 +41,8 @@
     "redux-promise-middleware": "5.0.0",
     "redux-thunk": "2.2.0",
     "tslib": "1.9.0",
-    "uuid": "3.2.1"
+    "uuid": "3.2.1",
+    "xlsx": "^0.13.0"
   },
   "devDependencies": {
     "@types/chai": "4.1.2",

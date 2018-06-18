@@ -14,7 +14,15 @@ import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -63,21 +71,21 @@ public class VendorResource {
     	List<Vendor> vendorBatch = new ArrayList<Vendor>();
 
         try {
-        	POIFSFileSystem fileSystem = null;      
+       /* 	POIFSFileSystem fileSystem = null;      
 			try {//get the excel document
 				fileSystem = new POIFSFileSystem(new ByteArrayInputStream(file.getBytes()));
 			}
 			catch(Exception e) {
 				e.printStackTrace();
 				log.error("The file uploaded is not an excel file");
-			}
+			}*/
 			
-			HSSFWorkbook workBook = new HSSFWorkbook (fileSystem);
-			HSSFSheet sheet = workBook.getSheetAt (0);
+			Workbook wb = WorkbookFactory.create(new ByteArrayInputStream(file.getBytes()));
+			Sheet sheet = wb.getSheetAt (0);
 			Iterator rows = sheet.rowIterator();
 			
 			while(rows.hasNext()){	
-				HSSFRow row = (HSSFRow) rows.next();
+				Row row = (Row) rows.next();
 				log.info("Row No.: " + row.getRowNum ());
 				
 				if(row.getRowNum() > 1) {//TODO : >1
@@ -85,21 +93,18 @@ public class VendorResource {
 					rowCount = rowCount + 1;
 					 
 					/*countryDetail.setId(1l);*/
-					vendorDetail.setId(new Long(row.getRowNum() - 1));
+					//vendorDetail.setId(new Long(row.getRowNum() - 1));
 					
 					Iterator cells = row.cellIterator();
 					while(cells.hasNext()) {
-						HSSFCell cell = (HSSFCell) cells.next();
-						HSSFCellStyle cellStyle = cell.getCellStyle();
-						log.info("Cell No.: " + cell.getNumericCellValue());
+						Cell cell = (Cell) cells.next();
+						CellStyle cellStyle = cell.getCellStyle();
+					//	log.info("Cell No.: " + cell.getNumericCellValue());
 						log.info("Cell type: " + cell.getCellTypeEnum());
-						
-						if(cell.getNumericCellValue() == 0){
-							vendorDetail.setShortCode(String.valueOf(cell.getStringCellValue()));
-						}
-						else if(cell.getNumericCellValue() == 1){
-							vendorDetail.setPincode(String.valueOf(cell.getStringCellValue()));
-						}
+						if(CellType.NUMERIC.equals(cell.getCellTypeEnum()))
+							vendorDetail.setPincode(String.valueOf(cell.getNumericCellValue()));
+						if(CellType.STRING.equals(cell.getCellTypeEnum()))
+							vendorDetail.setShortCode(cell.getStringCellValue());
 					}					
 					vendorBatch.add(vendorDetail);						
 				}
@@ -109,17 +114,18 @@ public class VendorResource {
 				for(Vendor vendor : vendorBatch){
 					result = vendorRepository.save(vendor);
 				}
-				return ResponseEntity.created(new URI("/api/countries/"))
-			            .headers(HeaderUtil.createEntityCreationAlert("country", null))
+				return ResponseEntity.created(new URI("/api/upload/"))
+			            .headers(HeaderUtil.createEntityCreationAlert("Vendor", null))
 			            .body(result);
 			}else{
-				return ResponseEntity.badRequest()
-	            		.headers(HeaderUtil.createFailureAlert("country", "errorEmptyUpload", "File cannot be empty")).body(null);
+				throw new BadRequestAlertException("A new vendor File cannot be empty", ENTITY_NAME, "idexists");
 			}
         }catch (RuntimeException | IOException e) {
             log.error("Error while uploading.", e);
-            return ResponseEntity.badRequest()
-            		.headers(HeaderUtil.createFailureAlert("country", "errorUpload", "Error While Uploading")).body(null);
+            throw new BadRequestAlertException("A new vendor File cannot be empty", ENTITY_NAME, "idexists");
+        } catch (InvalidFormatException e) {
+            log.error("Error while uploading.", e);
+            throw new BadRequestAlertException("A new vendor File cannot be empty", ENTITY_NAME, "idexists");
         }       
     }
     

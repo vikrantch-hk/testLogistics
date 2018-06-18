@@ -70,6 +70,9 @@ module.exports = options => ({
   stats: {
     children: false
   },
+  node: {
+    fs: 'empty'
+  },
   plugins: [
     new webpack.DefinePlugin({
       'process.env': {

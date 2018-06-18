@@ -10,7 +10,12 @@ import { getEntities } from './vendor.reducer';
 import { IVendor } from 'app/shared/model/vendor.model';
 // tslint:disable-next-line:no-unused-variable
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
-import { FileUpload } from 'file-upload-react';
+import ReactUploadFile from 'react-upload-file';
+import ReactFileReader from 'react-file-reader';
+import * as XLSX from 'xlsx';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import ReactExport from 'react-data-export';
 
 export interface IVendorProps {
   getEntities: ICrudGetAllAction<IVendor>;
@@ -25,11 +30,50 @@ export class Vendor extends React.Component<IVendorProps> {
 
   render() {
     const { vendorList, match } = this.props;
-    const options = {
-      baseUrl: 'http://127.0.0.1',
-      param: {
-        fid: 0
-      }
+
+    const ExcelFile = ReactExport.ExcelFile;
+    const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
+    const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
+
+    const handleUploadFiles = file => {
+      // tslint:disable-next-line:no-console
+      console.log(file);
+      // tslint:disable-next-line:no-console
+      //  console.log(axios.defaults.headers.common['Authorization']);
+      const data = new FormData();
+      const imagedata = file[0];
+      // tslint:disable-next-line:no-console
+      console.log(imagedata);
+      data.append('file', file[0]);
+      data.append('fileName', file[0]);
+      //  axios.get('api/vendor');
+      // tslint:disable-next-line:no-console
+      console.log('get success');
+      axios
+        .post('/api/upload', data)
+        .then(response => {
+          // tslint:disable-next-line:no-console
+          console.log(response);
+          toast.success(response.statusText);
+          this.setState({ vendorList: this.props.getEntities() });
+          this.setState({ file: null });
+          this.setState({ data: null });
+          file = null;
+          // return response;
+        })
+        .catch(error => {
+          // tslint:disable-next-line:no-console
+          console.log(error);
+          //  alert(error);
+          toast.error(error.message);
+          // return error;
+          file = null;
+        });
+      // tslint:disable-next-line:no-console
+      console.log('bye');
+      // const workbook = XLSX.readFile(file);
+      // tslint:disable-next-line:no-console
+      console.log('workbook');
     };
     return (
       <div>
@@ -38,12 +82,10 @@ export class Vendor extends React.Component<IVendorProps> {
           <Link to={`${match.url}/new`} className="btn btn-primary float-right jh-create-entity" id="jh-create-entity">
             <FontAwesomeIcon icon="plus" />&nbsp; Create new Vendor
           </Link>
+          <ReactFileReader handleFiles={handleUploadFiles} fileTypes={'.xlsx'}>
+            <button className="btn">Upload</button>
+          </ReactFileReader>
         </h2>
-        <FileUpload options={options}>
-          <Link to={`${match.url}/new`} className="btn btn-primary float-right jh-create-entity" id="jh-create-entity">
-            <FontAwesomeIcon icon="plus" />&nbsp; Create new Vendor
-          </Link>
-        </FileUpload>
         <div className="table-responsive">
           <Table responsive>
             <thead>
@@ -80,6 +122,12 @@ export class Vendor extends React.Component<IVendorProps> {
                 </tr>
               ))}
             </tbody>
+            <ExcelFile element={<button>Download Data</button>}>
+              <ExcelSheet data={vendorList} name="Vendors">
+                <ExcelColumn label="Short Code" value="shortCode" />
+                <ExcelColumn label="Pincode" value="pincode" />
+              </ExcelSheet>
+            </ExcelFile>
           </Table>
         </div>
       </div>
