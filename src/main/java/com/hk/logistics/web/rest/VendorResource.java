@@ -1,10 +1,13 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.hk.logistics.config.batch.BatchConfiguration;
 import com.hk.logistics.domain.Vendor;
 import com.hk.logistics.repository.VendorRepository;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
+import com.poiji.bind.Poiji;
+import com.poiji.exception.PoijiExcelType;
 import com.hk.logistics.service.dto.VendorDTO;
 import com.hk.logistics.service.mapper.VendorMapper;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -25,21 +28,40 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.validation.Valid;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * REST controller for managing Vendor.
@@ -55,6 +77,20 @@ public class VendorResource {
     private final VendorRepository vendorRepository;
 
     private final VendorMapper vendorMapper;
+    
+    private int batchSize = 100;
+    
+    @Autowired
+    JobLauncher jobLauncher;
+    
+    @Autowired
+    BatchConfiguration batchConfiguration;
+    
+    @Autowired
+    Job job;
+    
+    @PersistenceContext
+    private EntityManager em;
 
     public VendorResource(VendorRepository vendorRepository, VendorMapper vendorMapper) {
         this.vendorRepository = vendorRepository;
@@ -63,70 +99,79 @@ public class VendorResource {
     
 	@RequestMapping(value = "/upload", method = RequestMethod.POST,produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody ResponseEntity<Vendor> handleFileUpload(
-            @RequestParam(value="file", required=false) MultipartFile	 file) throws URISyntaxException {
-		
-    	Long rowCount = 0L;
+            @RequestParam(value="file", required=false) MultipartFile	 file) throws URISyntaxException, InterruptedException, ExecutionException {
     	Vendor result = null;
-    	Vendor vendorDetail = new Vendor();
-    	List<Vendor> vendorBatch = new ArrayList<Vendor>();
-
         try {
-       /* 	POIFSFileSystem fileSystem = null;      
-			try {//get the excel document
-				fileSystem = new POIFSFileSystem(new ByteArrayInputStream(file.getBytes()));
-			}
-			catch(Exception e) {
+        	List<Vendor> vendorList = Poiji.fromExcel(new ByteArrayInputStream(file.getBytes()), PoijiExcelType.XLSX, Vendor.class);
+        	/*try {
+				jobLauncher.run(job, new JobParameters());
+			} catch (JobExecutionAlreadyRunningException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
-				log.error("The file uploaded is not an excel file");
+			} catch (JobRestartException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JobInstanceAlreadyCompleteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JobParametersInvalidException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}*/
-			
-			Workbook wb = WorkbookFactory.create(new ByteArrayInputStream(file.getBytes()));
-			Sheet sheet = wb.getSheetAt (0);
-			Iterator rows = sheet.rowIterator();
-			
-			while(rows.hasNext()){	
-				Row row = (Row) rows.next();
-				log.info("Row No.: " + row.getRowNum ());
+        	
+        	
+        	Future<List<Vendor>> savedEntities;
+        	
+        	
+			if(vendorList.size() > 0){
 				
-				if(row.getRowNum() > 1) {//TODO : >1
-					//HW0011 bug#1910
-					rowCount = rowCount + 1;
-					 
-					/*countryDetail.setId(1l);*/
-					//vendorDetail.setId(new Long(row.getRowNum() - 1));
-					
-					Iterator cells = row.cellIterator();
-					while(cells.hasNext()) {
-						Cell cell = (Cell) cells.next();
-						CellStyle cellStyle = cell.getCellStyle();
-					//	log.info("Cell No.: " + cell.getNumericCellValue());
-						log.info("Cell type: " + cell.getCellTypeEnum());
-						if(CellType.NUMERIC.equals(cell.getCellTypeEnum()))
-							vendorDetail.setPincode(String.valueOf(cell.getNumericCellValue()));
-						if(CellType.STRING.equals(cell.getCellTypeEnum()))
-							vendorDetail.setShortCode(cell.getStringCellValue());
-					}					
-					vendorBatch.add(vendorDetail);						
-				}
-			}
-			
-			if(vendorBatch.size() > 0){
-				for(Vendor vendor : vendorBatch){
-					result = vendorRepository.save(vendor);
-				}
+				savedEntities = bulkSave(vendorList);
 				return ResponseEntity.created(new URI("/api/upload/"))
 			            .headers(HeaderUtil.createEntityCreationAlert("Vendor", null))
 			            .body(result);
+				
 			}else{
 				throw new BadRequestAlertException("A new vendor File cannot be empty", ENTITY_NAME, "idexists");
 			}
         }catch (RuntimeException | IOException e) {
             log.error("Error while uploading.", e);
             throw new BadRequestAlertException("A new vendor File cannot be empty", ENTITY_NAME, "idexists");
-        } catch (InvalidFormatException e) {
-            log.error("Error while uploading.", e);
-            throw new BadRequestAlertException("A new vendor File cannot be empty", ENTITY_NAME, "idexists");
         }       
+    }
+	
+	@Async
+	public Future<List<Vendor>> bulkSave(List<Vendor> entities) {
+        int size = entities.size();
+        List<Vendor> savedEntities = new ArrayList<>(size);
+        try {
+            for (int i = 0; i < size; i += batchSize) {
+                int toIndex = i + (((i + batchSize) < size) ? batchSize : size - i);
+                savedEntities.addAll(processBatch(entities.subList(i, toIndex)));
+                
+            }
+        } catch (Exception ignored) {
+            // or do something...  
+        }
+        
+        if(savedEntities.size()!=entities.size())
+		{
+			log.error("few entities are not saved");
+		}
+        else
+        {
+        	log.debug("entities are saved");
+        }
+        
+        return new AsyncResult<List<Vendor>>(savedEntities);
+    }
+	
+	
+	@Transactional
+    protected List<Vendor> processBatch(List<Vendor> batch) {
+        List<Vendor> list = vendorRepository.saveAll(batch);
+        //em.flush();
+        //em.clear();
+        return list;
     }
     
 

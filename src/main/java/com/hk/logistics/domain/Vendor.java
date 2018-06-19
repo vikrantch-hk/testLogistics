@@ -1,6 +1,8 @@
 package com.hk.logistics.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.poiji.annotation.ExcelCellName;
+import com.poiji.annotation.ExcelRow;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
@@ -25,10 +27,12 @@ public class Vendor implements Serializable {
 
     @NotNull
     @Column(name = "short_code", nullable = false)
+    @ExcelCellName("shortcode")
     private String shortCode;
 
     @NotNull
     @Column(name = "pincode", nullable = false)
+    @ExcelCellName("Pincode")
     private String pincode;
 
     @OneToMany(mappedBy = "vendor")

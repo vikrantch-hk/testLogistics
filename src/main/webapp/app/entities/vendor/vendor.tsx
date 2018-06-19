@@ -54,7 +54,7 @@ export class Vendor extends React.Component<IVendorProps> {
         .then(response => {
           // tslint:disable-next-line:no-console
           console.log(response);
-          toast.success(response.statusText);
+          toast.success('uploaded file please check after few seconds');
           this.setState({ vendorList: this.props.getEntities() });
           this.setState({ file: null });
           this.setState({ data: null });
