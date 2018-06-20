@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import configureStore from 'redux-mock-store';
 import promiseMiddleware from 'redux-promise-middleware';
 import axios from 'axios';
@@ -16,13 +15,13 @@ describe('User management reducer tests', () => {
 
   describe('Common', () => {
     it('should return the initial state', () => {
-      expect(userManagement(undefined, {})).to.eql({ ...initialState });
+      expect(userManagement(undefined, {})).toEqual({ ...initialState });
     });
   });
 
   describe('Failures', () => {
     it('should set state to failed and put an error message in errorMessage', () => {
-      expect(userManagement(undefined, { type: FAILURE(ACTION_TYPES.FETCH_USERS), payload: 'something happened' })).to.eql({
+      expect(userManagement(undefined, { type: FAILURE(ACTION_TYPES.FETCH_USERS), payload: 'something happened' })).toEqual({
         ...initialState,
         errorMessage: 'something happened'
       });
@@ -33,7 +32,7 @@ describe('User management reducer tests', () => {
     it('should update state according to a successful fetch users request', () => {
       const payload = { data: 'some handsome users' };
       const toTest = userManagement(undefined, { type: SUCCESS(ACTION_TYPES.FETCH_USERS), payload });
-      expect(toTest).to.contain({
+      expect(toTest).toMatchObject({
         users: payload.data
       });
     });
@@ -59,7 +58,7 @@ describe('User management reducer tests', () => {
           payload: resolvedObject
         }
       ];
-      await store.dispatch(getUsers()).then(() => expect(store.getActions()).to.eql(expectedActions));
+      await store.dispatch(getUsers()).then(() => expect(store.getActions()).toEqual(expectedActions));
     });
 
     it('dispatches FETCH_USERS_PENDING and FETCH_USERS_FULFILLED actions with pagination options', async () => {
@@ -72,7 +71,7 @@ describe('User management reducer tests', () => {
           payload: resolvedObject
         }
       ];
-      await store.dispatch(getUsers(1, 20, 'id,desc')).then(() => expect(store.getActions()).to.eql(expectedActions));
+      await store.dispatch(getUsers(1, 20, 'id,desc')).then(() => expect(store.getActions()).toEqual(expectedActions));
     });
   });
 });

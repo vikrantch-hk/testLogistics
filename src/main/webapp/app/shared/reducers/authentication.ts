@@ -12,14 +12,16 @@ export const ACTION_TYPES = {
 const initialState = {
   loading: false,
   isAuthenticated: false,
-  account: {},
-  errorMessage: null, // Errors returned from server side
-  redirectMessage: null
+  account: {} as any,
+  errorMessage: null as string, // Errors returned from server side
+  redirectMessage: null as string
 };
+
+export type AuthenticationState = Readonly<typeof initialState>;
 
 // Reducer
 
-export default (state = initialState, action) => {
+export default (state: AuthenticationState = initialState, action): AuthenticationState => {
   switch (action.type) {
     case REQUEST(ACTION_TYPES.GET_SESSION):
       return {
@@ -31,13 +33,11 @@ export default (state = initialState, action) => {
         ...state,
         loading: false,
         isAuthenticated: false,
-        showModalLogin: true,
         errorMessage: action.payload
       };
     case ACTION_TYPES.LOGOUT:
       return {
-        ...initialState,
-        showModalLogin: true
+        ...initialState
       };
     case SUCCESS(ACTION_TYPES.GET_SESSION): {
       const isAuthenticated = action.payload && action.payload.data && action.payload.data.activated;
@@ -51,14 +51,12 @@ export default (state = initialState, action) => {
     case ACTION_TYPES.ERROR_MESSAGE:
       return {
         ...initialState,
-        showModalLogin: true,
         redirectMessage: action.message
       };
     case ACTION_TYPES.CLEAR_AUTH:
       return {
         ...state,
         loading: false,
-        showModalLogin: true,
         isAuthenticated: false
       };
     default:

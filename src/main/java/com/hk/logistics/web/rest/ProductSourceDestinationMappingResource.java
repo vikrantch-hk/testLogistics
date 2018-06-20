@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.ProductSourceDestinationMapping;
-import com.hk.logistics.repository.ProductSourceDestinationMappingRepository;
+import com.hk.logistics.service.ProductSourceDestinationMappingService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.ProductSourceDestinationMappingDTO;
-import com.hk.logistics.service.mapper.ProductSourceDestinationMappingMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +16,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing ProductSourceDestinationMapping.
@@ -30,13 +31,10 @@ public class ProductSourceDestinationMappingResource {
 
     private static final String ENTITY_NAME = "productSourceDestinationMapping";
 
-    private final ProductSourceDestinationMappingRepository productSourceDestinationMappingRepository;
+    private final ProductSourceDestinationMappingService productSourceDestinationMappingService;
 
-    private final ProductSourceDestinationMappingMapper productSourceDestinationMappingMapper;
-
-    public ProductSourceDestinationMappingResource(ProductSourceDestinationMappingRepository productSourceDestinationMappingRepository, ProductSourceDestinationMappingMapper productSourceDestinationMappingMapper) {
-        this.productSourceDestinationMappingRepository = productSourceDestinationMappingRepository;
-        this.productSourceDestinationMappingMapper = productSourceDestinationMappingMapper;
+    public ProductSourceDestinationMappingResource(ProductSourceDestinationMappingService productSourceDestinationMappingService) {
+        this.productSourceDestinationMappingService = productSourceDestinationMappingService;
     }
 
     /**
@@ -52,10 +50,8 @@ public class ProductSourceDestinationMappingResource {
         log.debug("REST request to save ProductSourceDestinationMapping : {}", productSourceDestinationMappingDTO);
         if (productSourceDestinationMappingDTO.getId() != null) {
             throw new BadRequestAlertException("A new productSourceDestinationMapping cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        ProductSourceDestinationMapping productSourceDestinationMapping = productSourceDestinationMappingMapper.toEntity(productSourceDestinationMappingDTO);
-        productSourceDestinationMapping = productSourceDestinationMappingRepository.save(productSourceDestinationMapping);
-        ProductSourceDestinationMappingDTO result = productSourceDestinationMappingMapper.toDto(productSourceDestinationMapping);
+        }
+        ProductSourceDestinationMappingDTO result = productSourceDestinationMappingService.save(productSourceDestinationMappingDTO);
         return ResponseEntity.created(new URI("/api/product-source-destination-mappings/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -76,10 +72,8 @@ public class ProductSourceDestinationMappingResource {
         log.debug("REST request to update ProductSourceDestinationMapping : {}", productSourceDestinationMappingDTO);
         if (productSourceDestinationMappingDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        ProductSourceDestinationMapping productSourceDestinationMapping = productSourceDestinationMappingMapper.toEntity(productSourceDestinationMappingDTO);
-        productSourceDestinationMapping = productSourceDestinationMappingRepository.save(productSourceDestinationMapping);
-        ProductSourceDestinationMappingDTO result = productSourceDestinationMappingMapper.toDto(productSourceDestinationMapping);
+        }
+        ProductSourceDestinationMappingDTO result = productSourceDestinationMappingService.save(productSourceDestinationMappingDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, productSourceDestinationMappingDTO.getId().toString()))
             .body(result);
@@ -94,8 +88,7 @@ public class ProductSourceDestinationMappingResource {
     @Timed
     public List<ProductSourceDestinationMappingDTO> getAllProductSourceDestinationMappings() {
         log.debug("REST request to get all ProductSourceDestinationMappings");
-        List<ProductSourceDestinationMapping> productSourceDestinationMappings = productSourceDestinationMappingRepository.findAll();
-        return productSourceDestinationMappingMapper.toDto(productSourceDestinationMappings);
+        return productSourceDestinationMappingService.findAll();
     }
 
     /**
@@ -108,8 +101,7 @@ public class ProductSourceDestinationMappingResource {
     @Timed
     public ResponseEntity<ProductSourceDestinationMappingDTO> getProductSourceDestinationMapping(@PathVariable Long id) {
         log.debug("REST request to get ProductSourceDestinationMapping : {}", id);
-        Optional<ProductSourceDestinationMappingDTO> productSourceDestinationMappingDTO = productSourceDestinationMappingRepository.findById(id)
-            .map(productSourceDestinationMappingMapper::toDto);
+        Optional<ProductSourceDestinationMappingDTO> productSourceDestinationMappingDTO = productSourceDestinationMappingService.findOne(id);
         return ResponseUtil.wrapOrNotFound(productSourceDestinationMappingDTO);
     }
 
@@ -123,7 +115,22 @@ public class ProductSourceDestinationMappingResource {
     @Timed
     public ResponseEntity<Void> deleteProductSourceDestinationMapping(@PathVariable Long id) {
         log.debug("REST request to delete ProductSourceDestinationMapping : {}", id);
-        productSourceDestinationMappingRepository.deleteById(id);
+        productSourceDestinationMappingService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/product-source-destination-mappings?query=:query : search for the productSourceDestinationMapping corresponding
+     * to the query.
+     *
+     * @param query the query of the productSourceDestinationMapping search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/product-source-destination-mappings")
+    @Timed
+    public List<ProductSourceDestinationMappingDTO> searchProductSourceDestinationMappings(@RequestParam String query) {
+        log.debug("REST request to search ProductSourceDestinationMappings for query {}", query);
+        return productSourceDestinationMappingService.search(query);
+    }
+
 }

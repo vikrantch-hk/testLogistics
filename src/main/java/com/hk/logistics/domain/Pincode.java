@@ -1,10 +1,13 @@
 package com.hk.logistics.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
 
+import org.springframework.data.elasticsearch.annotations.Document;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -13,6 +16,8 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "pincode")
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@Document(indexName = "pincode")
 public class Pincode implements Serializable {
 
     private static final long serialVersionUID = 1L;

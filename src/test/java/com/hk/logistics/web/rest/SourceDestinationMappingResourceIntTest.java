@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.SourceDestinationMapping;
 import com.hk.logistics.repository.SourceDestinationMappingRepository;
+import com.hk.logistics.repository.search.SourceDestinationMappingSearchRepository;
+import com.hk.logistics.service.SourceDestinationMappingService;
 import com.hk.logistics.service.dto.SourceDestinationMappingDTO;
 import com.hk.logistics.service.mapper.SourceDestinationMappingMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -54,6 +58,18 @@ public class SourceDestinationMappingResourceIntTest {
 
     @Autowired
     private SourceDestinationMappingMapper sourceDestinationMappingMapper;
+    
+
+    @Autowired
+    private SourceDestinationMappingService sourceDestinationMappingService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.SourceDestinationMappingSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private SourceDestinationMappingSearchRepository mockSourceDestinationMappingSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -74,7 +90,7 @@ public class SourceDestinationMappingResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final SourceDestinationMappingResource sourceDestinationMappingResource = new SourceDestinationMappingResource(sourceDestinationMappingRepository, sourceDestinationMappingMapper);
+        final SourceDestinationMappingResource sourceDestinationMappingResource = new SourceDestinationMappingResource(sourceDestinationMappingService);
         this.restSourceDestinationMappingMockMvc = MockMvcBuilders.standaloneSetup(sourceDestinationMappingResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -118,6 +134,9 @@ public class SourceDestinationMappingResourceIntTest {
         SourceDestinationMapping testSourceDestinationMapping = sourceDestinationMappingList.get(sourceDestinationMappingList.size() - 1);
         assertThat(testSourceDestinationMapping.getSourcePincode()).isEqualTo(DEFAULT_SOURCE_PINCODE);
         assertThat(testSourceDestinationMapping.getDestinationPincode()).isEqualTo(DEFAULT_DESTINATION_PINCODE);
+
+        // Validate the SourceDestinationMapping in Elasticsearch
+        verify(mockSourceDestinationMappingSearchRepository, times(1)).save(testSourceDestinationMapping);
     }
 
     @Test
@@ -138,6 +157,9 @@ public class SourceDestinationMappingResourceIntTest {
         // Validate the SourceDestinationMapping in the database
         List<SourceDestinationMapping> sourceDestinationMappingList = sourceDestinationMappingRepository.findAll();
         assertThat(sourceDestinationMappingList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the SourceDestinationMapping in Elasticsearch
+        verify(mockSourceDestinationMappingSearchRepository, times(0)).save(sourceDestinationMapping);
     }
 
     @Test
@@ -244,6 +266,9 @@ public class SourceDestinationMappingResourceIntTest {
         SourceDestinationMapping testSourceDestinationMapping = sourceDestinationMappingList.get(sourceDestinationMappingList.size() - 1);
         assertThat(testSourceDestinationMapping.getSourcePincode()).isEqualTo(UPDATED_SOURCE_PINCODE);
         assertThat(testSourceDestinationMapping.getDestinationPincode()).isEqualTo(UPDATED_DESTINATION_PINCODE);
+
+        // Validate the SourceDestinationMapping in Elasticsearch
+        verify(mockSourceDestinationMappingSearchRepository, times(1)).save(testSourceDestinationMapping);
     }
 
     @Test
@@ -263,6 +288,9 @@ public class SourceDestinationMappingResourceIntTest {
         // Validate the SourceDestinationMapping in the database
         List<SourceDestinationMapping> sourceDestinationMappingList = sourceDestinationMappingRepository.findAll();
         assertThat(sourceDestinationMappingList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the SourceDestinationMapping in Elasticsearch
+        verify(mockSourceDestinationMappingSearchRepository, times(0)).save(sourceDestinationMapping);
     }
 
     @Test
@@ -281,6 +309,25 @@ public class SourceDestinationMappingResourceIntTest {
         // Validate the database is empty
         List<SourceDestinationMapping> sourceDestinationMappingList = sourceDestinationMappingRepository.findAll();
         assertThat(sourceDestinationMappingList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the SourceDestinationMapping in Elasticsearch
+        verify(mockSourceDestinationMappingSearchRepository, times(1)).deleteById(sourceDestinationMapping.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchSourceDestinationMapping() throws Exception {
+        // Initialize the database
+        sourceDestinationMappingRepository.saveAndFlush(sourceDestinationMapping);
+        when(mockSourceDestinationMappingSearchRepository.search(queryStringQuery("id:" + sourceDestinationMapping.getId())))
+            .thenReturn(Collections.singletonList(sourceDestinationMapping));
+        // Search the sourceDestinationMapping
+        restSourceDestinationMappingMockMvc.perform(get("/api/_search/source-destination-mappings?query=id:" + sourceDestinationMapping.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(sourceDestinationMapping.getId().intValue())))
+            .andExpect(jsonPath("$.[*].sourcePincode").value(hasItem(DEFAULT_SOURCE_PINCODE.toString())))
+            .andExpect(jsonPath("$.[*].destinationPincode").value(hasItem(DEFAULT_DESTINATION_PINCODE.toString())));
     }
 
     @Test

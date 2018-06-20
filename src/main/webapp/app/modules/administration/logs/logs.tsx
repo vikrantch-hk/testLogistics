@@ -2,13 +2,9 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 
 import { getLoggers, changeLogLevel } from '../administration.reducer';
+import { IRootState } from 'app/shared/reducers';
 
-export interface ILogsPageProps {
-  isFetching?: boolean;
-  getLoggers: Function;
-  changeLogLevel: Function;
-  logs: any;
-}
+export interface ILogsPageProps extends StateProps, DispatchProps {}
 
 export interface ILogsPageState {
   filter: string;
@@ -46,11 +42,11 @@ export class LogsPage extends React.Component<ILogsPageProps, ILogsPageState> {
   render() {
     const { logs, isFetching } = this.props;
     const { filter } = this.state;
-    const loggers = logs ? logs.loggers : {};
+    const loggers = logs ? logs.loggers : [];
     return (
       <div>
-        <h2>Logs</h2>
-        <p>There are {loggers.length} loggers.</p>
+        <h2 className="logs-page-heading">Logs</h2>
+        <p>There are {loggers.length.toString()} loggers.</p>
 
         <span>Filter</span>
         <input type="text" value={filter} onChange={this.setFilter} className="form-control" disabled={isFetching} />
@@ -125,11 +121,14 @@ export class LogsPage extends React.Component<ILogsPageProps, ILogsPageState> {
   }
 }
 
-const mapStateToProps = ({ administration }) => ({
+const mapStateToProps = ({ administration }: IRootState) => ({
   logs: administration.logs,
-  isFetching: administration.isFetching
+  isFetching: administration.loading
 });
 
 const mapDispatchToProps = { getLoggers, changeLogLevel };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(LogsPage);

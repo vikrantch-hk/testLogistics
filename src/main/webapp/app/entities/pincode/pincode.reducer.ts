@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
+import { ICrudSearchAction, ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
 import { SERVER_API_URL } from 'app/config/constants';
 
-import { IPincode } from 'app/shared/model/pincode.model';
+import { IPincode, defaultValue } from 'app/shared/model/pincode.model';
 
 export const ACTION_TYPES = {
+  SEARCH_PINCODES: 'pincode/SEARCH_PINCODES',
   FETCH_PINCODE_LIST: 'pincode/FETCH_PINCODE_LIST',
   FETCH_PINCODE: 'pincode/FETCH_PINCODE',
   CREATE_PINCODE: 'pincode/CREATE_PINCODE',
@@ -19,16 +20,19 @@ export const ACTION_TYPES = {
 const initialState = {
   loading: false,
   errorMessage: null,
-  entities: [],
-  entity: {},
+  entities: [] as ReadonlyArray<IPincode>,
+  entity: defaultValue,
   updating: false,
   updateSuccess: false
 };
 
+export type PincodeState = Readonly<typeof initialState>;
+
 // Reducer
 
-export default (state = initialState, action) => {
+export default (state: PincodeState = initialState, action): PincodeState => {
   switch (action.type) {
+    case REQUEST(ACTION_TYPES.SEARCH_PINCODES):
     case REQUEST(ACTION_TYPES.FETCH_PINCODE_LIST):
     case REQUEST(ACTION_TYPES.FETCH_PINCODE):
       return {
@@ -46,6 +50,7 @@ export default (state = initialState, action) => {
         updateSuccess: false,
         updating: true
       };
+    case FAILURE(ACTION_TYPES.SEARCH_PINCODES):
     case FAILURE(ACTION_TYPES.FETCH_PINCODE_LIST):
     case FAILURE(ACTION_TYPES.FETCH_PINCODE):
     case FAILURE(ACTION_TYPES.CREATE_PINCODE):
@@ -57,6 +62,12 @@ export default (state = initialState, action) => {
         updating: false,
         updateSuccess: false,
         errorMessage: action.payload
+      };
+    case SUCCESS(ACTION_TYPES.SEARCH_PINCODES):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
       };
     case SUCCESS(ACTION_TYPES.FETCH_PINCODE_LIST):
       return {
@@ -95,19 +106,25 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/pincodes';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/pincodes';
 
 // Actions
 
+export const getSearchEntities: ICrudSearchAction<IPincode> = query => ({
+  type: ACTION_TYPES.SEARCH_PINCODES,
+  payload: axios.get<IPincode>(`${apiSearchUrl}?query=` + query)
+});
+
 export const getEntities: ICrudGetAllAction<IPincode> = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_PINCODE_LIST,
-  payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`) as Promise<IPincode>
+  payload: axios.get<IPincode>(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
 });
 
 export const getEntity: ICrudGetAction<IPincode> = id => {
   const requestUrl = `${apiUrl}/${id}`;
   return {
     type: ACTION_TYPES.FETCH_PINCODE,
-    payload: axios.get(requestUrl) as Promise<IPincode>
+    payload: axios.get<IPincode>(requestUrl)
   };
 };
 

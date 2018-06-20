@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { expect } from 'chai';
+
 import configureStore from 'redux-mock-store';
 import promiseMiddleware from 'redux-promise-middleware';
 import thunk from 'redux-thunk';
@@ -14,6 +14,7 @@ import reducer, {
   updateEntity
 } from 'app/entities/source-destination-mapping/source-destination-mapping.reducer';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
+import { ISourceDestinationMapping, defaultValue } from 'app/shared/model/source-destination-mapping.model';
 
 // tslint:disable no-invalid-template-strings
 describe('Entities reducer tests', () => {
@@ -28,14 +29,14 @@ describe('Entities reducer tests', () => {
   const initialState = {
     loading: false,
     errorMessage: null,
-    entities: [],
-    entity: {},
+    entities: [] as ReadonlyArray<ISourceDestinationMapping>,
+    entity: defaultValue,
     updating: false,
     updateSuccess: false
   };
 
   function testInitialState(state) {
-    expect(state).to.contain({
+    expect(state).toMatchObject({
       loading: false,
       errorMessage: null,
       updating: false,
@@ -63,7 +64,7 @@ describe('Entities reducer tests', () => {
         [REQUEST(ACTION_TYPES.FETCH_SOURCEDESTINATIONMAPPING_LIST), REQUEST(ACTION_TYPES.FETCH_SOURCEDESTINATIONMAPPING)],
         {},
         state => {
-          expect(state).to.contain({
+          expect(state).toMatchObject({
             errorMessage: null,
             updateSuccess: false,
             loading: true
@@ -81,7 +82,7 @@ describe('Entities reducer tests', () => {
         ],
         {},
         state => {
-          expect(state).to.contain({
+          expect(state).toMatchObject({
             errorMessage: null,
             updateSuccess: false,
             updating: true
@@ -103,7 +104,7 @@ describe('Entities reducer tests', () => {
         ],
         'error message',
         state => {
-          expect(state).to.contain({
+          expect(state).toMatchObject({
             errorMessage: 'error message',
             updateSuccess: false,
             updating: false
@@ -121,7 +122,7 @@ describe('Entities reducer tests', () => {
           type: SUCCESS(ACTION_TYPES.FETCH_SOURCEDESTINATIONMAPPING_LIST),
           payload
         })
-      ).to.eql({
+      ).toEqual({
         ...initialState,
         loading: false,
         entities: payload.data
@@ -135,7 +136,7 @@ describe('Entities reducer tests', () => {
           type: SUCCESS(ACTION_TYPES.CREATE_SOURCEDESTINATIONMAPPING),
           payload
         })
-      ).to.eql({
+      ).toEqual({
         ...initialState,
         updating: false,
         updateSuccess: true,
@@ -149,7 +150,7 @@ describe('Entities reducer tests', () => {
         type: SUCCESS(ACTION_TYPES.DELETE_SOURCEDESTINATIONMAPPING),
         payload
       });
-      expect(toTest).to.contain({
+      expect(toTest).toMatchObject({
         updating: false,
         updateSuccess: true
       });
@@ -179,7 +180,7 @@ describe('Entities reducer tests', () => {
           payload: resolvedObject
         }
       ];
-      await store.dispatch(getEntities()).then(() => expect(store.getActions()).to.eql(expectedActions));
+      await store.dispatch(getEntities()).then(() => expect(store.getActions()).toEqual(expectedActions));
     });
 
     it('dispatches ACTION_TYPES.FETCH_SOURCEDESTINATIONMAPPING actions', async () => {
@@ -192,7 +193,7 @@ describe('Entities reducer tests', () => {
           payload: resolvedObject
         }
       ];
-      await store.dispatch(getEntity(42666)).then(() => expect(store.getActions()).to.eql(expectedActions));
+      await store.dispatch(getEntity(42666)).then(() => expect(store.getActions()).toEqual(expectedActions));
     });
 
     it('dispatches ACTION_TYPES.CREATE_SOURCEDESTINATIONMAPPING actions', async () => {
@@ -212,7 +213,7 @@ describe('Entities reducer tests', () => {
           payload: resolvedObject
         }
       ];
-      await store.dispatch(createEntity({ id: 1 })).then(() => expect(store.getActions()).to.eql(expectedActions));
+      await store.dispatch(createEntity({ id: 1 })).then(() => expect(store.getActions()).toEqual(expectedActions));
     });
 
     it('dispatches ACTION_TYPES.UPDATE_SOURCEDESTINATIONMAPPING actions', async () => {
@@ -232,7 +233,7 @@ describe('Entities reducer tests', () => {
           payload: resolvedObject
         }
       ];
-      await store.dispatch(updateEntity({ id: 1 })).then(() => expect(store.getActions()).to.eql(expectedActions));
+      await store.dispatch(updateEntity({ id: 1 })).then(() => expect(store.getActions()).toEqual(expectedActions));
     });
 
     it('dispatches ACTION_TYPES.DELETE_SOURCEDESTINATIONMAPPING actions', async () => {
@@ -252,7 +253,7 @@ describe('Entities reducer tests', () => {
           payload: resolvedObject
         }
       ];
-      await store.dispatch(deleteEntity(42666)).then(() => expect(store.getActions()).to.eql(expectedActions));
+      await store.dispatch(deleteEntity(42666)).then(() => expect(store.getActions()).toEqual(expectedActions));
     });
   });
 });

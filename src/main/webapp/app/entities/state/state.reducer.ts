@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
+import { ICrudSearchAction, ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
 import { SERVER_API_URL } from 'app/config/constants';
 
-import { IState } from 'app/shared/model/state.model';
+import { IState, defaultValue } from 'app/shared/model/state.model';
 
 export const ACTION_TYPES = {
+  SEARCH_STATES: 'state/SEARCH_STATES',
   FETCH_STATE_LIST: 'state/FETCH_STATE_LIST',
   FETCH_STATE: 'state/FETCH_STATE',
   CREATE_STATE: 'state/CREATE_STATE',
@@ -19,16 +20,19 @@ export const ACTION_TYPES = {
 const initialState = {
   loading: false,
   errorMessage: null,
-  entities: [],
-  entity: {},
+  entities: [] as ReadonlyArray<IState>,
+  entity: defaultValue,
   updating: false,
   updateSuccess: false
 };
 
+export type StateState = Readonly<typeof initialState>;
+
 // Reducer
 
-export default (state = initialState, action) => {
+export default (state: StateState = initialState, action): StateState => {
   switch (action.type) {
+    case REQUEST(ACTION_TYPES.SEARCH_STATES):
     case REQUEST(ACTION_TYPES.FETCH_STATE_LIST):
     case REQUEST(ACTION_TYPES.FETCH_STATE):
       return {
@@ -46,6 +50,7 @@ export default (state = initialState, action) => {
         updateSuccess: false,
         updating: true
       };
+    case FAILURE(ACTION_TYPES.SEARCH_STATES):
     case FAILURE(ACTION_TYPES.FETCH_STATE_LIST):
     case FAILURE(ACTION_TYPES.FETCH_STATE):
     case FAILURE(ACTION_TYPES.CREATE_STATE):
@@ -57,6 +62,12 @@ export default (state = initialState, action) => {
         updating: false,
         updateSuccess: false,
         errorMessage: action.payload
+      };
+    case SUCCESS(ACTION_TYPES.SEARCH_STATES):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
       };
     case SUCCESS(ACTION_TYPES.FETCH_STATE_LIST):
       return {
@@ -95,19 +106,25 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/states';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/states';
 
 // Actions
 
+export const getSearchEntities: ICrudSearchAction<IState> = query => ({
+  type: ACTION_TYPES.SEARCH_STATES,
+  payload: axios.get<IState>(`${apiSearchUrl}?query=` + query)
+});
+
 export const getEntities: ICrudGetAllAction<IState> = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_STATE_LIST,
-  payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`) as Promise<IState>
+  payload: axios.get<IState>(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
 });
 
 export const getEntity: ICrudGetAction<IState> = id => {
   const requestUrl = `${apiUrl}/${id}`;
   return {
     type: ACTION_TYPES.FETCH_STATE,
-    payload: axios.get(requestUrl) as Promise<IState>
+    payload: axios.get<IState>(requestUrl)
   };
 };
 

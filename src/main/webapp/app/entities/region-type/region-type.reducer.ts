@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
+import { ICrudSearchAction, ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
 import { SERVER_API_URL } from 'app/config/constants';
 
-import { IRegionType } from 'app/shared/model/region-type.model';
+import { IRegionType, defaultValue } from 'app/shared/model/region-type.model';
 
 export const ACTION_TYPES = {
+  SEARCH_REGIONTYPES: 'regionType/SEARCH_REGIONTYPES',
   FETCH_REGIONTYPE_LIST: 'regionType/FETCH_REGIONTYPE_LIST',
   FETCH_REGIONTYPE: 'regionType/FETCH_REGIONTYPE',
   CREATE_REGIONTYPE: 'regionType/CREATE_REGIONTYPE',
@@ -19,16 +20,19 @@ export const ACTION_TYPES = {
 const initialState = {
   loading: false,
   errorMessage: null,
-  entities: [],
-  entity: {},
+  entities: [] as ReadonlyArray<IRegionType>,
+  entity: defaultValue,
   updating: false,
   updateSuccess: false
 };
 
+export type RegionTypeState = Readonly<typeof initialState>;
+
 // Reducer
 
-export default (state = initialState, action) => {
+export default (state: RegionTypeState = initialState, action): RegionTypeState => {
   switch (action.type) {
+    case REQUEST(ACTION_TYPES.SEARCH_REGIONTYPES):
     case REQUEST(ACTION_TYPES.FETCH_REGIONTYPE_LIST):
     case REQUEST(ACTION_TYPES.FETCH_REGIONTYPE):
       return {
@@ -46,6 +50,7 @@ export default (state = initialState, action) => {
         updateSuccess: false,
         updating: true
       };
+    case FAILURE(ACTION_TYPES.SEARCH_REGIONTYPES):
     case FAILURE(ACTION_TYPES.FETCH_REGIONTYPE_LIST):
     case FAILURE(ACTION_TYPES.FETCH_REGIONTYPE):
     case FAILURE(ACTION_TYPES.CREATE_REGIONTYPE):
@@ -57,6 +62,12 @@ export default (state = initialState, action) => {
         updating: false,
         updateSuccess: false,
         errorMessage: action.payload
+      };
+    case SUCCESS(ACTION_TYPES.SEARCH_REGIONTYPES):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
       };
     case SUCCESS(ACTION_TYPES.FETCH_REGIONTYPE_LIST):
       return {
@@ -95,19 +106,25 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/region-types';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/region-types';
 
 // Actions
 
+export const getSearchEntities: ICrudSearchAction<IRegionType> = query => ({
+  type: ACTION_TYPES.SEARCH_REGIONTYPES,
+  payload: axios.get<IRegionType>(`${apiSearchUrl}?query=` + query)
+});
+
 export const getEntities: ICrudGetAllAction<IRegionType> = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_REGIONTYPE_LIST,
-  payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`) as Promise<IRegionType>
+  payload: axios.get<IRegionType>(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
 });
 
 export const getEntity: ICrudGetAction<IRegionType> = id => {
   const requestUrl = `${apiUrl}/${id}`;
   return {
     type: ACTION_TYPES.FETCH_REGIONTYPE,
-    payload: axios.get(requestUrl) as Promise<IRegionType>
+    payload: axios.get<IRegionType>(requestUrl)
   };
 };
 

@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.Awb;
-import com.hk.logistics.repository.AwbRepository;
+import com.hk.logistics.service.AwbService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.AwbDTO;
-import com.hk.logistics.service.mapper.AwbMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +17,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing Awb.
@@ -31,13 +32,10 @@ public class AwbResource {
 
     private static final String ENTITY_NAME = "awb";
 
-    private final AwbRepository awbRepository;
+    private final AwbService awbService;
 
-    private final AwbMapper awbMapper;
-
-    public AwbResource(AwbRepository awbRepository, AwbMapper awbMapper) {
-        this.awbRepository = awbRepository;
-        this.awbMapper = awbMapper;
+    public AwbResource(AwbService awbService) {
+        this.awbService = awbService;
     }
 
     /**
@@ -53,10 +51,8 @@ public class AwbResource {
         log.debug("REST request to save Awb : {}", awbDTO);
         if (awbDTO.getId() != null) {
             throw new BadRequestAlertException("A new awb cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        Awb awb = awbMapper.toEntity(awbDTO);
-        awb = awbRepository.save(awb);
-        AwbDTO result = awbMapper.toDto(awb);
+        }
+        AwbDTO result = awbService.save(awbDTO);
         return ResponseEntity.created(new URI("/api/awbs/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -77,10 +73,8 @@ public class AwbResource {
         log.debug("REST request to update Awb : {}", awbDTO);
         if (awbDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        Awb awb = awbMapper.toEntity(awbDTO);
-        awb = awbRepository.save(awb);
-        AwbDTO result = awbMapper.toDto(awb);
+        }
+        AwbDTO result = awbService.save(awbDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, awbDTO.getId().toString()))
             .body(result);
@@ -95,8 +89,7 @@ public class AwbResource {
     @Timed
     public List<AwbDTO> getAllAwbs() {
         log.debug("REST request to get all Awbs");
-        List<Awb> awbs = awbRepository.findAll();
-        return awbMapper.toDto(awbs);
+        return awbService.findAll();
     }
 
     /**
@@ -109,8 +102,7 @@ public class AwbResource {
     @Timed
     public ResponseEntity<AwbDTO> getAwb(@PathVariable Long id) {
         log.debug("REST request to get Awb : {}", id);
-        Optional<AwbDTO> awbDTO = awbRepository.findById(id)
-            .map(awbMapper::toDto);
+        Optional<AwbDTO> awbDTO = awbService.findOne(id);
         return ResponseUtil.wrapOrNotFound(awbDTO);
     }
 
@@ -124,7 +116,22 @@ public class AwbResource {
     @Timed
     public ResponseEntity<Void> deleteAwb(@PathVariable Long id) {
         log.debug("REST request to delete Awb : {}", id);
-        awbRepository.deleteById(id);
+        awbService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/awbs?query=:query : search for the awb corresponding
+     * to the query.
+     *
+     * @param query the query of the awb search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/awbs")
+    @Timed
+    public List<AwbDTO> searchAwbs(@RequestParam String query) {
+        log.debug("REST request to search Awbs for query {}", query);
+        return awbService.search(query);
+    }
+
 }

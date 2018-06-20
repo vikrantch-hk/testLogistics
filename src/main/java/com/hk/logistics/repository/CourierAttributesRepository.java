@@ -1,11 +1,12 @@
 package com.hk.logistics.repository;
 
 import com.hk.logistics.domain.CourierAttributes;
-import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.*;
+import org.springframework.stereotype.Repository;
+
 
 /**
- * Spring Data JPA repository for the CourierAttributes entity.
+ * Spring Data  repository for the CourierAttributes entity.
  */
 @SuppressWarnings("unused")
 @Repository

@@ -1,11 +1,12 @@
 package com.hk.logistics.repository;
 
 import com.hk.logistics.domain.Pincode;
-import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.*;
+import org.springframework.stereotype.Repository;
+
 
 /**
- * Spring Data JPA repository for the Pincode entity.
+ * Spring Data  repository for the Pincode entity.
  */
 @SuppressWarnings("unused")
 @Repository

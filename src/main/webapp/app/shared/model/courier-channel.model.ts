@@ -8,11 +8,4 @@ export interface ICourierChannel {
   couriers?: ICourier[];
 }
 
-export class CourierChannel implements ICourierChannel {
-  constructor(
-    public id?: number,
-    public name?: string,
-    public vendorWHCourierMappings?: IVendorWHCourierMapping[],
-    public couriers?: ICourier[]
-  ) {}
-}
+export const defaultValue: Readonly<ICourierChannel> = {};

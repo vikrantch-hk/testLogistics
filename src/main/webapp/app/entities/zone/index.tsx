@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+
+import ErrorBoundaryRoute from 'app/shared/error/error-boundary-route';
 
 import Zone from './zone';
 import ZoneDetail from './zone-detail';
@@ -9,12 +11,12 @@ import ZoneDeleteDialog from './zone-delete-dialog';
 const Routes = ({ match }) => (
   <>
     <Switch>
-      <Route exact path={`${match.url}/new`} component={ZoneUpdate} />
-      <Route exact path={`${match.url}/:id/edit`} component={ZoneUpdate} />
-      <Route exact path={`${match.url}/:id`} component={ZoneDetail} />
-      <Route path={match.url} component={Zone} />
+      <ErrorBoundaryRoute exact path={`${match.url}/new`} component={ZoneUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id/edit`} component={ZoneUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id`} component={ZoneDetail} />
+      <ErrorBoundaryRoute path={match.url} component={Zone} />
     </Switch>
-    <Route path={`${match.url}/:id/delete`} component={ZoneDeleteDialog} />
+    <ErrorBoundaryRoute path={`${match.url}/:id/delete`} component={ZoneDeleteDialog} />
   </>
 );
 

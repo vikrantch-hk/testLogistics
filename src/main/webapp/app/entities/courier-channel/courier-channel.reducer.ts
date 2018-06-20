@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
+import { ICrudSearchAction, ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
 import { SERVER_API_URL } from 'app/config/constants';
 
-import { ICourierChannel } from 'app/shared/model/courier-channel.model';
+import { ICourierChannel, defaultValue } from 'app/shared/model/courier-channel.model';
 
 export const ACTION_TYPES = {
+  SEARCH_COURIERCHANNELS: 'courierChannel/SEARCH_COURIERCHANNELS',
   FETCH_COURIERCHANNEL_LIST: 'courierChannel/FETCH_COURIERCHANNEL_LIST',
   FETCH_COURIERCHANNEL: 'courierChannel/FETCH_COURIERCHANNEL',
   CREATE_COURIERCHANNEL: 'courierChannel/CREATE_COURIERCHANNEL',
@@ -19,16 +20,19 @@ export const ACTION_TYPES = {
 const initialState = {
   loading: false,
   errorMessage: null,
-  entities: [],
-  entity: {},
+  entities: [] as ReadonlyArray<ICourierChannel>,
+  entity: defaultValue,
   updating: false,
   updateSuccess: false
 };
 
+export type CourierChannelState = Readonly<typeof initialState>;
+
 // Reducer
 
-export default (state = initialState, action) => {
+export default (state: CourierChannelState = initialState, action): CourierChannelState => {
   switch (action.type) {
+    case REQUEST(ACTION_TYPES.SEARCH_COURIERCHANNELS):
     case REQUEST(ACTION_TYPES.FETCH_COURIERCHANNEL_LIST):
     case REQUEST(ACTION_TYPES.FETCH_COURIERCHANNEL):
       return {
@@ -46,6 +50,7 @@ export default (state = initialState, action) => {
         updateSuccess: false,
         updating: true
       };
+    case FAILURE(ACTION_TYPES.SEARCH_COURIERCHANNELS):
     case FAILURE(ACTION_TYPES.FETCH_COURIERCHANNEL_LIST):
     case FAILURE(ACTION_TYPES.FETCH_COURIERCHANNEL):
     case FAILURE(ACTION_TYPES.CREATE_COURIERCHANNEL):
@@ -57,6 +62,12 @@ export default (state = initialState, action) => {
         updating: false,
         updateSuccess: false,
         errorMessage: action.payload
+      };
+    case SUCCESS(ACTION_TYPES.SEARCH_COURIERCHANNELS):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
       };
     case SUCCESS(ACTION_TYPES.FETCH_COURIERCHANNEL_LIST):
       return {
@@ -95,19 +106,25 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/courier-channels';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/courier-channels';
 
 // Actions
 
+export const getSearchEntities: ICrudSearchAction<ICourierChannel> = query => ({
+  type: ACTION_TYPES.SEARCH_COURIERCHANNELS,
+  payload: axios.get<ICourierChannel>(`${apiSearchUrl}?query=` + query)
+});
+
 export const getEntities: ICrudGetAllAction<ICourierChannel> = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_COURIERCHANNEL_LIST,
-  payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`) as Promise<ICourierChannel>
+  payload: axios.get<ICourierChannel>(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
 });
 
 export const getEntity: ICrudGetAction<ICourierChannel> = id => {
   const requestUrl = `${apiUrl}/${id}`;
   return {
     type: ACTION_TYPES.FETCH_COURIERCHANNEL,
-    payload: axios.get(requestUrl) as Promise<ICourierChannel>
+    payload: axios.get<ICourierChannel>(requestUrl)
   };
 };
 

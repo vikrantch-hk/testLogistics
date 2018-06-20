@@ -1,8 +1,11 @@
 package com.hk.logistics.domain;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 
+import org.springframework.data.elasticsearch.annotations.Document;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -11,6 +14,8 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "awb_status")
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@Document(indexName = "awbstatus")
 public class AwbStatus implements Serializable {
 
     private static final long serialVersionUID = 1L;

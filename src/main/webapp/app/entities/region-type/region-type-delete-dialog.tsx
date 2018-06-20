@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { ICrudGetAction, ICrudDeleteAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { IRegionType } from 'app/shared/model/region-type.model';
+import { IRootState } from 'app/shared/reducers';
 import { getEntity, deleteEntity } from './region-type.reducer';
 
-export interface IRegionTypeDeleteDialogProps {
-  getEntity: ICrudGetAction<IRegionType>;
-  deleteEntity: ICrudDeleteAction<IRegionType>;
-  regionType: IRegionType;
-  match: any;
-  history: any;
-}
+export interface IRegionTypeDeleteDialogProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class RegionTypeDeleteDialog extends React.Component<IRegionTypeDeleteDialogProps> {
   componentDidMount() {
@@ -21,7 +17,7 @@ export class RegionTypeDeleteDialog extends React.Component<IRegionTypeDeleteDia
   }
 
   confirmDelete = event => {
-    this.props.deleteEntity(this.props.regionType.id);
+    this.props.deleteEntity(this.props.regionTypeEntity.id);
     this.handleClose(event);
   };
 
@@ -31,7 +27,7 @@ export class RegionTypeDeleteDialog extends React.Component<IRegionTypeDeleteDia
   };
 
   render() {
-    const { regionType } = this.props;
+    const { regionTypeEntity } = this.props;
     return (
       <Modal isOpen toggle={this.handleClose}>
         <ModalHeader toggle={this.handleClose}>Confirm delete operation</ModalHeader>
@@ -49,10 +45,13 @@ export class RegionTypeDeleteDialog extends React.Component<IRegionTypeDeleteDia
   }
 }
 
-const mapStateToProps = ({ regionType }) => ({
-  regionType: regionType.entity
+const mapStateToProps = ({ regionType }: IRootState) => ({
+  regionTypeEntity: regionType.entity
 });
 
 const mapDispatchToProps = { getEntity, deleteEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(RegionTypeDeleteDialog);

@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { IVendor } from 'app/shared/model/vendor.model';
 import { getEntities as getVendors } from 'app/entities/vendor/vendor.reducer';
@@ -19,23 +20,7 @@ import { IVendorWHCourierMapping } from 'app/shared/model/vendor-wh-courier-mapp
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface IVendorWHCourierMappingUpdateProps {
-  getEntity: ICrudGetAction<IVendorWHCourierMapping>;
-  updateEntity: ICrudPutAction<IVendorWHCourierMapping>;
-  createEntity: ICrudPutAction<IVendorWHCourierMapping>;
-  getVendors: ICrudGetAllAction<IVendor>;
-  vendors: IVendor[];
-  getWarehouses: ICrudGetAllAction<IWarehouse>;
-  warehouses: IWarehouse[];
-  getCourierChannels: ICrudGetAllAction<ICourierChannel>;
-  courierChannels: ICourierChannel[];
-  vendorWHCourierMapping: IVendorWHCourierMapping;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface IVendorWHCourierMappingUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface IVendorWHCourierMappingUpdateState {
   isNew: boolean;
@@ -69,9 +54,9 @@ export class VendorWHCourierMappingUpdate extends React.Component<IVendorWHCouri
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { vendorWHCourierMapping } = this.props;
+      const { vendorWHCourierMappingEntity } = this.props;
       const entity = {
-        ...vendorWHCourierMapping,
+        ...vendorWHCourierMappingEntity,
         ...values
       };
 
@@ -89,14 +74,14 @@ export class VendorWHCourierMappingUpdate extends React.Component<IVendorWHCouri
   };
 
   vendorUpdate = element => {
-    const shortCode = element.target.value.toString();
-    if (shortCode === '') {
+    const name = element.target.value.toString();
+    if (name === '') {
       this.setState({
         vendorId: -1
       });
     } else {
       for (const i in this.props.vendors) {
-        if (shortCode === this.props.vendors[i].shortCode.toString()) {
+        if (name === this.props.vendors[i].name.toString()) {
           this.setState({
             vendorId: this.props.vendors[i].id
           });
@@ -141,14 +126,14 @@ export class VendorWHCourierMappingUpdate extends React.Component<IVendorWHCouri
 
   render() {
     const isInvalid = false;
-    const { vendorWHCourierMapping, vendors, warehouses, courierChannels, loading, updating } = this.props;
+    const { vendorWHCourierMappingEntity, vendors, warehouses, courierChannels, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-vendor-wh-courier-mapping-heading">Create or edit a VendorWHCourierMapping</h2>
+            <h2 id="testLogisticsApp.vendorWHCourierMapping.home.createOrEditLabel">Create or edit a VendorWHCourierMapping</h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -156,27 +141,33 @@ export class VendorWHCourierMappingUpdate extends React.Component<IVendorWHCouri
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : vendorWHCourierMapping} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : vendorWHCourierMappingEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="vendor-wh-courier-mapping-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <AvGroup>
                   <Label id="activeLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="active" />
+                    <AvInput id="vendor-wh-courier-mapping-active" type="checkbox" className="form-control" name="active" />
                     Active
                   </Label>
                 </AvGroup>
                 <AvGroup>
-                  <Label for="vendor.shortCode">Vendor</Label>
-                  <AvInput type="select" className="form-control" name="vendorId" onChange={this.vendorUpdate}>
+                  <Label for="vendor.name">Vendor</Label>
+                  <AvInput
+                    id="vendor-wh-courier-mapping-vendor"
+                    type="select"
+                    className="form-control"
+                    name="vendorId"
+                    onChange={this.vendorUpdate}
+                  >
                     <option value="" key="0" />
                     {vendors
                       ? vendors.map(otherEntity => (
                           <option value={otherEntity.id} key={otherEntity.id}>
-                            {otherEntity.shortCode}
+                            {otherEntity.name}
                           </option>
                         ))
                       : null}
@@ -184,7 +175,13 @@ export class VendorWHCourierMappingUpdate extends React.Component<IVendorWHCouri
                 </AvGroup>
                 <AvGroup>
                   <Label for="warehouse.name">Warehouse</Label>
-                  <AvInput type="select" className="form-control" name="warehouseId" onChange={this.warehouseUpdate}>
+                  <AvInput
+                    id="vendor-wh-courier-mapping-warehouse"
+                    type="select"
+                    className="form-control"
+                    name="warehouseId"
+                    onChange={this.warehouseUpdate}
+                  >
                     <option value="" key="0" />
                     {warehouses
                       ? warehouses.map(otherEntity => (
@@ -197,7 +194,13 @@ export class VendorWHCourierMappingUpdate extends React.Component<IVendorWHCouri
                 </AvGroup>
                 <AvGroup>
                   <Label for="courierChannel.name">Courier Channel</Label>
-                  <AvInput type="select" className="form-control" name="courierChannelId" onChange={this.courierChannelUpdate}>
+                  <AvInput
+                    id="vendor-wh-courier-mapping-courierChannel"
+                    type="select"
+                    className="form-control"
+                    name="courierChannelId"
+                    onChange={this.courierChannelUpdate}
+                  >
                     <option value="" key="0" />
                     {courierChannels
                       ? courierChannels.map(otherEntity => (
@@ -225,11 +228,11 @@ export class VendorWHCourierMappingUpdate extends React.Component<IVendorWHCouri
   }
 }
 
-const mapStateToProps = storeState => ({
+const mapStateToProps = (storeState: IRootState) => ({
   vendors: storeState.vendor.entities,
   warehouses: storeState.warehouse.entities,
   courierChannels: storeState.courierChannel.entities,
-  vendorWHCourierMapping: storeState.vendorWHCourierMapping.entity,
+  vendorWHCourierMappingEntity: storeState.vendorWHCourierMapping.entity,
   loading: storeState.vendorWHCourierMapping.loading,
   updating: storeState.vendorWHCourierMapping.updating
 });
@@ -243,5 +246,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(VendorWHCourierMappingUpdate);

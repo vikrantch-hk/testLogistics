@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvField } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { ICity } from 'app/shared/model/city.model';
 import { getEntities as getCities } from 'app/entities/city/city.reducer';
@@ -21,25 +22,7 @@ import { IPincode } from 'app/shared/model/pincode.model';
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface IPincodeUpdateProps {
-  getEntity: ICrudGetAction<IPincode>;
-  updateEntity: ICrudPutAction<IPincode>;
-  createEntity: ICrudPutAction<IPincode>;
-  getCities: ICrudGetAllAction<ICity>;
-  cities: ICity[];
-  getStates: ICrudGetAllAction<IState>;
-  states: IState[];
-  getZones: ICrudGetAllAction<IZone>;
-  zones: IZone[];
-  getHubs: ICrudGetAllAction<IHub>;
-  hubs: IHub[];
-  pincode: IPincode;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface IPincodeUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface IPincodeUpdateState {
   isNew: boolean;
@@ -76,9 +59,9 @@ export class PincodeUpdate extends React.Component<IPincodeUpdateProps, IPincode
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { pincode } = this.props;
+      const { pincodeEntity } = this.props;
       const entity = {
-        ...pincode,
+        ...pincodeEntity,
         ...values
       };
 
@@ -165,14 +148,14 @@ export class PincodeUpdate extends React.Component<IPincodeUpdateProps, IPincode
 
   render() {
     const isInvalid = false;
-    const { pincode, cities, states, zones, hubs, loading, updating } = this.props;
+    const { pincodeEntity, cities, states, zones, hubs, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-pincode-heading">Create or edit a Pincode</h2>
+            <h2 id="testLogisticsApp.pincode.home.createOrEditLabel">Create or edit a Pincode</h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -180,11 +163,11 @@ export class PincodeUpdate extends React.Component<IPincodeUpdateProps, IPincode
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : pincode} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : pincodeEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="pincode-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <AvGroup>
@@ -192,6 +175,7 @@ export class PincodeUpdate extends React.Component<IPincodeUpdateProps, IPincode
                     Pincode
                   </Label>
                   <AvField
+                    id="pincode-pincode"
                     type="text"
                     name="pincode"
                     validate={{
@@ -203,29 +187,29 @@ export class PincodeUpdate extends React.Component<IPincodeUpdateProps, IPincode
                   <Label id="regionLabel" for="region">
                     Region
                   </Label>
-                  <AvField type="text" name="region" />
+                  <AvField id="pincode-region" type="text" name="region" />
                 </AvGroup>
                 <AvGroup>
                   <Label id="localityLabel" for="locality">
                     Locality
                   </Label>
-                  <AvField type="text" name="locality" />
+                  <AvField id="pincode-locality" type="text" name="locality" />
                 </AvGroup>
                 <AvGroup>
                   <Label id="lastMileCostLabel" for="lastMileCost">
                     Last Mile Cost
                   </Label>
-                  <AvField type="number" className="form-control" name="lastMileCost" />
+                  <AvField id="pincode-lastMileCost" type="number" className="form-control" name="lastMileCost" />
                 </AvGroup>
                 <AvGroup>
                   <Label id="tierLabel" for="tier">
                     Tier
                   </Label>
-                  <AvField type="text" name="tier" />
+                  <AvField id="pincode-tier" type="text" name="tier" />
                 </AvGroup>
                 <AvGroup>
                   <Label for="city.name">City</Label>
-                  <AvInput type="select" className="form-control" name="cityId" onChange={this.cityUpdate}>
+                  <AvInput id="pincode-city" type="select" className="form-control" name="cityId" onChange={this.cityUpdate}>
                     <option value="" key="0" />
                     {cities
                       ? cities.map(otherEntity => (
@@ -238,7 +222,7 @@ export class PincodeUpdate extends React.Component<IPincodeUpdateProps, IPincode
                 </AvGroup>
                 <AvGroup>
                   <Label for="state.name">State</Label>
-                  <AvInput type="select" className="form-control" name="stateId" onChange={this.stateUpdate}>
+                  <AvInput id="pincode-state" type="select" className="form-control" name="stateId" onChange={this.stateUpdate}>
                     <option value="" key="0" />
                     {states
                       ? states.map(otherEntity => (
@@ -251,7 +235,7 @@ export class PincodeUpdate extends React.Component<IPincodeUpdateProps, IPincode
                 </AvGroup>
                 <AvGroup>
                   <Label for="zone.name">Zone</Label>
-                  <AvInput type="select" className="form-control" name="zoneId" onChange={this.zoneUpdate}>
+                  <AvInput id="pincode-zone" type="select" className="form-control" name="zoneId" onChange={this.zoneUpdate}>
                     <option value="" key="0" />
                     {zones
                       ? zones.map(otherEntity => (
@@ -264,7 +248,7 @@ export class PincodeUpdate extends React.Component<IPincodeUpdateProps, IPincode
                 </AvGroup>
                 <AvGroup>
                   <Label for="hub.name">Hub</Label>
-                  <AvInput type="select" className="form-control" name="hubId" onChange={this.hubUpdate}>
+                  <AvInput id="pincode-hub" type="select" className="form-control" name="hubId" onChange={this.hubUpdate}>
                     <option value="" key="0" />
                     {hubs
                       ? hubs.map(otherEntity => (
@@ -292,12 +276,12 @@ export class PincodeUpdate extends React.Component<IPincodeUpdateProps, IPincode
   }
 }
 
-const mapStateToProps = storeState => ({
+const mapStateToProps = (storeState: IRootState) => ({
   cities: storeState.city.entities,
   states: storeState.state.entities,
   zones: storeState.zone.entities,
   hubs: storeState.hub.entities,
-  pincode: storeState.pincode.entity,
+  pincodeEntity: storeState.pincode.entity,
   loading: storeState.pincode.loading,
   updating: storeState.pincode.updating
 });
@@ -312,5 +296,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(PincodeUpdate);

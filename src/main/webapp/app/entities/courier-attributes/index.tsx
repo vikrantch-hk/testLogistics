@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+
+import ErrorBoundaryRoute from 'app/shared/error/error-boundary-route';
 
 import CourierAttributes from './courier-attributes';
 import CourierAttributesDetail from './courier-attributes-detail';
@@ -9,12 +11,12 @@ import CourierAttributesDeleteDialog from './courier-attributes-delete-dialog';
 const Routes = ({ match }) => (
   <>
     <Switch>
-      <Route exact path={`${match.url}/new`} component={CourierAttributesUpdate} />
-      <Route exact path={`${match.url}/:id/edit`} component={CourierAttributesUpdate} />
-      <Route exact path={`${match.url}/:id`} component={CourierAttributesDetail} />
-      <Route path={match.url} component={CourierAttributes} />
+      <ErrorBoundaryRoute exact path={`${match.url}/new`} component={CourierAttributesUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id/edit`} component={CourierAttributesUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id`} component={CourierAttributesDetail} />
+      <ErrorBoundaryRoute path={match.url} component={CourierAttributes} />
     </Switch>
-    <Route path={`${match.url}/:id/delete`} component={CourierAttributesDeleteDialog} />
+    <ErrorBoundaryRoute path={`${match.url}/:id/delete`} component={CourierAttributesDeleteDialog} />
   </>
 );
 

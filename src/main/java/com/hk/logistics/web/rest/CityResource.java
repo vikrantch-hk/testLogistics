@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.City;
-import com.hk.logistics.repository.CityRepository;
+import com.hk.logistics.service.CityService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.CityDTO;
-import com.hk.logistics.service.mapper.CityMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +17,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing City.
@@ -31,13 +32,10 @@ public class CityResource {
 
     private static final String ENTITY_NAME = "city";
 
-    private final CityRepository cityRepository;
+    private final CityService cityService;
 
-    private final CityMapper cityMapper;
-
-    public CityResource(CityRepository cityRepository, CityMapper cityMapper) {
-        this.cityRepository = cityRepository;
-        this.cityMapper = cityMapper;
+    public CityResource(CityService cityService) {
+        this.cityService = cityService;
     }
 
     /**
@@ -53,10 +51,8 @@ public class CityResource {
         log.debug("REST request to save City : {}", cityDTO);
         if (cityDTO.getId() != null) {
             throw new BadRequestAlertException("A new city cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        City city = cityMapper.toEntity(cityDTO);
-        city = cityRepository.save(city);
-        CityDTO result = cityMapper.toDto(city);
+        }
+        CityDTO result = cityService.save(cityDTO);
         return ResponseEntity.created(new URI("/api/cities/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -77,10 +73,8 @@ public class CityResource {
         log.debug("REST request to update City : {}", cityDTO);
         if (cityDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        City city = cityMapper.toEntity(cityDTO);
-        city = cityRepository.save(city);
-        CityDTO result = cityMapper.toDto(city);
+        }
+        CityDTO result = cityService.save(cityDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, cityDTO.getId().toString()))
             .body(result);
@@ -95,8 +89,7 @@ public class CityResource {
     @Timed
     public List<CityDTO> getAllCities() {
         log.debug("REST request to get all Cities");
-        List<City> cities = cityRepository.findAll();
-        return cityMapper.toDto(cities);
+        return cityService.findAll();
     }
 
     /**
@@ -109,8 +102,7 @@ public class CityResource {
     @Timed
     public ResponseEntity<CityDTO> getCity(@PathVariable Long id) {
         log.debug("REST request to get City : {}", id);
-        Optional<CityDTO> cityDTO = cityRepository.findById(id)
-            .map(cityMapper::toDto);
+        Optional<CityDTO> cityDTO = cityService.findOne(id);
         return ResponseUtil.wrapOrNotFound(cityDTO);
     }
 
@@ -124,7 +116,22 @@ public class CityResource {
     @Timed
     public ResponseEntity<Void> deleteCity(@PathVariable Long id) {
         log.debug("REST request to delete City : {}", id);
-        cityRepository.deleteById(id);
+        cityService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/cities?query=:query : search for the city corresponding
+     * to the query.
+     *
+     * @param query the query of the city search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/cities")
+    @Timed
+    public List<CityDTO> searchCities(@RequestParam String query) {
+        log.debug("REST request to search Cities for query {}", query);
+        return cityService.search(query);
+    }
+
 }

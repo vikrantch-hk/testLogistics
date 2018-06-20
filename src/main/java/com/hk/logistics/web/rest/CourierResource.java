@@ -1,13 +1,11 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.Courier;
-import com.hk.logistics.repository.CourierRepository;
+import com.hk.logistics.service.CourierService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.web.rest.util.PaginationUtil;
 import com.hk.logistics.service.dto.CourierDTO;
-import com.hk.logistics.service.mapper.CourierMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +22,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing Courier.
@@ -36,13 +37,10 @@ public class CourierResource {
 
     private static final String ENTITY_NAME = "courier";
 
-    private final CourierRepository courierRepository;
+    private final CourierService courierService;
 
-    private final CourierMapper courierMapper;
-
-    public CourierResource(CourierRepository courierRepository, CourierMapper courierMapper) {
-        this.courierRepository = courierRepository;
-        this.courierMapper = courierMapper;
+    public CourierResource(CourierService courierService) {
+        this.courierService = courierService;
     }
 
     /**
@@ -58,10 +56,8 @@ public class CourierResource {
         log.debug("REST request to save Courier : {}", courierDTO);
         if (courierDTO.getId() != null) {
             throw new BadRequestAlertException("A new courier cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        Courier courier = courierMapper.toEntity(courierDTO);
-        courier = courierRepository.save(courier);
-        CourierDTO result = courierMapper.toDto(courier);
+        }
+        CourierDTO result = courierService.save(courierDTO);
         return ResponseEntity.created(new URI("/api/couriers/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -82,10 +78,8 @@ public class CourierResource {
         log.debug("REST request to update Courier : {}", courierDTO);
         if (courierDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        Courier courier = courierMapper.toEntity(courierDTO);
-        courier = courierRepository.save(courier);
-        CourierDTO result = courierMapper.toDto(courier);
+        }
+        CourierDTO result = courierService.save(courierDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, courierDTO.getId().toString()))
             .body(result);
@@ -104,9 +98,9 @@ public class CourierResource {
         log.debug("REST request to get a page of Couriers");
         Page<CourierDTO> page;
         if (eagerload) {
-            page = courierRepository.findAllWithEagerRelationships(pageable).map(courierMapper::toDto);
+            page = courierService.findAllWithEagerRelationships(pageable);
         } else {
-            page = courierRepository.findAll(pageable).map(courierMapper::toDto);
+            page = courierService.findAll(pageable);
         }
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, String.format("/api/couriers?eagerload=%b", eagerload));
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
@@ -122,8 +116,7 @@ public class CourierResource {
     @Timed
     public ResponseEntity<CourierDTO> getCourier(@PathVariable Long id) {
         log.debug("REST request to get Courier : {}", id);
-        Optional<CourierDTO> courierDTO = courierRepository.findOneWithEagerRelationships(id)
-            .map(courierMapper::toDto);
+        Optional<CourierDTO> courierDTO = courierService.findOne(id);
         return ResponseUtil.wrapOrNotFound(courierDTO);
     }
 
@@ -137,7 +130,25 @@ public class CourierResource {
     @Timed
     public ResponseEntity<Void> deleteCourier(@PathVariable Long id) {
         log.debug("REST request to delete Courier : {}", id);
-        courierRepository.deleteById(id);
+        courierService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/couriers?query=:query : search for the courier corresponding
+     * to the query.
+     *
+     * @param query the query of the courier search
+     * @param pageable the pagination information
+     * @return the result of the search
+     */
+    @GetMapping("/_search/couriers")
+    @Timed
+    public ResponseEntity<List<CourierDTO>> searchCouriers(@RequestParam String query, Pageable pageable) {
+        log.debug("REST request to search for a page of Couriers for query {}", query);
+        Page<CourierDTO> page = courierService.search(query, pageable);
+        HttpHeaders headers = PaginationUtil.generateSearchPaginationHttpHeaders(query, page, "/api/_search/couriers");
+        return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+    }
+
 }

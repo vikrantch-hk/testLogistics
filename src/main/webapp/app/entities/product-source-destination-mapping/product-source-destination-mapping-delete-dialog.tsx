@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { ICrudGetAction, ICrudDeleteAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { IProductSourceDestinationMapping } from 'app/shared/model/product-source-destination-mapping.model';
+import { IRootState } from 'app/shared/reducers';
 import { getEntity, deleteEntity } from './product-source-destination-mapping.reducer';
 
-export interface IProductSourceDestinationMappingDeleteDialogProps {
-  getEntity: ICrudGetAction<IProductSourceDestinationMapping>;
-  deleteEntity: ICrudDeleteAction<IProductSourceDestinationMapping>;
-  productSourceDestinationMapping: IProductSourceDestinationMapping;
-  match: any;
-  history: any;
-}
+export interface IProductSourceDestinationMappingDeleteDialogProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class ProductSourceDestinationMappingDeleteDialog extends React.Component<IProductSourceDestinationMappingDeleteDialogProps> {
   componentDidMount() {
@@ -21,7 +17,7 @@ export class ProductSourceDestinationMappingDeleteDialog extends React.Component
   }
 
   confirmDelete = event => {
-    this.props.deleteEntity(this.props.productSourceDestinationMapping.id);
+    this.props.deleteEntity(this.props.productSourceDestinationMappingEntity.id);
     this.handleClose(event);
   };
 
@@ -31,7 +27,7 @@ export class ProductSourceDestinationMappingDeleteDialog extends React.Component
   };
 
   render() {
-    const { productSourceDestinationMapping } = this.props;
+    const { productSourceDestinationMappingEntity } = this.props;
     return (
       <Modal isOpen toggle={this.handleClose}>
         <ModalHeader toggle={this.handleClose}>Confirm delete operation</ModalHeader>
@@ -49,10 +45,13 @@ export class ProductSourceDestinationMappingDeleteDialog extends React.Component
   }
 }
 
-const mapStateToProps = ({ productSourceDestinationMapping }) => ({
-  productSourceDestinationMapping: productSourceDestinationMapping.entity
+const mapStateToProps = ({ productSourceDestinationMapping }: IRootState) => ({
+  productSourceDestinationMappingEntity: productSourceDestinationMapping.entity
 });
 
 const mapDispatchToProps = { getEntity, deleteEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProductSourceDestinationMappingDeleteDialog);

@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.PincodeCourierMapping;
 import com.hk.logistics.repository.PincodeCourierMappingRepository;
+import com.hk.logistics.repository.search.PincodeCourierMappingSearchRepository;
+import com.hk.logistics.service.PincodeCourierMappingService;
 import com.hk.logistics.service.dto.PincodeCourierMappingDTO;
 import com.hk.logistics.service.mapper.PincodeCourierMappingMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -60,6 +64,18 @@ public class PincodeCourierMappingResourceIntTest {
 
     @Autowired
     private PincodeCourierMappingMapper pincodeCourierMappingMapper;
+    
+
+    @Autowired
+    private PincodeCourierMappingService pincodeCourierMappingService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.PincodeCourierMappingSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private PincodeCourierMappingSearchRepository mockPincodeCourierMappingSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -80,7 +96,7 @@ public class PincodeCourierMappingResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final PincodeCourierMappingResource pincodeCourierMappingResource = new PincodeCourierMappingResource(pincodeCourierMappingRepository, pincodeCourierMappingMapper);
+        final PincodeCourierMappingResource pincodeCourierMappingResource = new PincodeCourierMappingResource(pincodeCourierMappingService);
         this.restPincodeCourierMappingMockMvc = MockMvcBuilders.standaloneSetup(pincodeCourierMappingResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -128,6 +144,9 @@ public class PincodeCourierMappingResourceIntTest {
         assertThat(testPincodeCourierMapping.isApplicableForCheapestCourier()).isEqualTo(DEFAULT_APPLICABLE_FOR_CHEAPEST_COURIER);
         assertThat(testPincodeCourierMapping.getEstimatedDeliveryDays()).isEqualTo(DEFAULT_ESTIMATED_DELIVERY_DAYS);
         assertThat(testPincodeCourierMapping.isPickupAvailable()).isEqualTo(DEFAULT_PICKUP_AVAILABLE);
+
+        // Validate the PincodeCourierMapping in Elasticsearch
+        verify(mockPincodeCourierMappingSearchRepository, times(1)).save(testPincodeCourierMapping);
     }
 
     @Test
@@ -148,6 +167,9 @@ public class PincodeCourierMappingResourceIntTest {
         // Validate the PincodeCourierMapping in the database
         List<PincodeCourierMapping> pincodeCourierMappingList = pincodeCourierMappingRepository.findAll();
         assertThat(pincodeCourierMappingList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the PincodeCourierMapping in Elasticsearch
+        verify(mockPincodeCourierMappingSearchRepository, times(0)).save(pincodeCourierMapping);
     }
 
     @Test
@@ -262,6 +284,9 @@ public class PincodeCourierMappingResourceIntTest {
         assertThat(testPincodeCourierMapping.isApplicableForCheapestCourier()).isEqualTo(UPDATED_APPLICABLE_FOR_CHEAPEST_COURIER);
         assertThat(testPincodeCourierMapping.getEstimatedDeliveryDays()).isEqualTo(UPDATED_ESTIMATED_DELIVERY_DAYS);
         assertThat(testPincodeCourierMapping.isPickupAvailable()).isEqualTo(UPDATED_PICKUP_AVAILABLE);
+
+        // Validate the PincodeCourierMapping in Elasticsearch
+        verify(mockPincodeCourierMappingSearchRepository, times(1)).save(testPincodeCourierMapping);
     }
 
     @Test
@@ -281,6 +306,9 @@ public class PincodeCourierMappingResourceIntTest {
         // Validate the PincodeCourierMapping in the database
         List<PincodeCourierMapping> pincodeCourierMappingList = pincodeCourierMappingRepository.findAll();
         assertThat(pincodeCourierMappingList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the PincodeCourierMapping in Elasticsearch
+        verify(mockPincodeCourierMappingSearchRepository, times(0)).save(pincodeCourierMapping);
     }
 
     @Test
@@ -299,6 +327,27 @@ public class PincodeCourierMappingResourceIntTest {
         // Validate the database is empty
         List<PincodeCourierMapping> pincodeCourierMappingList = pincodeCourierMappingRepository.findAll();
         assertThat(pincodeCourierMappingList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the PincodeCourierMapping in Elasticsearch
+        verify(mockPincodeCourierMappingSearchRepository, times(1)).deleteById(pincodeCourierMapping.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchPincodeCourierMapping() throws Exception {
+        // Initialize the database
+        pincodeCourierMappingRepository.saveAndFlush(pincodeCourierMapping);
+        when(mockPincodeCourierMappingSearchRepository.search(queryStringQuery("id:" + pincodeCourierMapping.getId())))
+            .thenReturn(Collections.singletonList(pincodeCourierMapping));
+        // Search the pincodeCourierMapping
+        restPincodeCourierMappingMockMvc.perform(get("/api/_search/pincode-courier-mappings?query=id:" + pincodeCourierMapping.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(pincodeCourierMapping.getId().intValue())))
+            .andExpect(jsonPath("$.[*].routingCode").value(hasItem(DEFAULT_ROUTING_CODE.toString())))
+            .andExpect(jsonPath("$.[*].applicableForCheapestCourier").value(hasItem(DEFAULT_APPLICABLE_FOR_CHEAPEST_COURIER.booleanValue())))
+            .andExpect(jsonPath("$.[*].estimatedDeliveryDays").value(hasItem(DEFAULT_ESTIMATED_DELIVERY_DAYS.doubleValue())))
+            .andExpect(jsonPath("$.[*].pickupAvailable").value(hasItem(DEFAULT_PICKUP_AVAILABLE.booleanValue())));
     }
 
     @Test

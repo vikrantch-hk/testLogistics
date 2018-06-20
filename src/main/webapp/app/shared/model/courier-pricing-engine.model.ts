@@ -21,25 +21,4 @@ export interface ICourierPricingEngine {
   regionTypeId?: number;
 }
 
-export class CourierPricingEngine implements ICourierPricingEngine {
-  constructor(
-    public id?: number,
-    public firstBaseWt?: number,
-    public firstBaseCost?: number,
-    public secondBaseWt?: number,
-    public secondBaseCost?: number,
-    public additionalWt?: number,
-    public additionalCost?: number,
-    public fuelSurcharge?: number,
-    public minCodCharges?: number,
-    public codCutoffAmount?: number,
-    public variableCodCharges?: number,
-    public validUpto?: Moment,
-    public courierName?: string,
-    public courierId?: number,
-    public warehouseName?: string,
-    public warehouseId?: number,
-    public regionTypeName?: string,
-    public regionTypeId?: number
-  ) {}
-}
+export const defaultValue: Readonly<ICourierPricingEngine> = {};

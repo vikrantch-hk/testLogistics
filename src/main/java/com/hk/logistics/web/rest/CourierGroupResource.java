@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.CourierGroup;
-import com.hk.logistics.repository.CourierGroupRepository;
+import com.hk.logistics.service.CourierGroupService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.CourierGroupDTO;
-import com.hk.logistics.service.mapper.CourierGroupMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +16,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing CourierGroup.
@@ -30,13 +31,10 @@ public class CourierGroupResource {
 
     private static final String ENTITY_NAME = "courierGroup";
 
-    private final CourierGroupRepository courierGroupRepository;
+    private final CourierGroupService courierGroupService;
 
-    private final CourierGroupMapper courierGroupMapper;
-
-    public CourierGroupResource(CourierGroupRepository courierGroupRepository, CourierGroupMapper courierGroupMapper) {
-        this.courierGroupRepository = courierGroupRepository;
-        this.courierGroupMapper = courierGroupMapper;
+    public CourierGroupResource(CourierGroupService courierGroupService) {
+        this.courierGroupService = courierGroupService;
     }
 
     /**
@@ -52,10 +50,8 @@ public class CourierGroupResource {
         log.debug("REST request to save CourierGroup : {}", courierGroupDTO);
         if (courierGroupDTO.getId() != null) {
             throw new BadRequestAlertException("A new courierGroup cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        CourierGroup courierGroup = courierGroupMapper.toEntity(courierGroupDTO);
-        courierGroup = courierGroupRepository.save(courierGroup);
-        CourierGroupDTO result = courierGroupMapper.toDto(courierGroup);
+        }
+        CourierGroupDTO result = courierGroupService.save(courierGroupDTO);
         return ResponseEntity.created(new URI("/api/courier-groups/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -76,10 +72,8 @@ public class CourierGroupResource {
         log.debug("REST request to update CourierGroup : {}", courierGroupDTO);
         if (courierGroupDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        CourierGroup courierGroup = courierGroupMapper.toEntity(courierGroupDTO);
-        courierGroup = courierGroupRepository.save(courierGroup);
-        CourierGroupDTO result = courierGroupMapper.toDto(courierGroup);
+        }
+        CourierGroupDTO result = courierGroupService.save(courierGroupDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, courierGroupDTO.getId().toString()))
             .body(result);
@@ -94,8 +88,7 @@ public class CourierGroupResource {
     @Timed
     public List<CourierGroupDTO> getAllCourierGroups() {
         log.debug("REST request to get all CourierGroups");
-        List<CourierGroup> courierGroups = courierGroupRepository.findAll();
-        return courierGroupMapper.toDto(courierGroups);
+        return courierGroupService.findAll();
     }
 
     /**
@@ -108,8 +101,7 @@ public class CourierGroupResource {
     @Timed
     public ResponseEntity<CourierGroupDTO> getCourierGroup(@PathVariable Long id) {
         log.debug("REST request to get CourierGroup : {}", id);
-        Optional<CourierGroupDTO> courierGroupDTO = courierGroupRepository.findById(id)
-            .map(courierGroupMapper::toDto);
+        Optional<CourierGroupDTO> courierGroupDTO = courierGroupService.findOne(id);
         return ResponseUtil.wrapOrNotFound(courierGroupDTO);
     }
 
@@ -123,7 +115,22 @@ public class CourierGroupResource {
     @Timed
     public ResponseEntity<Void> deleteCourierGroup(@PathVariable Long id) {
         log.debug("REST request to delete CourierGroup : {}", id);
-        courierGroupRepository.deleteById(id);
+        courierGroupService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/courier-groups?query=:query : search for the courierGroup corresponding
+     * to the query.
+     *
+     * @param query the query of the courierGroup search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/courier-groups")
+    @Timed
+    public List<CourierGroupDTO> searchCourierGroups(@RequestParam String query) {
+        log.debug("REST request to search CourierGroups for query {}", query);
+        return courierGroupService.search(query);
+    }
+
 }

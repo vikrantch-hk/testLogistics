@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { ICrudGetAction, ICrudDeleteAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { IPincode } from 'app/shared/model/pincode.model';
+import { IRootState } from 'app/shared/reducers';
 import { getEntity, deleteEntity } from './pincode.reducer';
 
-export interface IPincodeDeleteDialogProps {
-  getEntity: ICrudGetAction<IPincode>;
-  deleteEntity: ICrudDeleteAction<IPincode>;
-  pincode: IPincode;
-  match: any;
-  history: any;
-}
+export interface IPincodeDeleteDialogProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class PincodeDeleteDialog extends React.Component<IPincodeDeleteDialogProps> {
   componentDidMount() {
@@ -21,7 +17,7 @@ export class PincodeDeleteDialog extends React.Component<IPincodeDeleteDialogPro
   }
 
   confirmDelete = event => {
-    this.props.deleteEntity(this.props.pincode.id);
+    this.props.deleteEntity(this.props.pincodeEntity.id);
     this.handleClose(event);
   };
 
@@ -31,7 +27,7 @@ export class PincodeDeleteDialog extends React.Component<IPincodeDeleteDialogPro
   };
 
   render() {
-    const { pincode } = this.props;
+    const { pincodeEntity } = this.props;
     return (
       <Modal isOpen toggle={this.handleClose}>
         <ModalHeader toggle={this.handleClose}>Confirm delete operation</ModalHeader>
@@ -49,10 +45,13 @@ export class PincodeDeleteDialog extends React.Component<IPincodeDeleteDialogPro
   }
 }
 
-const mapStateToProps = ({ pincode }) => ({
-  pincode: pincode.entity
+const mapStateToProps = ({ pincode }: IRootState) => ({
+  pincodeEntity: pincode.entity
 });
 
 const mapDispatchToProps = { getEntity, deleteEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(PincodeDeleteDialog);

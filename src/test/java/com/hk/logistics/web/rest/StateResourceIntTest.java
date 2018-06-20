@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.State;
 import com.hk.logistics.repository.StateRepository;
+import com.hk.logistics.repository.search.StateSearchRepository;
+import com.hk.logistics.service.StateService;
 import com.hk.logistics.service.dto.StateDTO;
 import com.hk.logistics.service.mapper.StateMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -57,6 +61,18 @@ public class StateResourceIntTest {
 
     @Autowired
     private StateMapper stateMapper;
+    
+
+    @Autowired
+    private StateService stateService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.StateSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private StateSearchRepository mockStateSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -77,7 +93,7 @@ public class StateResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final StateResource stateResource = new StateResource(stateRepository, stateMapper);
+        final StateResource stateResource = new StateResource(stateService);
         this.restStateMockMvc = MockMvcBuilders.standaloneSetup(stateResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -123,6 +139,9 @@ public class StateResourceIntTest {
         assertThat(testState.getName()).isEqualTo(DEFAULT_NAME);
         assertThat(testState.getIdentifier()).isEqualTo(DEFAULT_IDENTIFIER);
         assertThat(testState.isUnionTerritory()).isEqualTo(DEFAULT_UNION_TERRITORY);
+
+        // Validate the State in Elasticsearch
+        verify(mockStateSearchRepository, times(1)).save(testState);
     }
 
     @Test
@@ -143,6 +162,9 @@ public class StateResourceIntTest {
         // Validate the State in the database
         List<State> stateList = stateRepository.findAll();
         assertThat(stateList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the State in Elasticsearch
+        verify(mockStateSearchRepository, times(0)).save(state);
     }
 
     @Test
@@ -253,6 +275,9 @@ public class StateResourceIntTest {
         assertThat(testState.getName()).isEqualTo(UPDATED_NAME);
         assertThat(testState.getIdentifier()).isEqualTo(UPDATED_IDENTIFIER);
         assertThat(testState.isUnionTerritory()).isEqualTo(UPDATED_UNION_TERRITORY);
+
+        // Validate the State in Elasticsearch
+        verify(mockStateSearchRepository, times(1)).save(testState);
     }
 
     @Test
@@ -272,6 +297,9 @@ public class StateResourceIntTest {
         // Validate the State in the database
         List<State> stateList = stateRepository.findAll();
         assertThat(stateList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the State in Elasticsearch
+        verify(mockStateSearchRepository, times(0)).save(state);
     }
 
     @Test
@@ -290,6 +318,26 @@ public class StateResourceIntTest {
         // Validate the database is empty
         List<State> stateList = stateRepository.findAll();
         assertThat(stateList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the State in Elasticsearch
+        verify(mockStateSearchRepository, times(1)).deleteById(state.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchState() throws Exception {
+        // Initialize the database
+        stateRepository.saveAndFlush(state);
+        when(mockStateSearchRepository.search(queryStringQuery("id:" + state.getId())))
+            .thenReturn(Collections.singletonList(state));
+        // Search the state
+        restStateMockMvc.perform(get("/api/_search/states?query=id:" + state.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(state.getId().intValue())))
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
+            .andExpect(jsonPath("$.[*].identifier").value(hasItem(DEFAULT_IDENTIFIER.toString())))
+            .andExpect(jsonPath("$.[*].unionTerritory").value(hasItem(DEFAULT_UNION_TERRITORY.booleanValue())));
     }
 
     @Test

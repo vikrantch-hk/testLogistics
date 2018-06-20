@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.Awb;
 import com.hk.logistics.repository.AwbRepository;
+import com.hk.logistics.repository.search.AwbSearchRepository;
+import com.hk.logistics.service.AwbService;
 import com.hk.logistics.service.dto.AwbDTO;
 import com.hk.logistics.service.mapper.AwbMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,12 +27,15 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -71,6 +75,18 @@ public class AwbResourceIntTest {
 
     @Autowired
     private AwbMapper awbMapper;
+    
+
+    @Autowired
+    private AwbService awbService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.AwbSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private AwbSearchRepository mockAwbSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -91,7 +107,7 @@ public class AwbResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final AwbResource awbResource = new AwbResource(awbRepository, awbMapper);
+        final AwbResource awbResource = new AwbResource(awbService);
         this.restAwbMockMvc = MockMvcBuilders.standaloneSetup(awbResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -145,6 +161,9 @@ public class AwbResourceIntTest {
         assertThat(testAwb.getReturnAwbNumber()).isEqualTo(DEFAULT_RETURN_AWB_NUMBER);
         assertThat(testAwb.getReturnAwbBarCode()).isEqualTo(DEFAULT_RETURN_AWB_BAR_CODE);
         assertThat(testAwb.isIsBrightAwb()).isEqualTo(DEFAULT_IS_BRIGHT_AWB);
+
+        // Validate the Awb in Elasticsearch
+        verify(mockAwbSearchRepository, times(1)).save(testAwb);
     }
 
     @Test
@@ -165,6 +184,9 @@ public class AwbResourceIntTest {
         // Validate the Awb in the database
         List<Awb> awbList = awbRepository.findAll();
         assertThat(awbList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the Awb in Elasticsearch
+        verify(mockAwbSearchRepository, times(0)).save(awb);
     }
 
     @Test
@@ -348,6 +370,9 @@ public class AwbResourceIntTest {
         assertThat(testAwb.getReturnAwbNumber()).isEqualTo(UPDATED_RETURN_AWB_NUMBER);
         assertThat(testAwb.getReturnAwbBarCode()).isEqualTo(UPDATED_RETURN_AWB_BAR_CODE);
         assertThat(testAwb.isIsBrightAwb()).isEqualTo(UPDATED_IS_BRIGHT_AWB);
+
+        // Validate the Awb in Elasticsearch
+        verify(mockAwbSearchRepository, times(1)).save(testAwb);
     }
 
     @Test
@@ -367,6 +392,9 @@ public class AwbResourceIntTest {
         // Validate the Awb in the database
         List<Awb> awbList = awbRepository.findAll();
         assertThat(awbList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the Awb in Elasticsearch
+        verify(mockAwbSearchRepository, times(0)).save(awb);
     }
 
     @Test
@@ -385,6 +413,30 @@ public class AwbResourceIntTest {
         // Validate the database is empty
         List<Awb> awbList = awbRepository.findAll();
         assertThat(awbList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the Awb in Elasticsearch
+        verify(mockAwbSearchRepository, times(1)).deleteById(awb.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchAwb() throws Exception {
+        // Initialize the database
+        awbRepository.saveAndFlush(awb);
+        when(mockAwbSearchRepository.search(queryStringQuery("id:" + awb.getId())))
+            .thenReturn(Collections.singletonList(awb));
+        // Search the awb
+        restAwbMockMvc.perform(get("/api/_search/awbs?query=id:" + awb.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(awb.getId().intValue())))
+            .andExpect(jsonPath("$.[*].awbNumber").value(hasItem(DEFAULT_AWB_NUMBER.toString())))
+            .andExpect(jsonPath("$.[*].awbBarCode").value(hasItem(DEFAULT_AWB_BAR_CODE.toString())))
+            .andExpect(jsonPath("$.[*].cod").value(hasItem(DEFAULT_COD.booleanValue())))
+            .andExpect(jsonPath("$.[*].createDate").value(hasItem(DEFAULT_CREATE_DATE.toString())))
+            .andExpect(jsonPath("$.[*].returnAwbNumber").value(hasItem(DEFAULT_RETURN_AWB_NUMBER.toString())))
+            .andExpect(jsonPath("$.[*].returnAwbBarCode").value(hasItem(DEFAULT_RETURN_AWB_BAR_CODE.toString())))
+            .andExpect(jsonPath("$.[*].isBrightAwb").value(hasItem(DEFAULT_IS_BRIGHT_AWB.booleanValue())));
     }
 
     @Test

@@ -1,9 +1,12 @@
 package com.hk.logistics.domain;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
 
+import org.springframework.data.elasticsearch.annotations.Document;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,6 +17,8 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "courier")
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@Document(indexName = "courier")
 public class Courier implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -40,12 +45,14 @@ public class Courier implements Serializable {
     private Long parentCourierId;
 
     @ManyToMany
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     @JoinTable(name = "courier_courier_channel",
                joinColumns = @JoinColumn(name = "couriers_id", referencedColumnName = "id"),
                inverseJoinColumns = @JoinColumn(name = "courier_channels_id", referencedColumnName = "id"))
     private Set<CourierChannel> courierChannels = new HashSet<>();
 
     @ManyToMany
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     @JoinTable(name = "courier_courier_group",
                joinColumns = @JoinColumn(name = "couriers_id", referencedColumnName = "id"),
                inverseJoinColumns = @JoinColumn(name = "courier_groups_id", referencedColumnName = "id"))

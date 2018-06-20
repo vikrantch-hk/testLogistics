@@ -3,6 +3,4 @@ export interface IAwbStatus {
   awbStatus?: string;
 }
 
-export class AwbStatus implements IAwbStatus {
-  constructor(public id?: number, public awbStatus?: string) {}
-}
+export const defaultValue: Readonly<IAwbStatus> = {};

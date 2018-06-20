@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvField } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { getEntity, updateEntity, createEntity, reset } from './state.reducer';
 import { IState } from 'app/shared/model/state.model';
@@ -13,17 +14,7 @@ import { IState } from 'app/shared/model/state.model';
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface IStateUpdateProps {
-  getEntity: ICrudGetAction<IState>;
-  updateEntity: ICrudPutAction<IState>;
-  createEntity: ICrudPutAction<IState>;
-  state: IState;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface IStateUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface IStateUpdateState {
   isNew: boolean;
@@ -47,9 +38,9 @@ export class StateUpdate extends React.Component<IStateUpdateProps, IStateUpdate
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { state } = this.props;
+      const { stateEntity } = this.props;
       const entity = {
-        ...state,
+        ...stateEntity,
         ...values
       };
 
@@ -68,14 +59,14 @@ export class StateUpdate extends React.Component<IStateUpdateProps, IStateUpdate
 
   render() {
     const isInvalid = false;
-    const { state, loading, updating } = this.props;
+    const { stateEntity, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-state-heading">Create or edit a State</h2>
+            <h2 id="testLogisticsApp.state.home.createOrEditLabel">Create or edit a State</h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -83,11 +74,11 @@ export class StateUpdate extends React.Component<IStateUpdateProps, IStateUpdate
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : state} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : stateEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="state-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <AvGroup>
@@ -95,6 +86,7 @@ export class StateUpdate extends React.Component<IStateUpdateProps, IStateUpdate
                     Name
                   </Label>
                   <AvField
+                    id="state-name"
                     type="text"
                     name="name"
                     validate={{
@@ -106,11 +98,11 @@ export class StateUpdate extends React.Component<IStateUpdateProps, IStateUpdate
                   <Label id="identifierLabel" for="identifier">
                     Identifier
                   </Label>
-                  <AvField type="text" name="identifier" />
+                  <AvField id="state-identifier" type="text" name="identifier" />
                 </AvGroup>
                 <AvGroup>
                   <Label id="unionTerritoryLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="unionTerritory" />
+                    <AvInput id="state-unionTerritory" type="checkbox" className="form-control" name="unionTerritory" />
                     Union Territory
                   </Label>
                 </AvGroup>
@@ -131,8 +123,8 @@ export class StateUpdate extends React.Component<IStateUpdateProps, IStateUpdate
   }
 }
 
-const mapStateToProps = storeState => ({
-  state: storeState.state.entity,
+const mapStateToProps = (storeState: IRootState) => ({
+  stateEntity: storeState.state.entity,
   loading: storeState.state.loading,
   updating: storeState.state.updating
 });
@@ -143,5 +135,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(StateUpdate);

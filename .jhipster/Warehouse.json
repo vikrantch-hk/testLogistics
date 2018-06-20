@@ -1,4 +1,5 @@
 {
+    "name": "Warehouse",
     "fields": [
         {
             "fieldName": "name",
@@ -23,11 +24,11 @@
             "otherEntityRelationshipName": "warehouse"
         }
     ],
-    "changelogDate": "20180608074051",
+    "changelogDate": "20180619110514",
     "entityTableName": "warehouse",
     "dto": "mapstruct",
     "pagination": "no",
-    "service": "no",
+    "service": "serviceImpl",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,
     "clientRootFolder": "",

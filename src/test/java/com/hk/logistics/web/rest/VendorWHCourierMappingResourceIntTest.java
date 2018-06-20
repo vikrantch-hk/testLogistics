@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.VendorWHCourierMapping;
 import com.hk.logistics.repository.VendorWHCourierMappingRepository;
+import com.hk.logistics.repository.search.VendorWHCourierMappingSearchRepository;
+import com.hk.logistics.service.VendorWHCourierMappingService;
 import com.hk.logistics.service.dto.VendorWHCourierMappingDTO;
 import com.hk.logistics.service.mapper.VendorWHCourierMappingMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -51,6 +55,18 @@ public class VendorWHCourierMappingResourceIntTest {
 
     @Autowired
     private VendorWHCourierMappingMapper vendorWHCourierMappingMapper;
+    
+
+    @Autowired
+    private VendorWHCourierMappingService vendorWHCourierMappingService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.VendorWHCourierMappingSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private VendorWHCourierMappingSearchRepository mockVendorWHCourierMappingSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -71,7 +87,7 @@ public class VendorWHCourierMappingResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final VendorWHCourierMappingResource vendorWHCourierMappingResource = new VendorWHCourierMappingResource(vendorWHCourierMappingRepository, vendorWHCourierMappingMapper);
+        final VendorWHCourierMappingResource vendorWHCourierMappingResource = new VendorWHCourierMappingResource(vendorWHCourierMappingService);
         this.restVendorWHCourierMappingMockMvc = MockMvcBuilders.standaloneSetup(vendorWHCourierMappingResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -113,6 +129,9 @@ public class VendorWHCourierMappingResourceIntTest {
         assertThat(vendorWHCourierMappingList).hasSize(databaseSizeBeforeCreate + 1);
         VendorWHCourierMapping testVendorWHCourierMapping = vendorWHCourierMappingList.get(vendorWHCourierMappingList.size() - 1);
         assertThat(testVendorWHCourierMapping.isActive()).isEqualTo(DEFAULT_ACTIVE);
+
+        // Validate the VendorWHCourierMapping in Elasticsearch
+        verify(mockVendorWHCourierMappingSearchRepository, times(1)).save(testVendorWHCourierMapping);
     }
 
     @Test
@@ -133,6 +152,9 @@ public class VendorWHCourierMappingResourceIntTest {
         // Validate the VendorWHCourierMapping in the database
         List<VendorWHCourierMapping> vendorWHCourierMappingList = vendorWHCourierMappingRepository.findAll();
         assertThat(vendorWHCourierMappingList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the VendorWHCourierMapping in Elasticsearch
+        verify(mockVendorWHCourierMappingSearchRepository, times(0)).save(vendorWHCourierMapping);
     }
 
     @Test
@@ -216,6 +238,9 @@ public class VendorWHCourierMappingResourceIntTest {
         assertThat(vendorWHCourierMappingList).hasSize(databaseSizeBeforeUpdate);
         VendorWHCourierMapping testVendorWHCourierMapping = vendorWHCourierMappingList.get(vendorWHCourierMappingList.size() - 1);
         assertThat(testVendorWHCourierMapping.isActive()).isEqualTo(UPDATED_ACTIVE);
+
+        // Validate the VendorWHCourierMapping in Elasticsearch
+        verify(mockVendorWHCourierMappingSearchRepository, times(1)).save(testVendorWHCourierMapping);
     }
 
     @Test
@@ -235,6 +260,9 @@ public class VendorWHCourierMappingResourceIntTest {
         // Validate the VendorWHCourierMapping in the database
         List<VendorWHCourierMapping> vendorWHCourierMappingList = vendorWHCourierMappingRepository.findAll();
         assertThat(vendorWHCourierMappingList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the VendorWHCourierMapping in Elasticsearch
+        verify(mockVendorWHCourierMappingSearchRepository, times(0)).save(vendorWHCourierMapping);
     }
 
     @Test
@@ -253,6 +281,24 @@ public class VendorWHCourierMappingResourceIntTest {
         // Validate the database is empty
         List<VendorWHCourierMapping> vendorWHCourierMappingList = vendorWHCourierMappingRepository.findAll();
         assertThat(vendorWHCourierMappingList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the VendorWHCourierMapping in Elasticsearch
+        verify(mockVendorWHCourierMappingSearchRepository, times(1)).deleteById(vendorWHCourierMapping.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchVendorWHCourierMapping() throws Exception {
+        // Initialize the database
+        vendorWHCourierMappingRepository.saveAndFlush(vendorWHCourierMapping);
+        when(mockVendorWHCourierMappingSearchRepository.search(queryStringQuery("id:" + vendorWHCourierMapping.getId())))
+            .thenReturn(Collections.singletonList(vendorWHCourierMapping));
+        // Search the vendorWHCourierMapping
+        restVendorWHCourierMappingMockMvc.perform(get("/api/_search/vendor-wh-courier-mappings?query=id:" + vendorWHCourierMapping.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(vendorWHCourierMapping.getId().intValue())))
+            .andExpect(jsonPath("$.[*].active").value(hasItem(DEFAULT_ACTIVE.booleanValue())));
     }
 
     @Test

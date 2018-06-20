@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvField } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { ICourier } from 'app/shared/model/courier.model';
 import { getEntities as getCouriers } from 'app/entities/courier/courier.reducer';
@@ -15,19 +16,7 @@ import { ICourierChannel } from 'app/shared/model/courier-channel.model';
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface ICourierChannelUpdateProps {
-  getEntity: ICrudGetAction<ICourierChannel>;
-  updateEntity: ICrudPutAction<ICourierChannel>;
-  createEntity: ICrudPutAction<ICourierChannel>;
-  getCouriers: ICrudGetAllAction<ICourier>;
-  couriers: ICourier[];
-  courierChannel: ICourierChannel;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface ICourierChannelUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface ICourierChannelUpdateState {
   isNew: boolean;
@@ -55,9 +44,9 @@ export class CourierChannelUpdate extends React.Component<ICourierChannelUpdateP
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { courierChannel } = this.props;
+      const { courierChannelEntity } = this.props;
       const entity = {
-        ...courierChannel,
+        ...courierChannelEntity,
         ...values
       };
 
@@ -76,14 +65,14 @@ export class CourierChannelUpdate extends React.Component<ICourierChannelUpdateP
 
   render() {
     const isInvalid = false;
-    const { courierChannel, couriers, loading, updating } = this.props;
+    const { courierChannelEntity, couriers, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-courier-channel-heading">Create or edit a CourierChannel</h2>
+            <h2 id="testLogisticsApp.courierChannel.home.createOrEditLabel">Create or edit a CourierChannel</h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -91,18 +80,18 @@ export class CourierChannelUpdate extends React.Component<ICourierChannelUpdateP
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : courierChannel} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : courierChannelEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="courier-channel-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <AvGroup>
                   <Label id="nameLabel" for="name">
                     Name
                   </Label>
-                  <AvField type="text" name="name" />
+                  <AvField id="courier-channel-name" type="text" name="name" />
                 </AvGroup>
                 <Button tag={Link} id="cancel-save" to="/entity/courier-channel" replace color="info">
                   <FontAwesomeIcon icon="arrow-left" />&nbsp;
@@ -121,9 +110,9 @@ export class CourierChannelUpdate extends React.Component<ICourierChannelUpdateP
   }
 }
 
-const mapStateToProps = storeState => ({
+const mapStateToProps = (storeState: IRootState) => ({
   couriers: storeState.courier.entities,
-  courierChannel: storeState.courierChannel.entity,
+  courierChannelEntity: storeState.courierChannel.entity,
   loading: storeState.courierChannel.loading,
   updating: storeState.courierChannel.updating
 });
@@ -135,5 +124,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(CourierChannelUpdate);

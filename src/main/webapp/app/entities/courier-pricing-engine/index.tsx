@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+
+import ErrorBoundaryRoute from 'app/shared/error/error-boundary-route';
 
 import CourierPricingEngine from './courier-pricing-engine';
 import CourierPricingEngineDetail from './courier-pricing-engine-detail';
@@ -9,12 +11,12 @@ import CourierPricingEngineDeleteDialog from './courier-pricing-engine-delete-di
 const Routes = ({ match }) => (
   <>
     <Switch>
-      <Route exact path={`${match.url}/new`} component={CourierPricingEngineUpdate} />
-      <Route exact path={`${match.url}/:id/edit`} component={CourierPricingEngineUpdate} />
-      <Route exact path={`${match.url}/:id`} component={CourierPricingEngineDetail} />
-      <Route path={match.url} component={CourierPricingEngine} />
+      <ErrorBoundaryRoute exact path={`${match.url}/new`} component={CourierPricingEngineUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id/edit`} component={CourierPricingEngineUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id`} component={CourierPricingEngineDetail} />
+      <ErrorBoundaryRoute path={match.url} component={CourierPricingEngine} />
     </Switch>
-    <Route path={`${match.url}/:id/delete`} component={CourierPricingEngineDeleteDialog} />
+    <ErrorBoundaryRoute path={`${match.url}/:id/delete`} component={CourierPricingEngineDeleteDialog} />
   </>
 );
 

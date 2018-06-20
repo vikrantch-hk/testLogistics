@@ -1,10 +1,13 @@
 package com.hk.logistics.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
 
+import org.springframework.data.elasticsearch.annotations.Document;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -14,6 +17,8 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "courier_pricing_engine")
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@Document(indexName = "courierpricingengine")
 public class CourierPricingEngine implements Serializable {
 
     private static final long serialVersionUID = 1L;

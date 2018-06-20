@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+
+import ErrorBoundaryRoute from 'app/shared/error/error-boundary-route';
 
 import Awb from './awb';
 import AwbDetail from './awb-detail';
@@ -9,12 +11,12 @@ import AwbDeleteDialog from './awb-delete-dialog';
 const Routes = ({ match }) => (
   <>
     <Switch>
-      <Route exact path={`${match.url}/new`} component={AwbUpdate} />
-      <Route exact path={`${match.url}/:id/edit`} component={AwbUpdate} />
-      <Route exact path={`${match.url}/:id`} component={AwbDetail} />
-      <Route path={match.url} component={Awb} />
+      <ErrorBoundaryRoute exact path={`${match.url}/new`} component={AwbUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id/edit`} component={AwbUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id`} component={AwbDetail} />
+      <ErrorBoundaryRoute path={match.url} component={Awb} />
     </Switch>
-    <Route path={`${match.url}/:id/delete`} component={AwbDeleteDialog} />
+    <ErrorBoundaryRoute path={`${match.url}/:id/delete`} component={AwbDeleteDialog} />
   </>
 );
 

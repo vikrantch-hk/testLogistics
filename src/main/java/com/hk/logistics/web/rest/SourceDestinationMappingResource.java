@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.SourceDestinationMapping;
-import com.hk.logistics.repository.SourceDestinationMappingRepository;
+import com.hk.logistics.service.SourceDestinationMappingService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.SourceDestinationMappingDTO;
-import com.hk.logistics.service.mapper.SourceDestinationMappingMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +17,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing SourceDestinationMapping.
@@ -31,13 +32,10 @@ public class SourceDestinationMappingResource {
 
     private static final String ENTITY_NAME = "sourceDestinationMapping";
 
-    private final SourceDestinationMappingRepository sourceDestinationMappingRepository;
+    private final SourceDestinationMappingService sourceDestinationMappingService;
 
-    private final SourceDestinationMappingMapper sourceDestinationMappingMapper;
-
-    public SourceDestinationMappingResource(SourceDestinationMappingRepository sourceDestinationMappingRepository, SourceDestinationMappingMapper sourceDestinationMappingMapper) {
-        this.sourceDestinationMappingRepository = sourceDestinationMappingRepository;
-        this.sourceDestinationMappingMapper = sourceDestinationMappingMapper;
+    public SourceDestinationMappingResource(SourceDestinationMappingService sourceDestinationMappingService) {
+        this.sourceDestinationMappingService = sourceDestinationMappingService;
     }
 
     /**
@@ -53,10 +51,8 @@ public class SourceDestinationMappingResource {
         log.debug("REST request to save SourceDestinationMapping : {}", sourceDestinationMappingDTO);
         if (sourceDestinationMappingDTO.getId() != null) {
             throw new BadRequestAlertException("A new sourceDestinationMapping cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        SourceDestinationMapping sourceDestinationMapping = sourceDestinationMappingMapper.toEntity(sourceDestinationMappingDTO);
-        sourceDestinationMapping = sourceDestinationMappingRepository.save(sourceDestinationMapping);
-        SourceDestinationMappingDTO result = sourceDestinationMappingMapper.toDto(sourceDestinationMapping);
+        }
+        SourceDestinationMappingDTO result = sourceDestinationMappingService.save(sourceDestinationMappingDTO);
         return ResponseEntity.created(new URI("/api/source-destination-mappings/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -77,10 +73,8 @@ public class SourceDestinationMappingResource {
         log.debug("REST request to update SourceDestinationMapping : {}", sourceDestinationMappingDTO);
         if (sourceDestinationMappingDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        SourceDestinationMapping sourceDestinationMapping = sourceDestinationMappingMapper.toEntity(sourceDestinationMappingDTO);
-        sourceDestinationMapping = sourceDestinationMappingRepository.save(sourceDestinationMapping);
-        SourceDestinationMappingDTO result = sourceDestinationMappingMapper.toDto(sourceDestinationMapping);
+        }
+        SourceDestinationMappingDTO result = sourceDestinationMappingService.save(sourceDestinationMappingDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, sourceDestinationMappingDTO.getId().toString()))
             .body(result);
@@ -95,8 +89,7 @@ public class SourceDestinationMappingResource {
     @Timed
     public List<SourceDestinationMappingDTO> getAllSourceDestinationMappings() {
         log.debug("REST request to get all SourceDestinationMappings");
-        List<SourceDestinationMapping> sourceDestinationMappings = sourceDestinationMappingRepository.findAll();
-        return sourceDestinationMappingMapper.toDto(sourceDestinationMappings);
+        return sourceDestinationMappingService.findAll();
     }
 
     /**
@@ -109,8 +102,7 @@ public class SourceDestinationMappingResource {
     @Timed
     public ResponseEntity<SourceDestinationMappingDTO> getSourceDestinationMapping(@PathVariable Long id) {
         log.debug("REST request to get SourceDestinationMapping : {}", id);
-        Optional<SourceDestinationMappingDTO> sourceDestinationMappingDTO = sourceDestinationMappingRepository.findById(id)
-            .map(sourceDestinationMappingMapper::toDto);
+        Optional<SourceDestinationMappingDTO> sourceDestinationMappingDTO = sourceDestinationMappingService.findOne(id);
         return ResponseUtil.wrapOrNotFound(sourceDestinationMappingDTO);
     }
 
@@ -124,7 +116,22 @@ public class SourceDestinationMappingResource {
     @Timed
     public ResponseEntity<Void> deleteSourceDestinationMapping(@PathVariable Long id) {
         log.debug("REST request to delete SourceDestinationMapping : {}", id);
-        sourceDestinationMappingRepository.deleteById(id);
+        sourceDestinationMappingService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/source-destination-mappings?query=:query : search for the sourceDestinationMapping corresponding
+     * to the query.
+     *
+     * @param query the query of the sourceDestinationMapping search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/source-destination-mappings")
+    @Timed
+    public List<SourceDestinationMappingDTO> searchSourceDestinationMappings(@RequestParam String query) {
+        log.debug("REST request to search SourceDestinationMappings for query {}", query);
+        return sourceDestinationMappingService.search(query);
+    }
+
 }

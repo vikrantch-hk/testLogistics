@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.Hub;
-import com.hk.logistics.repository.HubRepository;
+import com.hk.logistics.service.HubService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.HubDTO;
-import com.hk.logistics.service.mapper.HubMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +17,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing Hub.
@@ -31,13 +32,10 @@ public class HubResource {
 
     private static final String ENTITY_NAME = "hub";
 
-    private final HubRepository hubRepository;
+    private final HubService hubService;
 
-    private final HubMapper hubMapper;
-
-    public HubResource(HubRepository hubRepository, HubMapper hubMapper) {
-        this.hubRepository = hubRepository;
-        this.hubMapper = hubMapper;
+    public HubResource(HubService hubService) {
+        this.hubService = hubService;
     }
 
     /**
@@ -53,10 +51,8 @@ public class HubResource {
         log.debug("REST request to save Hub : {}", hubDTO);
         if (hubDTO.getId() != null) {
             throw new BadRequestAlertException("A new hub cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        Hub hub = hubMapper.toEntity(hubDTO);
-        hub = hubRepository.save(hub);
-        HubDTO result = hubMapper.toDto(hub);
+        }
+        HubDTO result = hubService.save(hubDTO);
         return ResponseEntity.created(new URI("/api/hubs/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -77,10 +73,8 @@ public class HubResource {
         log.debug("REST request to update Hub : {}", hubDTO);
         if (hubDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        Hub hub = hubMapper.toEntity(hubDTO);
-        hub = hubRepository.save(hub);
-        HubDTO result = hubMapper.toDto(hub);
+        }
+        HubDTO result = hubService.save(hubDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, hubDTO.getId().toString()))
             .body(result);
@@ -95,8 +89,7 @@ public class HubResource {
     @Timed
     public List<HubDTO> getAllHubs() {
         log.debug("REST request to get all Hubs");
-        List<Hub> hubs = hubRepository.findAll();
-        return hubMapper.toDto(hubs);
+        return hubService.findAll();
     }
 
     /**
@@ -109,8 +102,7 @@ public class HubResource {
     @Timed
     public ResponseEntity<HubDTO> getHub(@PathVariable Long id) {
         log.debug("REST request to get Hub : {}", id);
-        Optional<HubDTO> hubDTO = hubRepository.findById(id)
-            .map(hubMapper::toDto);
+        Optional<HubDTO> hubDTO = hubService.findOne(id);
         return ResponseUtil.wrapOrNotFound(hubDTO);
     }
 
@@ -124,7 +116,22 @@ public class HubResource {
     @Timed
     public ResponseEntity<Void> deleteHub(@PathVariable Long id) {
         log.debug("REST request to delete Hub : {}", id);
-        hubRepository.deleteById(id);
+        hubService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/hubs?query=:query : search for the hub corresponding
+     * to the query.
+     *
+     * @param query the query of the hub search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/hubs")
+    @Timed
+    public List<HubDTO> searchHubs(@RequestParam String query) {
+        log.debug("REST request to search Hubs for query {}", query);
+        return hubService.search(query);
+    }
+
 }

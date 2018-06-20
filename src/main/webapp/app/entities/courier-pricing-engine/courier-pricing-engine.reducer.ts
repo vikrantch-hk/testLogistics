@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
+import { ICrudSearchAction, ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
 import { SERVER_API_URL } from 'app/config/constants';
 
-import { ICourierPricingEngine } from 'app/shared/model/courier-pricing-engine.model';
+import { ICourierPricingEngine, defaultValue } from 'app/shared/model/courier-pricing-engine.model';
 
 export const ACTION_TYPES = {
+  SEARCH_COURIERPRICINGENGINES: 'courierPricingEngine/SEARCH_COURIERPRICINGENGINES',
   FETCH_COURIERPRICINGENGINE_LIST: 'courierPricingEngine/FETCH_COURIERPRICINGENGINE_LIST',
   FETCH_COURIERPRICINGENGINE: 'courierPricingEngine/FETCH_COURIERPRICINGENGINE',
   CREATE_COURIERPRICINGENGINE: 'courierPricingEngine/CREATE_COURIERPRICINGENGINE',
@@ -19,16 +20,19 @@ export const ACTION_TYPES = {
 const initialState = {
   loading: false,
   errorMessage: null,
-  entities: [],
-  entity: {},
+  entities: [] as ReadonlyArray<ICourierPricingEngine>,
+  entity: defaultValue,
   updating: false,
   updateSuccess: false
 };
 
+export type CourierPricingEngineState = Readonly<typeof initialState>;
+
 // Reducer
 
-export default (state = initialState, action) => {
+export default (state: CourierPricingEngineState = initialState, action): CourierPricingEngineState => {
   switch (action.type) {
+    case REQUEST(ACTION_TYPES.SEARCH_COURIERPRICINGENGINES):
     case REQUEST(ACTION_TYPES.FETCH_COURIERPRICINGENGINE_LIST):
     case REQUEST(ACTION_TYPES.FETCH_COURIERPRICINGENGINE):
       return {
@@ -46,6 +50,7 @@ export default (state = initialState, action) => {
         updateSuccess: false,
         updating: true
       };
+    case FAILURE(ACTION_TYPES.SEARCH_COURIERPRICINGENGINES):
     case FAILURE(ACTION_TYPES.FETCH_COURIERPRICINGENGINE_LIST):
     case FAILURE(ACTION_TYPES.FETCH_COURIERPRICINGENGINE):
     case FAILURE(ACTION_TYPES.CREATE_COURIERPRICINGENGINE):
@@ -57,6 +62,12 @@ export default (state = initialState, action) => {
         updating: false,
         updateSuccess: false,
         errorMessage: action.payload
+      };
+    case SUCCESS(ACTION_TYPES.SEARCH_COURIERPRICINGENGINES):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
       };
     case SUCCESS(ACTION_TYPES.FETCH_COURIERPRICINGENGINE_LIST):
       return {
@@ -95,19 +106,25 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/courier-pricing-engines';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/courier-pricing-engines';
 
 // Actions
 
+export const getSearchEntities: ICrudSearchAction<ICourierPricingEngine> = query => ({
+  type: ACTION_TYPES.SEARCH_COURIERPRICINGENGINES,
+  payload: axios.get<ICourierPricingEngine>(`${apiSearchUrl}?query=` + query)
+});
+
 export const getEntities: ICrudGetAllAction<ICourierPricingEngine> = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_COURIERPRICINGENGINE_LIST,
-  payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`) as Promise<ICourierPricingEngine>
+  payload: axios.get<ICourierPricingEngine>(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
 });
 
 export const getEntity: ICrudGetAction<ICourierPricingEngine> = id => {
   const requestUrl = `${apiUrl}/${id}`;
   return {
     type: ACTION_TYPES.FETCH_COURIERPRICINGENGINE,
-    payload: axios.get(requestUrl) as Promise<ICourierPricingEngine>
+    payload: axios.get<ICourierPricingEngine>(requestUrl)
   };
 };
 

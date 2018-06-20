@@ -3,14 +3,15 @@ const webpackMerge = require('webpack-merge');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const WorkboxPlugin = require('workbox-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
 const path = require('path');
 
 const utils = require('./utils.js');
 const commonConfig = require('./webpack.common.js');
 
 const ENV = 'production';
-const extractCSS = new ExtractTextPlugin(`[name].[hash].css`);
-const extractSASS = new ExtractTextPlugin(`[name]-sass.[hash].css`);
+const extractCSS = new ExtractTextPlugin(`content/[name].[hash].css`);
+const extractSASS = new ExtractTextPlugin(`content/[name]-sass.[hash].css`);
 
 module.exports = webpackMerge(commonConfig({ env: ENV }), {
   // devtool: 'source-map', // Enable source maps. Please note that this will slow down the build
@@ -34,14 +35,16 @@ module.exports = webpackMerge(commonConfig({ env: ENV }), {
         test: /\.scss$/,
         use: extractSASS.extract({
           fallback: 'style-loader',
-          use: ['css-loader', 'postcss-loader', 'sass-loader']
+          use: ['css-loader', 'postcss-loader', 'sass-loader'],
+          publicPath: '../'
         })
       },
       {
         test: /\.css$/,
         use: extractCSS.extract({
           fallback: 'style-loader',
-          use: ['css-loader']
+          use: ['css-loader'],
+          publicPath: '../'
         })
       }
     ]
@@ -78,6 +81,11 @@ module.exports = webpackMerge(commonConfig({ env: ENV }), {
   plugins: [
     extractCSS,
     extractSASS,
+    new MomentLocalesPlugin({
+      localesToKeep: [
+        // jhipster-needle-i18n-language-moment-webpack - JHipster will add/remove languages in this array
+      ]
+    }),
     new webpack.LoaderOptionsPlugin({
       minimize: true,
       debug: false

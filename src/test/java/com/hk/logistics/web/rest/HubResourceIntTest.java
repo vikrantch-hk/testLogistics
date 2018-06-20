@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.Hub;
 import com.hk.logistics.repository.HubRepository;
+import com.hk.logistics.repository.search.HubSearchRepository;
+import com.hk.logistics.service.HubService;
 import com.hk.logistics.service.dto.HubDTO;
 import com.hk.logistics.service.mapper.HubMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -57,6 +61,18 @@ public class HubResourceIntTest {
 
     @Autowired
     private HubMapper hubMapper;
+    
+
+    @Autowired
+    private HubService hubService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.HubSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private HubSearchRepository mockHubSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -77,7 +93,7 @@ public class HubResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final HubResource hubResource = new HubResource(hubRepository, hubMapper);
+        final HubResource hubResource = new HubResource(hubService);
         this.restHubMockMvc = MockMvcBuilders.standaloneSetup(hubResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -123,6 +139,9 @@ public class HubResourceIntTest {
         assertThat(testHub.getName()).isEqualTo(DEFAULT_NAME);
         assertThat(testHub.getAddress()).isEqualTo(DEFAULT_ADDRESS);
         assertThat(testHub.getCountry()).isEqualTo(DEFAULT_COUNTRY);
+
+        // Validate the Hub in Elasticsearch
+        verify(mockHubSearchRepository, times(1)).save(testHub);
     }
 
     @Test
@@ -143,6 +162,9 @@ public class HubResourceIntTest {
         // Validate the Hub in the database
         List<Hub> hubList = hubRepository.findAll();
         assertThat(hubList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the Hub in Elasticsearch
+        verify(mockHubSearchRepository, times(0)).save(hub);
     }
 
     @Test
@@ -234,6 +256,9 @@ public class HubResourceIntTest {
         assertThat(testHub.getName()).isEqualTo(UPDATED_NAME);
         assertThat(testHub.getAddress()).isEqualTo(UPDATED_ADDRESS);
         assertThat(testHub.getCountry()).isEqualTo(UPDATED_COUNTRY);
+
+        // Validate the Hub in Elasticsearch
+        verify(mockHubSearchRepository, times(1)).save(testHub);
     }
 
     @Test
@@ -253,6 +278,9 @@ public class HubResourceIntTest {
         // Validate the Hub in the database
         List<Hub> hubList = hubRepository.findAll();
         assertThat(hubList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the Hub in Elasticsearch
+        verify(mockHubSearchRepository, times(0)).save(hub);
     }
 
     @Test
@@ -271,6 +299,26 @@ public class HubResourceIntTest {
         // Validate the database is empty
         List<Hub> hubList = hubRepository.findAll();
         assertThat(hubList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the Hub in Elasticsearch
+        verify(mockHubSearchRepository, times(1)).deleteById(hub.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchHub() throws Exception {
+        // Initialize the database
+        hubRepository.saveAndFlush(hub);
+        when(mockHubSearchRepository.search(queryStringQuery("id:" + hub.getId())))
+            .thenReturn(Collections.singletonList(hub));
+        // Search the hub
+        restHubMockMvc.perform(get("/api/_search/hubs?query=id:" + hub.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(hub.getId().intValue())))
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
+            .andExpect(jsonPath("$.[*].address").value(hasItem(DEFAULT_ADDRESS.toString())))
+            .andExpect(jsonPath("$.[*].country").value(hasItem(DEFAULT_COUNTRY.toString())));
     }
 
     @Test

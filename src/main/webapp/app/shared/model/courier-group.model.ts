@@ -6,6 +6,4 @@ export interface ICourierGroup {
   couriers?: ICourier[];
 }
 
-export class CourierGroup implements ICourierGroup {
-  constructor(public id?: number, public name?: string, public couriers?: ICourier[]) {}
-}
+export const defaultValue: Readonly<ICourierGroup> = {};

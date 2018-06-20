@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.Product;
-import com.hk.logistics.repository.ProductRepository;
+import com.hk.logistics.service.ProductService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.ProductDTO;
-import com.hk.logistics.service.mapper.ProductMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +17,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing Product.
@@ -31,13 +32,10 @@ public class ProductResource {
 
     private static final String ENTITY_NAME = "product";
 
-    private final ProductRepository productRepository;
+    private final ProductService productService;
 
-    private final ProductMapper productMapper;
-
-    public ProductResource(ProductRepository productRepository, ProductMapper productMapper) {
-        this.productRepository = productRepository;
-        this.productMapper = productMapper;
+    public ProductResource(ProductService productService) {
+        this.productService = productService;
     }
 
     /**
@@ -53,10 +51,8 @@ public class ProductResource {
         log.debug("REST request to save Product : {}", productDTO);
         if (productDTO.getId() != null) {
             throw new BadRequestAlertException("A new product cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        Product product = productMapper.toEntity(productDTO);
-        product = productRepository.save(product);
-        ProductDTO result = productMapper.toDto(product);
+        }
+        ProductDTO result = productService.save(productDTO);
         return ResponseEntity.created(new URI("/api/products/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -77,10 +73,8 @@ public class ProductResource {
         log.debug("REST request to update Product : {}", productDTO);
         if (productDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        Product product = productMapper.toEntity(productDTO);
-        product = productRepository.save(product);
-        ProductDTO result = productMapper.toDto(product);
+        }
+        ProductDTO result = productService.save(productDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, productDTO.getId().toString()))
             .body(result);
@@ -95,8 +89,7 @@ public class ProductResource {
     @Timed
     public List<ProductDTO> getAllProducts() {
         log.debug("REST request to get all Products");
-        List<Product> products = productRepository.findAll();
-        return productMapper.toDto(products);
+        return productService.findAll();
     }
 
     /**
@@ -109,8 +102,7 @@ public class ProductResource {
     @Timed
     public ResponseEntity<ProductDTO> getProduct(@PathVariable Long id) {
         log.debug("REST request to get Product : {}", id);
-        Optional<ProductDTO> productDTO = productRepository.findById(id)
-            .map(productMapper::toDto);
+        Optional<ProductDTO> productDTO = productService.findOne(id);
         return ResponseUtil.wrapOrNotFound(productDTO);
     }
 
@@ -124,7 +116,22 @@ public class ProductResource {
     @Timed
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         log.debug("REST request to delete Product : {}", id);
-        productRepository.deleteById(id);
+        productService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/products?query=:query : search for the product corresponding
+     * to the query.
+     *
+     * @param query the query of the product search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/products")
+    @Timed
+    public List<ProductDTO> searchProducts(@RequestParam String query) {
+        log.debug("REST request to search Products for query {}", query);
+        return productService.search(query);
+    }
+
 }

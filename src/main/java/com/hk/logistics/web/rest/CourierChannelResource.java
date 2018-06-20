@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.CourierChannel;
-import com.hk.logistics.repository.CourierChannelRepository;
+import com.hk.logistics.service.CourierChannelService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.CourierChannelDTO;
-import com.hk.logistics.service.mapper.CourierChannelMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +16,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing CourierChannel.
@@ -30,13 +31,10 @@ public class CourierChannelResource {
 
     private static final String ENTITY_NAME = "courierChannel";
 
-    private final CourierChannelRepository courierChannelRepository;
+    private final CourierChannelService courierChannelService;
 
-    private final CourierChannelMapper courierChannelMapper;
-
-    public CourierChannelResource(CourierChannelRepository courierChannelRepository, CourierChannelMapper courierChannelMapper) {
-        this.courierChannelRepository = courierChannelRepository;
-        this.courierChannelMapper = courierChannelMapper;
+    public CourierChannelResource(CourierChannelService courierChannelService) {
+        this.courierChannelService = courierChannelService;
     }
 
     /**
@@ -52,10 +50,8 @@ public class CourierChannelResource {
         log.debug("REST request to save CourierChannel : {}", courierChannelDTO);
         if (courierChannelDTO.getId() != null) {
             throw new BadRequestAlertException("A new courierChannel cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        CourierChannel courierChannel = courierChannelMapper.toEntity(courierChannelDTO);
-        courierChannel = courierChannelRepository.save(courierChannel);
-        CourierChannelDTO result = courierChannelMapper.toDto(courierChannel);
+        }
+        CourierChannelDTO result = courierChannelService.save(courierChannelDTO);
         return ResponseEntity.created(new URI("/api/courier-channels/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -76,10 +72,8 @@ public class CourierChannelResource {
         log.debug("REST request to update CourierChannel : {}", courierChannelDTO);
         if (courierChannelDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        CourierChannel courierChannel = courierChannelMapper.toEntity(courierChannelDTO);
-        courierChannel = courierChannelRepository.save(courierChannel);
-        CourierChannelDTO result = courierChannelMapper.toDto(courierChannel);
+        }
+        CourierChannelDTO result = courierChannelService.save(courierChannelDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, courierChannelDTO.getId().toString()))
             .body(result);
@@ -94,8 +88,7 @@ public class CourierChannelResource {
     @Timed
     public List<CourierChannelDTO> getAllCourierChannels() {
         log.debug("REST request to get all CourierChannels");
-        List<CourierChannel> courierChannels = courierChannelRepository.findAll();
-        return courierChannelMapper.toDto(courierChannels);
+        return courierChannelService.findAll();
     }
 
     /**
@@ -108,8 +101,7 @@ public class CourierChannelResource {
     @Timed
     public ResponseEntity<CourierChannelDTO> getCourierChannel(@PathVariable Long id) {
         log.debug("REST request to get CourierChannel : {}", id);
-        Optional<CourierChannelDTO> courierChannelDTO = courierChannelRepository.findById(id)
-            .map(courierChannelMapper::toDto);
+        Optional<CourierChannelDTO> courierChannelDTO = courierChannelService.findOne(id);
         return ResponseUtil.wrapOrNotFound(courierChannelDTO);
     }
 
@@ -123,7 +115,22 @@ public class CourierChannelResource {
     @Timed
     public ResponseEntity<Void> deleteCourierChannel(@PathVariable Long id) {
         log.debug("REST request to delete CourierChannel : {}", id);
-        courierChannelRepository.deleteById(id);
+        courierChannelService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/courier-channels?query=:query : search for the courierChannel corresponding
+     * to the query.
+     *
+     * @param query the query of the courierChannel search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/courier-channels")
+    @Timed
+    public List<CourierChannelDTO> searchCourierChannels(@RequestParam String query) {
+        log.debug("REST request to search CourierChannels for query {}", query);
+        return courierChannelService.search(query);
+    }
+
 }

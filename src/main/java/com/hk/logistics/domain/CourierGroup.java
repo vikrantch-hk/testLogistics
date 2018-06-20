@@ -1,9 +1,12 @@
 package com.hk.logistics.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 
+import org.springframework.data.elasticsearch.annotations.Document;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,6 +17,8 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "courier_group")
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@Document(indexName = "couriergroup")
 public class CourierGroup implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -27,6 +32,7 @@ public class CourierGroup implements Serializable {
 
     @ManyToMany(mappedBy = "courierGroups")
     @JsonIgnore
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<Courier> couriers = new HashSet<>();
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove

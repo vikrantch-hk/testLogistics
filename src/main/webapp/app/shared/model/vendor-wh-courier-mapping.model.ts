@@ -1,7 +1,7 @@
 export interface IVendorWHCourierMapping {
   id?: number;
   active?: boolean;
-  vendorShortCode?: string;
+  vendorName?: string;
   vendorId?: number;
   warehouseName?: string;
   warehouseId?: number;
@@ -9,17 +9,6 @@ export interface IVendorWHCourierMapping {
   courierChannelId?: number;
 }
 
-export class VendorWHCourierMapping implements IVendorWHCourierMapping {
-  constructor(
-    public id?: number,
-    public active?: boolean,
-    public vendorShortCode?: string,
-    public vendorId?: number,
-    public warehouseName?: string,
-    public warehouseId?: number,
-    public courierChannelName?: string,
-    public courierChannelId?: number
-  ) {
-    this.active = false;
-  }
-}
+export const defaultValue: Readonly<IVendorWHCourierMapping> = {
+  active: false
+};

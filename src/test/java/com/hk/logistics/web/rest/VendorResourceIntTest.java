@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.Vendor;
 import com.hk.logistics.repository.VendorRepository;
+import com.hk.logistics.repository.search.VendorSearchRepository;
+import com.hk.logistics.service.VendorService;
 import com.hk.logistics.service.dto.VendorDTO;
 import com.hk.logistics.service.mapper.VendorMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -42,8 +46,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = TestLogisticsApp.class)
 public class VendorResourceIntTest {
 
-    private static final String DEFAULT_SHORT_CODE = "AAAAAAAAAA";
-    private static final String UPDATED_SHORT_CODE = "BBBBBBBBBB";
+    private static final String DEFAULT_NAME = "AAAAAAAAAA";
+    private static final String UPDATED_NAME = "BBBBBBBBBB";
 
     private static final String DEFAULT_PINCODE = "AAAAAAAAAA";
     private static final String UPDATED_PINCODE = "BBBBBBBBBB";
@@ -54,6 +58,18 @@ public class VendorResourceIntTest {
 
     @Autowired
     private VendorMapper vendorMapper;
+    
+
+    @Autowired
+    private VendorService vendorService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.VendorSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private VendorSearchRepository mockVendorSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -74,7 +90,7 @@ public class VendorResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final VendorResource vendorResource = new VendorResource(vendorRepository, vendorMapper);
+        final VendorResource vendorResource = new VendorResource(vendorService);
         this.restVendorMockMvc = MockMvcBuilders.standaloneSetup(vendorResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -90,7 +106,7 @@ public class VendorResourceIntTest {
      */
     public static Vendor createEntity(EntityManager em) {
         Vendor vendor = new Vendor()
-            .shortCode(DEFAULT_SHORT_CODE)
+            .name(DEFAULT_NAME)
             .pincode(DEFAULT_PINCODE);
         return vendor;
     }
@@ -116,8 +132,11 @@ public class VendorResourceIntTest {
         List<Vendor> vendorList = vendorRepository.findAll();
         assertThat(vendorList).hasSize(databaseSizeBeforeCreate + 1);
         Vendor testVendor = vendorList.get(vendorList.size() - 1);
-        assertThat(testVendor.getShortCode()).isEqualTo(DEFAULT_SHORT_CODE);
+        assertThat(testVendor.getName()).isEqualTo(DEFAULT_NAME);
         assertThat(testVendor.getPincode()).isEqualTo(DEFAULT_PINCODE);
+
+        // Validate the Vendor in Elasticsearch
+        verify(mockVendorSearchRepository, times(1)).save(testVendor);
     }
 
     @Test
@@ -138,14 +157,17 @@ public class VendorResourceIntTest {
         // Validate the Vendor in the database
         List<Vendor> vendorList = vendorRepository.findAll();
         assertThat(vendorList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the Vendor in Elasticsearch
+        verify(mockVendorSearchRepository, times(0)).save(vendor);
     }
 
     @Test
     @Transactional
-    public void checkShortCodeIsRequired() throws Exception {
+    public void checkNameIsRequired() throws Exception {
         int databaseSizeBeforeTest = vendorRepository.findAll().size();
         // set the field null
-        vendor.setShortCode(null);
+        vendor.setName(null);
 
         // Create the Vendor, which fails.
         VendorDTO vendorDTO = vendorMapper.toDto(vendor);
@@ -189,7 +211,7 @@ public class VendorResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(vendor.getId().intValue())))
-            .andExpect(jsonPath("$.[*].shortCode").value(hasItem(DEFAULT_SHORT_CODE.toString())))
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
             .andExpect(jsonPath("$.[*].pincode").value(hasItem(DEFAULT_PINCODE.toString())));
     }
     
@@ -205,7 +227,7 @@ public class VendorResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(vendor.getId().intValue()))
-            .andExpect(jsonPath("$.shortCode").value(DEFAULT_SHORT_CODE.toString()))
+            .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()))
             .andExpect(jsonPath("$.pincode").value(DEFAULT_PINCODE.toString()));
     }
     @Test
@@ -229,7 +251,7 @@ public class VendorResourceIntTest {
         // Disconnect from session so that the updates on updatedVendor are not directly saved in db
         em.detach(updatedVendor);
         updatedVendor
-            .shortCode(UPDATED_SHORT_CODE)
+            .name(UPDATED_NAME)
             .pincode(UPDATED_PINCODE);
         VendorDTO vendorDTO = vendorMapper.toDto(updatedVendor);
 
@@ -242,8 +264,11 @@ public class VendorResourceIntTest {
         List<Vendor> vendorList = vendorRepository.findAll();
         assertThat(vendorList).hasSize(databaseSizeBeforeUpdate);
         Vendor testVendor = vendorList.get(vendorList.size() - 1);
-        assertThat(testVendor.getShortCode()).isEqualTo(UPDATED_SHORT_CODE);
+        assertThat(testVendor.getName()).isEqualTo(UPDATED_NAME);
         assertThat(testVendor.getPincode()).isEqualTo(UPDATED_PINCODE);
+
+        // Validate the Vendor in Elasticsearch
+        verify(mockVendorSearchRepository, times(1)).save(testVendor);
     }
 
     @Test
@@ -263,6 +288,9 @@ public class VendorResourceIntTest {
         // Validate the Vendor in the database
         List<Vendor> vendorList = vendorRepository.findAll();
         assertThat(vendorList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the Vendor in Elasticsearch
+        verify(mockVendorSearchRepository, times(0)).save(vendor);
     }
 
     @Test
@@ -281,6 +309,25 @@ public class VendorResourceIntTest {
         // Validate the database is empty
         List<Vendor> vendorList = vendorRepository.findAll();
         assertThat(vendorList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the Vendor in Elasticsearch
+        verify(mockVendorSearchRepository, times(1)).deleteById(vendor.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchVendor() throws Exception {
+        // Initialize the database
+        vendorRepository.saveAndFlush(vendor);
+        when(mockVendorSearchRepository.search(queryStringQuery("id:" + vendor.getId())))
+            .thenReturn(Collections.singletonList(vendor));
+        // Search the vendor
+        restVendorMockMvc.perform(get("/api/_search/vendors?query=id:" + vendor.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(vendor.getId().intValue())))
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
+            .andExpect(jsonPath("$.[*].pincode").value(hasItem(DEFAULT_PINCODE.toString())));
     }
 
     @Test

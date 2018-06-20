@@ -4,6 +4,7 @@ import com.hk.logistics.TestLogisticsApp;
 import com.hk.logistics.domain.Authority;
 import com.hk.logistics.domain.User;
 import com.hk.logistics.repository.UserRepository;
+import com.hk.logistics.repository.search.UserSearchRepository;
 import com.hk.logistics.security.AuthoritiesConstants;
 
 import com.hk.logistics.service.UserService;
@@ -64,6 +65,14 @@ public class UserResourceIntTest {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.UserSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private UserSearchRepository mockUserSearchRepository;
+
     @Autowired
     private UserService userService;
 
@@ -94,7 +103,7 @@ public class UserResourceIntTest {
         MockitoAnnotations.initMocks(this);
         cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE).clear();
         cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE).clear();
-        UserResource userResource = new UserResource(userService);
+        UserResource userResource = new UserResource(userService, mockUserSearchRepository);
         this.restUserMockMvc = MockMvcBuilders.standaloneSetup(userResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -133,6 +142,7 @@ public class UserResourceIntTest {
     public void getAllUsers() throws Exception {
         // Initialize the database
         userRepository.saveAndFlush(user);
+        mockUserSearchRepository.save(user);
 
         // Get all the users
         restUserMockMvc.perform(get("/api/users?sort=id,desc")
@@ -152,6 +162,7 @@ public class UserResourceIntTest {
     public void getUser() throws Exception {
         // Initialize the database
         userRepository.saveAndFlush(user);
+        mockUserSearchRepository.save(user);
 
         assertThat(cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE).get(user.getLogin())).isNull();
 

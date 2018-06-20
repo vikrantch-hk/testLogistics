@@ -11,18 +11,7 @@ export interface IAwb {
   isBrightAwb?: boolean;
 }
 
-export class Awb implements IAwb {
-  constructor(
-    public id?: number,
-    public awbNumber?: string,
-    public awbBarCode?: string,
-    public cod?: boolean,
-    public createDate?: Moment,
-    public returnAwbNumber?: string,
-    public returnAwbBarCode?: string,
-    public isBrightAwb?: boolean
-  ) {
-    this.cod = false;
-    this.isBrightAwb = false;
-  }
-}
+export const defaultValue: Readonly<IAwb> = {
+  cod: false,
+  isBrightAwb: false
+};

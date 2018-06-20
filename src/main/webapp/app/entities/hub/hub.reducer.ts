@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
+import { ICrudSearchAction, ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
 import { SERVER_API_URL } from 'app/config/constants';
 
-import { IHub } from 'app/shared/model/hub.model';
+import { IHub, defaultValue } from 'app/shared/model/hub.model';
 
 export const ACTION_TYPES = {
+  SEARCH_HUBS: 'hub/SEARCH_HUBS',
   FETCH_HUB_LIST: 'hub/FETCH_HUB_LIST',
   FETCH_HUB: 'hub/FETCH_HUB',
   CREATE_HUB: 'hub/CREATE_HUB',
@@ -19,16 +20,19 @@ export const ACTION_TYPES = {
 const initialState = {
   loading: false,
   errorMessage: null,
-  entities: [],
-  entity: {},
+  entities: [] as ReadonlyArray<IHub>,
+  entity: defaultValue,
   updating: false,
   updateSuccess: false
 };
 
+export type HubState = Readonly<typeof initialState>;
+
 // Reducer
 
-export default (state = initialState, action) => {
+export default (state: HubState = initialState, action): HubState => {
   switch (action.type) {
+    case REQUEST(ACTION_TYPES.SEARCH_HUBS):
     case REQUEST(ACTION_TYPES.FETCH_HUB_LIST):
     case REQUEST(ACTION_TYPES.FETCH_HUB):
       return {
@@ -46,6 +50,7 @@ export default (state = initialState, action) => {
         updateSuccess: false,
         updating: true
       };
+    case FAILURE(ACTION_TYPES.SEARCH_HUBS):
     case FAILURE(ACTION_TYPES.FETCH_HUB_LIST):
     case FAILURE(ACTION_TYPES.FETCH_HUB):
     case FAILURE(ACTION_TYPES.CREATE_HUB):
@@ -57,6 +62,12 @@ export default (state = initialState, action) => {
         updating: false,
         updateSuccess: false,
         errorMessage: action.payload
+      };
+    case SUCCESS(ACTION_TYPES.SEARCH_HUBS):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
       };
     case SUCCESS(ACTION_TYPES.FETCH_HUB_LIST):
       return {
@@ -95,19 +106,25 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/hubs';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/hubs';
 
 // Actions
 
+export const getSearchEntities: ICrudSearchAction<IHub> = query => ({
+  type: ACTION_TYPES.SEARCH_HUBS,
+  payload: axios.get<IHub>(`${apiSearchUrl}?query=` + query)
+});
+
 export const getEntities: ICrudGetAllAction<IHub> = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_HUB_LIST,
-  payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`) as Promise<IHub>
+  payload: axios.get<IHub>(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
 });
 
 export const getEntity: ICrudGetAction<IHub> = id => {
   const requestUrl = `${apiUrl}/${id}`;
   return {
     type: ACTION_TYPES.FETCH_HUB,
-    payload: axios.get(requestUrl) as Promise<IHub>
+    payload: axios.get<IHub>(requestUrl)
   };
 };
 

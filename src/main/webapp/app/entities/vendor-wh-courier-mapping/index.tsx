@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+
+import ErrorBoundaryRoute from 'app/shared/error/error-boundary-route';
 
 import VendorWHCourierMapping from './vendor-wh-courier-mapping';
 import VendorWHCourierMappingDetail from './vendor-wh-courier-mapping-detail';
@@ -9,12 +11,12 @@ import VendorWHCourierMappingDeleteDialog from './vendor-wh-courier-mapping-dele
 const Routes = ({ match }) => (
   <>
     <Switch>
-      <Route exact path={`${match.url}/new`} component={VendorWHCourierMappingUpdate} />
-      <Route exact path={`${match.url}/:id/edit`} component={VendorWHCourierMappingUpdate} />
-      <Route exact path={`${match.url}/:id`} component={VendorWHCourierMappingDetail} />
-      <Route path={match.url} component={VendorWHCourierMapping} />
+      <ErrorBoundaryRoute exact path={`${match.url}/new`} component={VendorWHCourierMappingUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id/edit`} component={VendorWHCourierMappingUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id`} component={VendorWHCourierMappingDetail} />
+      <ErrorBoundaryRoute path={match.url} component={VendorWHCourierMapping} />
     </Switch>
-    <Route path={`${match.url}/:id/delete`} component={VendorWHCourierMappingDeleteDialog} />
+    <ErrorBoundaryRoute path={`${match.url}/:id/delete`} component={VendorWHCourierMappingDeleteDialog} />
   </>
 );
 

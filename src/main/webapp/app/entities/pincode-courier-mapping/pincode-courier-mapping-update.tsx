@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvField } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { IPincode } from 'app/shared/model/pincode.model';
 import { getEntities as getPincodes } from 'app/entities/pincode/pincode.reducer';
@@ -21,25 +22,7 @@ import { IPincodeCourierMapping } from 'app/shared/model/pincode-courier-mapping
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface IPincodeCourierMappingUpdateProps {
-  getEntity: ICrudGetAction<IPincodeCourierMapping>;
-  updateEntity: ICrudPutAction<IPincodeCourierMapping>;
-  createEntity: ICrudPutAction<IPincodeCourierMapping>;
-  getPincodes: ICrudGetAllAction<IPincode>;
-  pincodes: IPincode[];
-  getCourierAttributes: ICrudGetAllAction<ICourierAttributes>;
-  courierAttributes: ICourierAttributes[];
-  getVendorWhCourierMappings: ICrudGetAllAction<IVendorWHCourierMapping>;
-  vendorWHCourierMappings: IVendorWHCourierMapping[];
-  getSourceDestinationMappings: ICrudGetAllAction<ISourceDestinationMapping>;
-  sourceDestinationMappings: ISourceDestinationMapping[];
-  pincodeCourierMapping: IPincodeCourierMapping;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface IPincodeCourierMappingUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface IPincodeCourierMappingUpdateState {
   isNew: boolean;
@@ -76,9 +59,9 @@ export class PincodeCourierMappingUpdate extends React.Component<IPincodeCourier
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { pincodeCourierMapping } = this.props;
+      const { pincodeCourierMappingEntity } = this.props;
       const entity = {
-        ...pincodeCourierMapping,
+        ...pincodeCourierMappingEntity,
         ...values
       };
 
@@ -166,7 +149,7 @@ export class PincodeCourierMappingUpdate extends React.Component<IPincodeCourier
   render() {
     const isInvalid = false;
     const {
-      pincodeCourierMapping,
+      pincodeCourierMappingEntity,
       pincodes,
       courierAttributes,
       vendorWHCourierMappings,
@@ -180,7 +163,7 @@ export class PincodeCourierMappingUpdate extends React.Component<IPincodeCourier
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-pincode-courier-mapping-heading">Create or edit a PincodeCourierMapping</h2>
+            <h2 id="testLogisticsApp.pincodeCourierMapping.home.createOrEditLabel">Create or edit a PincodeCourierMapping</h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -188,22 +171,27 @@ export class PincodeCourierMappingUpdate extends React.Component<IPincodeCourier
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : pincodeCourierMapping} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : pincodeCourierMappingEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="pincode-courier-mapping-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <AvGroup>
                   <Label id="routingCodeLabel" for="routingCode">
                     Routing Code
                   </Label>
-                  <AvField type="text" name="routingCode" />
+                  <AvField id="pincode-courier-mapping-routingCode" type="text" name="routingCode" />
                 </AvGroup>
                 <AvGroup>
                   <Label id="applicableForCheapestCourierLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="applicableForCheapestCourier" />
+                    <AvInput
+                      id="pincode-courier-mapping-applicableForCheapestCourier"
+                      type="checkbox"
+                      className="form-control"
+                      name="applicableForCheapestCourier"
+                    />
                     Applicable For Cheapest Courier
                   </Label>
                 </AvGroup>
@@ -211,17 +199,28 @@ export class PincodeCourierMappingUpdate extends React.Component<IPincodeCourier
                   <Label id="estimatedDeliveryDaysLabel" for="estimatedDeliveryDays">
                     Estimated Delivery Days
                   </Label>
-                  <AvField type="number" className="form-control" name="estimatedDeliveryDays" />
+                  <AvField
+                    id="pincode-courier-mapping-estimatedDeliveryDays"
+                    type="number"
+                    className="form-control"
+                    name="estimatedDeliveryDays"
+                  />
                 </AvGroup>
                 <AvGroup>
                   <Label id="pickupAvailableLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="pickupAvailable" />
+                    <AvInput id="pincode-courier-mapping-pickupAvailable" type="checkbox" className="form-control" name="pickupAvailable" />
                     Pickup Available
                   </Label>
                 </AvGroup>
                 <AvGroup>
                   <Label for="pincode.id">Pincode</Label>
-                  <AvInput type="select" className="form-control" name="pincodeId" onChange={this.pincodeUpdate}>
+                  <AvInput
+                    id="pincode-courier-mapping-pincode"
+                    type="select"
+                    className="form-control"
+                    name="pincodeId"
+                    onChange={this.pincodeUpdate}
+                  >
                     <option value="" key="0" />
                     {pincodes
                       ? pincodes.map(otherEntity => (
@@ -234,7 +233,13 @@ export class PincodeCourierMappingUpdate extends React.Component<IPincodeCourier
                 </AvGroup>
                 <AvGroup>
                   <Label for="attributes.id">Attributes</Label>
-                  <AvInput type="select" className="form-control" name="attributesId" onChange={this.attributesUpdate}>
+                  <AvInput
+                    id="pincode-courier-mapping-attributes"
+                    type="select"
+                    className="form-control"
+                    name="attributesId"
+                    onChange={this.attributesUpdate}
+                  >
                     <option value="" key="0" />
                     {courierAttributes
                       ? courierAttributes.map(otherEntity => (
@@ -248,6 +253,7 @@ export class PincodeCourierMappingUpdate extends React.Component<IPincodeCourier
                 <AvGroup>
                   <Label for="vendorWHCourierMapping.id">Vendor WH Courier Mapping</Label>
                   <AvInput
+                    id="pincode-courier-mapping-vendorWHCourierMapping"
                     type="select"
                     className="form-control"
                     name="vendorWHCourierMappingId"
@@ -266,6 +272,7 @@ export class PincodeCourierMappingUpdate extends React.Component<IPincodeCourier
                 <AvGroup>
                   <Label for="sourceDestinationMapping.id">Source Destination Mapping</Label>
                   <AvInput
+                    id="pincode-courier-mapping-sourceDestinationMapping"
                     type="select"
                     className="form-control"
                     name="sourceDestinationMappingId"
@@ -298,12 +305,12 @@ export class PincodeCourierMappingUpdate extends React.Component<IPincodeCourier
   }
 }
 
-const mapStateToProps = storeState => ({
+const mapStateToProps = (storeState: IRootState) => ({
   pincodes: storeState.pincode.entities,
   courierAttributes: storeState.courierAttributes.entities,
   vendorWHCourierMappings: storeState.vendorWHCourierMapping.entities,
   sourceDestinationMappings: storeState.sourceDestinationMapping.entities,
-  pincodeCourierMapping: storeState.pincodeCourierMapping.entity,
+  pincodeCourierMappingEntity: storeState.pincodeCourierMapping.entity,
   loading: storeState.pincodeCourierMapping.loading,
   updating: storeState.pincodeCourierMapping.updating
 });
@@ -318,5 +325,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(PincodeCourierMappingUpdate);

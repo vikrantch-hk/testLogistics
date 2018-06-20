@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.Warehouse;
 import com.hk.logistics.repository.WarehouseRepository;
+import com.hk.logistics.repository.search.WarehouseSearchRepository;
+import com.hk.logistics.service.WarehouseService;
 import com.hk.logistics.service.dto.WarehouseDTO;
 import com.hk.logistics.service.mapper.WarehouseMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -54,6 +58,18 @@ public class WarehouseResourceIntTest {
 
     @Autowired
     private WarehouseMapper warehouseMapper;
+    
+
+    @Autowired
+    private WarehouseService warehouseService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.WarehouseSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private WarehouseSearchRepository mockWarehouseSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -74,7 +90,7 @@ public class WarehouseResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final WarehouseResource warehouseResource = new WarehouseResource(warehouseRepository, warehouseMapper);
+        final WarehouseResource warehouseResource = new WarehouseResource(warehouseService);
         this.restWarehouseMockMvc = MockMvcBuilders.standaloneSetup(warehouseResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -118,6 +134,9 @@ public class WarehouseResourceIntTest {
         Warehouse testWarehouse = warehouseList.get(warehouseList.size() - 1);
         assertThat(testWarehouse.getName()).isEqualTo(DEFAULT_NAME);
         assertThat(testWarehouse.getPincode()).isEqualTo(DEFAULT_PINCODE);
+
+        // Validate the Warehouse in Elasticsearch
+        verify(mockWarehouseSearchRepository, times(1)).save(testWarehouse);
     }
 
     @Test
@@ -138,6 +157,9 @@ public class WarehouseResourceIntTest {
         // Validate the Warehouse in the database
         List<Warehouse> warehouseList = warehouseRepository.findAll();
         assertThat(warehouseList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the Warehouse in Elasticsearch
+        verify(mockWarehouseSearchRepository, times(0)).save(warehouse);
     }
 
     @Test
@@ -244,6 +266,9 @@ public class WarehouseResourceIntTest {
         Warehouse testWarehouse = warehouseList.get(warehouseList.size() - 1);
         assertThat(testWarehouse.getName()).isEqualTo(UPDATED_NAME);
         assertThat(testWarehouse.getPincode()).isEqualTo(UPDATED_PINCODE);
+
+        // Validate the Warehouse in Elasticsearch
+        verify(mockWarehouseSearchRepository, times(1)).save(testWarehouse);
     }
 
     @Test
@@ -263,6 +288,9 @@ public class WarehouseResourceIntTest {
         // Validate the Warehouse in the database
         List<Warehouse> warehouseList = warehouseRepository.findAll();
         assertThat(warehouseList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the Warehouse in Elasticsearch
+        verify(mockWarehouseSearchRepository, times(0)).save(warehouse);
     }
 
     @Test
@@ -281,6 +309,25 @@ public class WarehouseResourceIntTest {
         // Validate the database is empty
         List<Warehouse> warehouseList = warehouseRepository.findAll();
         assertThat(warehouseList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the Warehouse in Elasticsearch
+        verify(mockWarehouseSearchRepository, times(1)).deleteById(warehouse.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchWarehouse() throws Exception {
+        // Initialize the database
+        warehouseRepository.saveAndFlush(warehouse);
+        when(mockWarehouseSearchRepository.search(queryStringQuery("id:" + warehouse.getId())))
+            .thenReturn(Collections.singletonList(warehouse));
+        // Search the warehouse
+        restWarehouseMockMvc.perform(get("/api/_search/warehouses?query=id:" + warehouse.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(warehouse.getId().intValue())))
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
+            .andExpect(jsonPath("$.[*].pincode").value(hasItem(DEFAULT_PINCODE.toString())));
     }
 
     @Test

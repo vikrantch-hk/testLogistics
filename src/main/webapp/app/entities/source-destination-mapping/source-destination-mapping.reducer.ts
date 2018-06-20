@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
+import { ICrudSearchAction, ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
 import { SERVER_API_URL } from 'app/config/constants';
 
-import { ISourceDestinationMapping } from 'app/shared/model/source-destination-mapping.model';
+import { ISourceDestinationMapping, defaultValue } from 'app/shared/model/source-destination-mapping.model';
 
 export const ACTION_TYPES = {
+  SEARCH_SOURCEDESTINATIONMAPPINGS: 'sourceDestinationMapping/SEARCH_SOURCEDESTINATIONMAPPINGS',
   FETCH_SOURCEDESTINATIONMAPPING_LIST: 'sourceDestinationMapping/FETCH_SOURCEDESTINATIONMAPPING_LIST',
   FETCH_SOURCEDESTINATIONMAPPING: 'sourceDestinationMapping/FETCH_SOURCEDESTINATIONMAPPING',
   CREATE_SOURCEDESTINATIONMAPPING: 'sourceDestinationMapping/CREATE_SOURCEDESTINATIONMAPPING',
@@ -19,16 +20,19 @@ export const ACTION_TYPES = {
 const initialState = {
   loading: false,
   errorMessage: null,
-  entities: [],
-  entity: {},
+  entities: [] as ReadonlyArray<ISourceDestinationMapping>,
+  entity: defaultValue,
   updating: false,
   updateSuccess: false
 };
 
+export type SourceDestinationMappingState = Readonly<typeof initialState>;
+
 // Reducer
 
-export default (state = initialState, action) => {
+export default (state: SourceDestinationMappingState = initialState, action): SourceDestinationMappingState => {
   switch (action.type) {
+    case REQUEST(ACTION_TYPES.SEARCH_SOURCEDESTINATIONMAPPINGS):
     case REQUEST(ACTION_TYPES.FETCH_SOURCEDESTINATIONMAPPING_LIST):
     case REQUEST(ACTION_TYPES.FETCH_SOURCEDESTINATIONMAPPING):
       return {
@@ -46,6 +50,7 @@ export default (state = initialState, action) => {
         updateSuccess: false,
         updating: true
       };
+    case FAILURE(ACTION_TYPES.SEARCH_SOURCEDESTINATIONMAPPINGS):
     case FAILURE(ACTION_TYPES.FETCH_SOURCEDESTINATIONMAPPING_LIST):
     case FAILURE(ACTION_TYPES.FETCH_SOURCEDESTINATIONMAPPING):
     case FAILURE(ACTION_TYPES.CREATE_SOURCEDESTINATIONMAPPING):
@@ -57,6 +62,12 @@ export default (state = initialState, action) => {
         updating: false,
         updateSuccess: false,
         errorMessage: action.payload
+      };
+    case SUCCESS(ACTION_TYPES.SEARCH_SOURCEDESTINATIONMAPPINGS):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
       };
     case SUCCESS(ACTION_TYPES.FETCH_SOURCEDESTINATIONMAPPING_LIST):
       return {
@@ -95,19 +106,25 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/source-destination-mappings';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/source-destination-mappings';
 
 // Actions
 
+export const getSearchEntities: ICrudSearchAction<ISourceDestinationMapping> = query => ({
+  type: ACTION_TYPES.SEARCH_SOURCEDESTINATIONMAPPINGS,
+  payload: axios.get<ISourceDestinationMapping>(`${apiSearchUrl}?query=` + query)
+});
+
 export const getEntities: ICrudGetAllAction<ISourceDestinationMapping> = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_SOURCEDESTINATIONMAPPING_LIST,
-  payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`) as Promise<ISourceDestinationMapping>
+  payload: axios.get<ISourceDestinationMapping>(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
 });
 
 export const getEntity: ICrudGetAction<ISourceDestinationMapping> = id => {
   const requestUrl = `${apiUrl}/${id}`;
   return {
     type: ACTION_TYPES.FETCH_SOURCEDESTINATIONMAPPING,
-    payload: axios.get(requestUrl) as Promise<ISourceDestinationMapping>
+    payload: axios.get<ISourceDestinationMapping>(requestUrl)
   };
 };
 

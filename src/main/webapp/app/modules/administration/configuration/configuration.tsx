@@ -3,13 +3,9 @@ import { connect } from 'react-redux';
 import { Table, Input, Row, Col, Badge } from 'reactstrap';
 
 import { getConfigurations, getEnv } from '../administration.reducer';
+import { IRootState } from 'app/shared/reducers';
 
-export interface IConfigurationPageProps {
-  isFetching?: boolean;
-  getConfigurations: Function;
-  getEnv: Function;
-  configuration: any;
-}
+export interface IConfigurationPageProps extends StateProps, DispatchProps {}
 
 export interface IConfigurationPageState {
   filter: string;
@@ -62,7 +58,7 @@ export class ConfigurationPage extends React.Component<IConfigurationPageProps, 
     const env = configuration && configuration.env ? configuration.env : {};
     return (
       <div>
-        <h2>Configuration</h2>
+        <h2 className="configuration-page-heading">Configuration</h2>
         <span>Filter</span> <Input type="search" value={filter} onChange={this.setFilter} name="search" id="search" />
         <label>Spring configuration</label>
         <Table className="table table-striped table-bordered table-responsive d-table">
@@ -128,11 +124,14 @@ export class ConfigurationPage extends React.Component<IConfigurationPageProps, 
   }
 }
 
-const mapStateToProps = ({ administration }) => ({
+const mapStateToProps = ({ administration }: IRootState) => ({
   configuration: administration.configuration,
-  isFetching: administration.isFetching
+  isFetching: administration.loading
 });
 
 const mapDispatchToProps = { getConfigurations, getEnv };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConfigurationPage);

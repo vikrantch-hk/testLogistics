@@ -1,37 +1,75 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { Button, Col, Row, Table } from 'reactstrap';
+import { Link, RouteComponentProps } from 'react-router-dom';
+import { Button, InputGroup, Col, Row, Table } from 'reactstrap';
+import { AvForm, AvGroup, AvInput } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
-import { ICrudGetAllAction } from 'react-jhipster';
+import { ICrudSearchAction, ICrudGetAllAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
-import { getEntities } from './vendor-wh-courier-mapping.reducer';
+import { IRootState } from 'app/shared/reducers';
+import { getSearchEntities, getEntities } from './vendor-wh-courier-mapping.reducer';
 import { IVendorWHCourierMapping } from 'app/shared/model/vendor-wh-courier-mapping.model';
 // tslint:disable-next-line:no-unused-variable
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
 
-export interface IVendorWHCourierMappingProps {
-  getEntities: ICrudGetAllAction<IVendorWHCourierMapping>;
-  vendorWHCourierMappingList: IVendorWHCourierMapping[];
-  match: any;
+export interface IVendorWHCourierMappingProps extends StateProps, DispatchProps, RouteComponentProps<{ url: string }> {}
+
+export interface IVendorWHCourierMappingState {
+  search: string;
 }
 
-export class VendorWHCourierMapping extends React.Component<IVendorWHCourierMappingProps> {
+export class VendorWHCourierMapping extends React.Component<IVendorWHCourierMappingProps, IVendorWHCourierMappingState> {
+  state: IVendorWHCourierMappingState = {
+    search: ''
+  };
+
   componentDidMount() {
     this.props.getEntities();
   }
+
+  search = () => {
+    if (this.state.search) {
+      this.props.getSearchEntities(this.state.search);
+    }
+  };
+
+  clear = () => {
+    this.props.getEntities();
+    this.setState({
+      search: ''
+    });
+  };
+
+  handleSearch = event => this.setState({ search: event.target.value });
 
   render() {
     const { vendorWHCourierMappingList, match } = this.props;
     return (
       <div>
-        <h2 id="page-heading">
+        <h2 id="vendor-wh-courier-mapping-heading">
           Vendor WH Courier Mappings
           <Link to={`${match.url}/new`} className="btn btn-primary float-right jh-create-entity" id="jh-create-entity">
             <FontAwesomeIcon icon="plus" />&nbsp; Create new Vendor WH Courier Mapping
           </Link>
         </h2>
+        <Row>
+          <Col sm="12">
+            <AvForm onSubmit={this.search}>
+              <AvGroup>
+                <InputGroup>
+                  <AvInput type="text" name="search" value={this.state.search} onChange={this.handleSearch} placeholder="Search" />
+                  <Button className="input-group-addon">
+                    <FontAwesomeIcon icon="search" />
+                  </Button>
+                  <Button type="reset" className="input-group-addon" onClick={this.clear}>
+                    <FontAwesomeIcon icon="trash" />
+                  </Button>
+                </InputGroup>
+              </AvGroup>
+            </AvForm>
+          </Col>
+        </Row>
         <div className="table-responsive">
           <Table responsive>
             <thead>
@@ -54,8 +92,8 @@ export class VendorWHCourierMapping extends React.Component<IVendorWHCourierMapp
                   </td>
                   <td>{vendorWHCourierMapping.active ? 'true' : 'false'}</td>
                   <td>
-                    {vendorWHCourierMapping.vendorShortCode ? (
-                      <Link to={`vendor/${vendorWHCourierMapping.vendorId}`}>{vendorWHCourierMapping.vendorShortCode}</Link>
+                    {vendorWHCourierMapping.vendorName ? (
+                      <Link to={`vendor/${vendorWHCourierMapping.vendorId}`}>{vendorWHCourierMapping.vendorName}</Link>
                     ) : (
                       ''
                     )}
@@ -99,12 +137,16 @@ export class VendorWHCourierMapping extends React.Component<IVendorWHCourierMapp
   }
 }
 
-const mapStateToProps = ({ vendorWHCourierMapping }) => ({
+const mapStateToProps = ({ vendorWHCourierMapping }: IRootState) => ({
   vendorWHCourierMappingList: vendorWHCourierMapping.entities
 });
 
 const mapDispatchToProps = {
+  getSearchEntities,
   getEntities
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(VendorWHCourierMapping);

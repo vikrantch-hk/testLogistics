@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.Pincode;
 import com.hk.logistics.repository.PincodeRepository;
+import com.hk.logistics.repository.search.PincodeSearchRepository;
+import com.hk.logistics.service.PincodeService;
 import com.hk.logistics.service.dto.PincodeDTO;
 import com.hk.logistics.service.mapper.PincodeMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -63,6 +67,18 @@ public class PincodeResourceIntTest {
 
     @Autowired
     private PincodeMapper pincodeMapper;
+    
+
+    @Autowired
+    private PincodeService pincodeService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.PincodeSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private PincodeSearchRepository mockPincodeSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -83,7 +99,7 @@ public class PincodeResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final PincodeResource pincodeResource = new PincodeResource(pincodeRepository, pincodeMapper);
+        final PincodeResource pincodeResource = new PincodeResource(pincodeService);
         this.restPincodeMockMvc = MockMvcBuilders.standaloneSetup(pincodeResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -133,6 +149,9 @@ public class PincodeResourceIntTest {
         assertThat(testPincode.getLocality()).isEqualTo(DEFAULT_LOCALITY);
         assertThat(testPincode.getLastMileCost()).isEqualTo(DEFAULT_LAST_MILE_COST);
         assertThat(testPincode.getTier()).isEqualTo(DEFAULT_TIER);
+
+        // Validate the Pincode in Elasticsearch
+        verify(mockPincodeSearchRepository, times(1)).save(testPincode);
     }
 
     @Test
@@ -153,6 +172,9 @@ public class PincodeResourceIntTest {
         // Validate the Pincode in the database
         List<Pincode> pincodeList = pincodeRepository.findAll();
         assertThat(pincodeList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the Pincode in Elasticsearch
+        verify(mockPincodeSearchRepository, times(0)).save(pincode);
     }
 
     @Test
@@ -252,6 +274,9 @@ public class PincodeResourceIntTest {
         assertThat(testPincode.getLocality()).isEqualTo(UPDATED_LOCALITY);
         assertThat(testPincode.getLastMileCost()).isEqualTo(UPDATED_LAST_MILE_COST);
         assertThat(testPincode.getTier()).isEqualTo(UPDATED_TIER);
+
+        // Validate the Pincode in Elasticsearch
+        verify(mockPincodeSearchRepository, times(1)).save(testPincode);
     }
 
     @Test
@@ -271,6 +296,9 @@ public class PincodeResourceIntTest {
         // Validate the Pincode in the database
         List<Pincode> pincodeList = pincodeRepository.findAll();
         assertThat(pincodeList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the Pincode in Elasticsearch
+        verify(mockPincodeSearchRepository, times(0)).save(pincode);
     }
 
     @Test
@@ -289,6 +317,28 @@ public class PincodeResourceIntTest {
         // Validate the database is empty
         List<Pincode> pincodeList = pincodeRepository.findAll();
         assertThat(pincodeList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the Pincode in Elasticsearch
+        verify(mockPincodeSearchRepository, times(1)).deleteById(pincode.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchPincode() throws Exception {
+        // Initialize the database
+        pincodeRepository.saveAndFlush(pincode);
+        when(mockPincodeSearchRepository.search(queryStringQuery("id:" + pincode.getId())))
+            .thenReturn(Collections.singletonList(pincode));
+        // Search the pincode
+        restPincodeMockMvc.perform(get("/api/_search/pincodes?query=id:" + pincode.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(pincode.getId().intValue())))
+            .andExpect(jsonPath("$.[*].pincode").value(hasItem(DEFAULT_PINCODE.toString())))
+            .andExpect(jsonPath("$.[*].region").value(hasItem(DEFAULT_REGION.toString())))
+            .andExpect(jsonPath("$.[*].locality").value(hasItem(DEFAULT_LOCALITY.toString())))
+            .andExpect(jsonPath("$.[*].lastMileCost").value(hasItem(DEFAULT_LAST_MILE_COST.doubleValue())))
+            .andExpect(jsonPath("$.[*].tier").value(hasItem(DEFAULT_TIER.toString())));
     }
 
     @Test

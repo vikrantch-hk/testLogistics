@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.CourierAttributes;
 import com.hk.logistics.repository.CourierAttributesRepository;
+import com.hk.logistics.repository.search.CourierAttributesSearchRepository;
+import com.hk.logistics.service.CourierAttributesService;
 import com.hk.logistics.service.dto.CourierAttributesDTO;
 import com.hk.logistics.service.mapper.CourierAttributesMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -72,6 +76,18 @@ public class CourierAttributesResourceIntTest {
 
     @Autowired
     private CourierAttributesMapper courierAttributesMapper;
+    
+
+    @Autowired
+    private CourierAttributesService courierAttributesService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.CourierAttributesSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private CourierAttributesSearchRepository mockCourierAttributesSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -92,7 +108,7 @@ public class CourierAttributesResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final CourierAttributesResource courierAttributesResource = new CourierAttributesResource(courierAttributesRepository, courierAttributesMapper);
+        final CourierAttributesResource courierAttributesResource = new CourierAttributesResource(courierAttributesService);
         this.restCourierAttributesMockMvc = MockMvcBuilders.standaloneSetup(courierAttributesResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -148,6 +164,9 @@ public class CourierAttributesResourceIntTest {
         assertThat(testCourierAttributes.isReverseGround()).isEqualTo(DEFAULT_REVERSE_GROUND);
         assertThat(testCourierAttributes.isCardOnDeliveryAir()).isEqualTo(DEFAULT_CARD_ON_DELIVERY_AIR);
         assertThat(testCourierAttributes.isCardOnDeliveryGround()).isEqualTo(DEFAULT_CARD_ON_DELIVERY_GROUND);
+
+        // Validate the CourierAttributes in Elasticsearch
+        verify(mockCourierAttributesSearchRepository, times(1)).save(testCourierAttributes);
     }
 
     @Test
@@ -168,6 +187,9 @@ public class CourierAttributesResourceIntTest {
         // Validate the CourierAttributes in the database
         List<CourierAttributes> courierAttributesList = courierAttributesRepository.findAll();
         assertThat(courierAttributesList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the CourierAttributes in Elasticsearch
+        verify(mockCourierAttributesSearchRepository, times(0)).save(courierAttributes);
     }
 
     @Test
@@ -412,6 +434,9 @@ public class CourierAttributesResourceIntTest {
         assertThat(testCourierAttributes.isReverseGround()).isEqualTo(UPDATED_REVERSE_GROUND);
         assertThat(testCourierAttributes.isCardOnDeliveryAir()).isEqualTo(UPDATED_CARD_ON_DELIVERY_AIR);
         assertThat(testCourierAttributes.isCardOnDeliveryGround()).isEqualTo(UPDATED_CARD_ON_DELIVERY_GROUND);
+
+        // Validate the CourierAttributes in Elasticsearch
+        verify(mockCourierAttributesSearchRepository, times(1)).save(testCourierAttributes);
     }
 
     @Test
@@ -431,6 +456,9 @@ public class CourierAttributesResourceIntTest {
         // Validate the CourierAttributes in the database
         List<CourierAttributes> courierAttributesList = courierAttributesRepository.findAll();
         assertThat(courierAttributesList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the CourierAttributes in Elasticsearch
+        verify(mockCourierAttributesSearchRepository, times(0)).save(courierAttributes);
     }
 
     @Test
@@ -449,6 +477,31 @@ public class CourierAttributesResourceIntTest {
         // Validate the database is empty
         List<CourierAttributes> courierAttributesList = courierAttributesRepository.findAll();
         assertThat(courierAttributesList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the CourierAttributes in Elasticsearch
+        verify(mockCourierAttributesSearchRepository, times(1)).deleteById(courierAttributes.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchCourierAttributes() throws Exception {
+        // Initialize the database
+        courierAttributesRepository.saveAndFlush(courierAttributes);
+        when(mockCourierAttributesSearchRepository.search(queryStringQuery("id:" + courierAttributes.getId())))
+            .thenReturn(Collections.singletonList(courierAttributes));
+        // Search the courierAttributes
+        restCourierAttributesMockMvc.perform(get("/api/_search/courier-attributes?query=id:" + courierAttributes.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(courierAttributes.getId().intValue())))
+            .andExpect(jsonPath("$.[*].prepaidAir").value(hasItem(DEFAULT_PREPAID_AIR.booleanValue())))
+            .andExpect(jsonPath("$.[*].prepaidGround").value(hasItem(DEFAULT_PREPAID_GROUND.booleanValue())))
+            .andExpect(jsonPath("$.[*].codAir").value(hasItem(DEFAULT_COD_AIR.booleanValue())))
+            .andExpect(jsonPath("$.[*].codGround").value(hasItem(DEFAULT_COD_GROUND.booleanValue())))
+            .andExpect(jsonPath("$.[*].reverseAir").value(hasItem(DEFAULT_REVERSE_AIR.booleanValue())))
+            .andExpect(jsonPath("$.[*].reverseGround").value(hasItem(DEFAULT_REVERSE_GROUND.booleanValue())))
+            .andExpect(jsonPath("$.[*].cardOnDeliveryAir").value(hasItem(DEFAULT_CARD_ON_DELIVERY_AIR.booleanValue())))
+            .andExpect(jsonPath("$.[*].cardOnDeliveryGround").value(hasItem(DEFAULT_CARD_ON_DELIVERY_GROUND.booleanValue())));
     }
 
     @Test

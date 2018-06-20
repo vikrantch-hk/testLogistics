@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { ICrudGetAction, ICrudDeleteAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { ICourier } from 'app/shared/model/courier.model';
+import { IRootState } from 'app/shared/reducers';
 import { getEntity, deleteEntity } from './courier.reducer';
 
-export interface ICourierDeleteDialogProps {
-  getEntity: ICrudGetAction<ICourier>;
-  deleteEntity: ICrudDeleteAction<ICourier>;
-  courier: ICourier;
-  match: any;
-  history: any;
-}
+export interface ICourierDeleteDialogProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class CourierDeleteDialog extends React.Component<ICourierDeleteDialogProps> {
   componentDidMount() {
@@ -21,7 +17,7 @@ export class CourierDeleteDialog extends React.Component<ICourierDeleteDialogPro
   }
 
   confirmDelete = event => {
-    this.props.deleteEntity(this.props.courier.id);
+    this.props.deleteEntity(this.props.courierEntity.id);
     this.handleClose(event);
   };
 
@@ -31,7 +27,7 @@ export class CourierDeleteDialog extends React.Component<ICourierDeleteDialogPro
   };
 
   render() {
-    const { courier } = this.props;
+    const { courierEntity } = this.props;
     return (
       <Modal isOpen toggle={this.handleClose}>
         <ModalHeader toggle={this.handleClose}>Confirm delete operation</ModalHeader>
@@ -49,10 +45,13 @@ export class CourierDeleteDialog extends React.Component<ICourierDeleteDialogPro
   }
 }
 
-const mapStateToProps = ({ courier }) => ({
-  courier: courier.entity
+const mapStateToProps = ({ courier }: IRootState) => ({
+  courierEntity: courier.entity
 });
 
 const mapDispatchToProps = { getEntity, deleteEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(CourierDeleteDialog);

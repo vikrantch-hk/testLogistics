@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { ICrudGetAction, ICrudDeleteAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { ICourierGroup } from 'app/shared/model/courier-group.model';
+import { IRootState } from 'app/shared/reducers';
 import { getEntity, deleteEntity } from './courier-group.reducer';
 
-export interface ICourierGroupDeleteDialogProps {
-  getEntity: ICrudGetAction<ICourierGroup>;
-  deleteEntity: ICrudDeleteAction<ICourierGroup>;
-  courierGroup: ICourierGroup;
-  match: any;
-  history: any;
-}
+export interface ICourierGroupDeleteDialogProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class CourierGroupDeleteDialog extends React.Component<ICourierGroupDeleteDialogProps> {
   componentDidMount() {
@@ -21,7 +17,7 @@ export class CourierGroupDeleteDialog extends React.Component<ICourierGroupDelet
   }
 
   confirmDelete = event => {
-    this.props.deleteEntity(this.props.courierGroup.id);
+    this.props.deleteEntity(this.props.courierGroupEntity.id);
     this.handleClose(event);
   };
 
@@ -31,7 +27,7 @@ export class CourierGroupDeleteDialog extends React.Component<ICourierGroupDelet
   };
 
   render() {
-    const { courierGroup } = this.props;
+    const { courierGroupEntity } = this.props;
     return (
       <Modal isOpen toggle={this.handleClose}>
         <ModalHeader toggle={this.handleClose}>Confirm delete operation</ModalHeader>
@@ -49,10 +45,13 @@ export class CourierGroupDeleteDialog extends React.Component<ICourierGroupDelet
   }
 }
 
-const mapStateToProps = ({ courierGroup }) => ({
-  courierGroup: courierGroup.entity
+const mapStateToProps = ({ courierGroup }: IRootState) => ({
+  courierGroupEntity: courierGroup.entity
 });
 
 const mapDispatchToProps = { getEntity, deleteEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(CourierGroupDeleteDialog);

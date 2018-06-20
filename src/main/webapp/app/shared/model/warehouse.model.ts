@@ -7,11 +7,4 @@ export interface IWarehouse {
   vendorWHCourierMappings?: IVendorWHCourierMapping[];
 }
 
-export class Warehouse implements IWarehouse {
-  constructor(
-    public id?: number,
-    public name?: string,
-    public pincode?: string,
-    public vendorWHCourierMappings?: IVendorWHCourierMapping[]
-  ) {}
-}
+export const defaultValue: Readonly<IWarehouse> = {};

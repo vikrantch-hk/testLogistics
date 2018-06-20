@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { ICrudGetAction, ICrudDeleteAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { IVendor } from 'app/shared/model/vendor.model';
+import { IRootState } from 'app/shared/reducers';
 import { getEntity, deleteEntity } from './vendor.reducer';
 
-export interface IVendorDeleteDialogProps {
-  getEntity: ICrudGetAction<IVendor>;
-  deleteEntity: ICrudDeleteAction<IVendor>;
-  vendor: IVendor;
-  match: any;
-  history: any;
-}
+export interface IVendorDeleteDialogProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class VendorDeleteDialog extends React.Component<IVendorDeleteDialogProps> {
   componentDidMount() {
@@ -21,7 +17,7 @@ export class VendorDeleteDialog extends React.Component<IVendorDeleteDialogProps
   }
 
   confirmDelete = event => {
-    this.props.deleteEntity(this.props.vendor.id);
+    this.props.deleteEntity(this.props.vendorEntity.id);
     this.handleClose(event);
   };
 
@@ -31,7 +27,7 @@ export class VendorDeleteDialog extends React.Component<IVendorDeleteDialogProps
   };
 
   render() {
-    const { vendor } = this.props;
+    const { vendorEntity } = this.props;
     return (
       <Modal isOpen toggle={this.handleClose}>
         <ModalHeader toggle={this.handleClose}>Confirm delete operation</ModalHeader>
@@ -49,10 +45,13 @@ export class VendorDeleteDialog extends React.Component<IVendorDeleteDialogProps
   }
 }
 
-const mapStateToProps = ({ vendor }) => ({
-  vendor: vendor.entity
+const mapStateToProps = ({ vendor }: IRootState) => ({
+  vendorEntity: vendor.entity
 });
 
 const mapDispatchToProps = { getEntity, deleteEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(VendorDeleteDialog);

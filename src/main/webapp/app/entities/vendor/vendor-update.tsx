@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvField } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { getEntity, updateEntity, createEntity, reset } from './vendor.reducer';
 import { IVendor } from 'app/shared/model/vendor.model';
@@ -13,17 +14,7 @@ import { IVendor } from 'app/shared/model/vendor.model';
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface IVendorUpdateProps {
-  getEntity: ICrudGetAction<IVendor>;
-  updateEntity: ICrudPutAction<IVendor>;
-  createEntity: ICrudPutAction<IVendor>;
-  vendor: IVendor;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface IVendorUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface IVendorUpdateState {
   isNew: boolean;
@@ -47,9 +38,9 @@ export class VendorUpdate extends React.Component<IVendorUpdateProps, IVendorUpd
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { vendor } = this.props;
+      const { vendorEntity } = this.props;
       const entity = {
-        ...vendor,
+        ...vendorEntity,
         ...values
       };
 
@@ -68,14 +59,14 @@ export class VendorUpdate extends React.Component<IVendorUpdateProps, IVendorUpd
 
   render() {
     const isInvalid = false;
-    const { vendor, loading, updating } = this.props;
+    const { vendorEntity, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-vendor-heading">Create or edit a Vendor</h2>
+            <h2 id="testLogisticsApp.vendor.home.createOrEditLabel">Create or edit a Vendor</h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -83,20 +74,21 @@ export class VendorUpdate extends React.Component<IVendorUpdateProps, IVendorUpd
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : vendor} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : vendorEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="vendor-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <AvGroup>
-                  <Label id="shortCodeLabel" for="shortCode">
-                    Short Code
+                  <Label id="nameLabel" for="name">
+                    Name
                   </Label>
                   <AvField
+                    id="vendor-name"
                     type="text"
-                    name="shortCode"
+                    name="name"
                     validate={{
                       required: { value: true, errorMessage: 'This field is required.' }
                     }}
@@ -107,6 +99,7 @@ export class VendorUpdate extends React.Component<IVendorUpdateProps, IVendorUpd
                     Pincode
                   </Label>
                   <AvField
+                    id="vendor-pincode"
                     type="text"
                     name="pincode"
                     validate={{
@@ -131,8 +124,8 @@ export class VendorUpdate extends React.Component<IVendorUpdateProps, IVendorUpd
   }
 }
 
-const mapStateToProps = storeState => ({
-  vendor: storeState.vendor.entity,
+const mapStateToProps = (storeState: IRootState) => ({
+  vendorEntity: storeState.vendor.entity,
   loading: storeState.vendor.loading,
   updating: storeState.vendor.updating
 });
@@ -143,5 +136,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(VendorUpdate);

@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
+import { ICrudSearchAction, ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
 import { SERVER_API_URL } from 'app/config/constants';
 
-import { IZone } from 'app/shared/model/zone.model';
+import { IZone, defaultValue } from 'app/shared/model/zone.model';
 
 export const ACTION_TYPES = {
+  SEARCH_ZONES: 'zone/SEARCH_ZONES',
   FETCH_ZONE_LIST: 'zone/FETCH_ZONE_LIST',
   FETCH_ZONE: 'zone/FETCH_ZONE',
   CREATE_ZONE: 'zone/CREATE_ZONE',
@@ -19,16 +20,19 @@ export const ACTION_TYPES = {
 const initialState = {
   loading: false,
   errorMessage: null,
-  entities: [],
-  entity: {},
+  entities: [] as ReadonlyArray<IZone>,
+  entity: defaultValue,
   updating: false,
   updateSuccess: false
 };
 
+export type ZoneState = Readonly<typeof initialState>;
+
 // Reducer
 
-export default (state = initialState, action) => {
+export default (state: ZoneState = initialState, action): ZoneState => {
   switch (action.type) {
+    case REQUEST(ACTION_TYPES.SEARCH_ZONES):
     case REQUEST(ACTION_TYPES.FETCH_ZONE_LIST):
     case REQUEST(ACTION_TYPES.FETCH_ZONE):
       return {
@@ -46,6 +50,7 @@ export default (state = initialState, action) => {
         updateSuccess: false,
         updating: true
       };
+    case FAILURE(ACTION_TYPES.SEARCH_ZONES):
     case FAILURE(ACTION_TYPES.FETCH_ZONE_LIST):
     case FAILURE(ACTION_TYPES.FETCH_ZONE):
     case FAILURE(ACTION_TYPES.CREATE_ZONE):
@@ -57,6 +62,12 @@ export default (state = initialState, action) => {
         updating: false,
         updateSuccess: false,
         errorMessage: action.payload
+      };
+    case SUCCESS(ACTION_TYPES.SEARCH_ZONES):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
       };
     case SUCCESS(ACTION_TYPES.FETCH_ZONE_LIST):
       return {
@@ -95,19 +106,25 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/zones';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/zones';
 
 // Actions
 
+export const getSearchEntities: ICrudSearchAction<IZone> = query => ({
+  type: ACTION_TYPES.SEARCH_ZONES,
+  payload: axios.get<IZone>(`${apiSearchUrl}?query=` + query)
+});
+
 export const getEntities: ICrudGetAllAction<IZone> = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_ZONE_LIST,
-  payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`) as Promise<IZone>
+  payload: axios.get<IZone>(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
 });
 
 export const getEntity: ICrudGetAction<IZone> = id => {
   const requestUrl = `${apiUrl}/${id}`;
   return {
     type: ACTION_TYPES.FETCH_ZONE,
-    payload: axios.get(requestUrl) as Promise<IZone>
+    payload: axios.get<IZone>(requestUrl)
   };
 };
 

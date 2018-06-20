@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.AwbStatus;
 import com.hk.logistics.repository.AwbStatusRepository;
+import com.hk.logistics.repository.search.AwbStatusSearchRepository;
+import com.hk.logistics.service.AwbStatusService;
 import com.hk.logistics.service.dto.AwbStatusDTO;
 import com.hk.logistics.service.mapper.AwbStatusMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -51,6 +55,18 @@ public class AwbStatusResourceIntTest {
 
     @Autowired
     private AwbStatusMapper awbStatusMapper;
+    
+
+    @Autowired
+    private AwbStatusService awbStatusService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.AwbStatusSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private AwbStatusSearchRepository mockAwbStatusSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -71,7 +87,7 @@ public class AwbStatusResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final AwbStatusResource awbStatusResource = new AwbStatusResource(awbStatusRepository, awbStatusMapper);
+        final AwbStatusResource awbStatusResource = new AwbStatusResource(awbStatusService);
         this.restAwbStatusMockMvc = MockMvcBuilders.standaloneSetup(awbStatusResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -113,6 +129,9 @@ public class AwbStatusResourceIntTest {
         assertThat(awbStatusList).hasSize(databaseSizeBeforeCreate + 1);
         AwbStatus testAwbStatus = awbStatusList.get(awbStatusList.size() - 1);
         assertThat(testAwbStatus.getAwbStatus()).isEqualTo(DEFAULT_AWB_STATUS);
+
+        // Validate the AwbStatus in Elasticsearch
+        verify(mockAwbStatusSearchRepository, times(1)).save(testAwbStatus);
     }
 
     @Test
@@ -133,6 +152,9 @@ public class AwbStatusResourceIntTest {
         // Validate the AwbStatus in the database
         List<AwbStatus> awbStatusList = awbStatusRepository.findAll();
         assertThat(awbStatusList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the AwbStatus in Elasticsearch
+        verify(mockAwbStatusSearchRepository, times(0)).save(awbStatus);
     }
 
     @Test
@@ -197,6 +219,9 @@ public class AwbStatusResourceIntTest {
         assertThat(awbStatusList).hasSize(databaseSizeBeforeUpdate);
         AwbStatus testAwbStatus = awbStatusList.get(awbStatusList.size() - 1);
         assertThat(testAwbStatus.getAwbStatus()).isEqualTo(UPDATED_AWB_STATUS);
+
+        // Validate the AwbStatus in Elasticsearch
+        verify(mockAwbStatusSearchRepository, times(1)).save(testAwbStatus);
     }
 
     @Test
@@ -216,6 +241,9 @@ public class AwbStatusResourceIntTest {
         // Validate the AwbStatus in the database
         List<AwbStatus> awbStatusList = awbStatusRepository.findAll();
         assertThat(awbStatusList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the AwbStatus in Elasticsearch
+        verify(mockAwbStatusSearchRepository, times(0)).save(awbStatus);
     }
 
     @Test
@@ -234,6 +262,24 @@ public class AwbStatusResourceIntTest {
         // Validate the database is empty
         List<AwbStatus> awbStatusList = awbStatusRepository.findAll();
         assertThat(awbStatusList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the AwbStatus in Elasticsearch
+        verify(mockAwbStatusSearchRepository, times(1)).deleteById(awbStatus.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchAwbStatus() throws Exception {
+        // Initialize the database
+        awbStatusRepository.saveAndFlush(awbStatus);
+        when(mockAwbStatusSearchRepository.search(queryStringQuery("id:" + awbStatus.getId())))
+            .thenReturn(Collections.singletonList(awbStatus));
+        // Search the awbStatus
+        restAwbStatusMockMvc.perform(get("/api/_search/awb-statuses?query=id:" + awbStatus.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(awbStatus.getId().intValue())))
+            .andExpect(jsonPath("$.[*].awbStatus").value(hasItem(DEFAULT_AWB_STATUS.toString())));
     }
 
     @Test

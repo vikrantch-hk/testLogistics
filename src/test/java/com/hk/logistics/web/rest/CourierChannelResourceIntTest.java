@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.CourierChannel;
 import com.hk.logistics.repository.CourierChannelRepository;
+import com.hk.logistics.repository.search.CourierChannelSearchRepository;
+import com.hk.logistics.service.CourierChannelService;
 import com.hk.logistics.service.dto.CourierChannelDTO;
 import com.hk.logistics.service.mapper.CourierChannelMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -51,6 +55,18 @@ public class CourierChannelResourceIntTest {
 
     @Autowired
     private CourierChannelMapper courierChannelMapper;
+    
+
+    @Autowired
+    private CourierChannelService courierChannelService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.CourierChannelSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private CourierChannelSearchRepository mockCourierChannelSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -71,7 +87,7 @@ public class CourierChannelResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final CourierChannelResource courierChannelResource = new CourierChannelResource(courierChannelRepository, courierChannelMapper);
+        final CourierChannelResource courierChannelResource = new CourierChannelResource(courierChannelService);
         this.restCourierChannelMockMvc = MockMvcBuilders.standaloneSetup(courierChannelResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -113,6 +129,9 @@ public class CourierChannelResourceIntTest {
         assertThat(courierChannelList).hasSize(databaseSizeBeforeCreate + 1);
         CourierChannel testCourierChannel = courierChannelList.get(courierChannelList.size() - 1);
         assertThat(testCourierChannel.getName()).isEqualTo(DEFAULT_NAME);
+
+        // Validate the CourierChannel in Elasticsearch
+        verify(mockCourierChannelSearchRepository, times(1)).save(testCourierChannel);
     }
 
     @Test
@@ -133,6 +152,9 @@ public class CourierChannelResourceIntTest {
         // Validate the CourierChannel in the database
         List<CourierChannel> courierChannelList = courierChannelRepository.findAll();
         assertThat(courierChannelList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the CourierChannel in Elasticsearch
+        verify(mockCourierChannelSearchRepository, times(0)).save(courierChannel);
     }
 
     @Test
@@ -197,6 +219,9 @@ public class CourierChannelResourceIntTest {
         assertThat(courierChannelList).hasSize(databaseSizeBeforeUpdate);
         CourierChannel testCourierChannel = courierChannelList.get(courierChannelList.size() - 1);
         assertThat(testCourierChannel.getName()).isEqualTo(UPDATED_NAME);
+
+        // Validate the CourierChannel in Elasticsearch
+        verify(mockCourierChannelSearchRepository, times(1)).save(testCourierChannel);
     }
 
     @Test
@@ -216,6 +241,9 @@ public class CourierChannelResourceIntTest {
         // Validate the CourierChannel in the database
         List<CourierChannel> courierChannelList = courierChannelRepository.findAll();
         assertThat(courierChannelList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the CourierChannel in Elasticsearch
+        verify(mockCourierChannelSearchRepository, times(0)).save(courierChannel);
     }
 
     @Test
@@ -234,6 +262,24 @@ public class CourierChannelResourceIntTest {
         // Validate the database is empty
         List<CourierChannel> courierChannelList = courierChannelRepository.findAll();
         assertThat(courierChannelList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the CourierChannel in Elasticsearch
+        verify(mockCourierChannelSearchRepository, times(1)).deleteById(courierChannel.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchCourierChannel() throws Exception {
+        // Initialize the database
+        courierChannelRepository.saveAndFlush(courierChannel);
+        when(mockCourierChannelSearchRepository.search(queryStringQuery("id:" + courierChannel.getId())))
+            .thenReturn(Collections.singletonList(courierChannel));
+        // Search the courierChannel
+        restCourierChannelMockMvc.perform(get("/api/_search/courier-channels?query=id:" + courierChannel.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(courierChannel.getId().intValue())))
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())));
     }
 
     @Test

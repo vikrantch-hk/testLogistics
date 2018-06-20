@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.PincodeRegionZone;
 import com.hk.logistics.repository.PincodeRegionZoneRepository;
+import com.hk.logistics.repository.search.PincodeRegionZoneSearchRepository;
+import com.hk.logistics.service.PincodeRegionZoneService;
 import com.hk.logistics.service.dto.PincodeRegionZoneDTO;
 import com.hk.logistics.service.mapper.PincodeRegionZoneMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -48,6 +52,18 @@ public class PincodeRegionZoneResourceIntTest {
 
     @Autowired
     private PincodeRegionZoneMapper pincodeRegionZoneMapper;
+    
+
+    @Autowired
+    private PincodeRegionZoneService pincodeRegionZoneService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.PincodeRegionZoneSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private PincodeRegionZoneSearchRepository mockPincodeRegionZoneSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -68,7 +84,7 @@ public class PincodeRegionZoneResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final PincodeRegionZoneResource pincodeRegionZoneResource = new PincodeRegionZoneResource(pincodeRegionZoneRepository, pincodeRegionZoneMapper);
+        final PincodeRegionZoneResource pincodeRegionZoneResource = new PincodeRegionZoneResource(pincodeRegionZoneService);
         this.restPincodeRegionZoneMockMvc = MockMvcBuilders.standaloneSetup(pincodeRegionZoneResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -108,6 +124,9 @@ public class PincodeRegionZoneResourceIntTest {
         List<PincodeRegionZone> pincodeRegionZoneList = pincodeRegionZoneRepository.findAll();
         assertThat(pincodeRegionZoneList).hasSize(databaseSizeBeforeCreate + 1);
         PincodeRegionZone testPincodeRegionZone = pincodeRegionZoneList.get(pincodeRegionZoneList.size() - 1);
+
+        // Validate the PincodeRegionZone in Elasticsearch
+        verify(mockPincodeRegionZoneSearchRepository, times(1)).save(testPincodeRegionZone);
     }
 
     @Test
@@ -128,6 +147,9 @@ public class PincodeRegionZoneResourceIntTest {
         // Validate the PincodeRegionZone in the database
         List<PincodeRegionZone> pincodeRegionZoneList = pincodeRegionZoneRepository.findAll();
         assertThat(pincodeRegionZoneList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the PincodeRegionZone in Elasticsearch
+        verify(mockPincodeRegionZoneSearchRepository, times(0)).save(pincodeRegionZone);
     }
 
     @Test
@@ -187,6 +209,9 @@ public class PincodeRegionZoneResourceIntTest {
         List<PincodeRegionZone> pincodeRegionZoneList = pincodeRegionZoneRepository.findAll();
         assertThat(pincodeRegionZoneList).hasSize(databaseSizeBeforeUpdate);
         PincodeRegionZone testPincodeRegionZone = pincodeRegionZoneList.get(pincodeRegionZoneList.size() - 1);
+
+        // Validate the PincodeRegionZone in Elasticsearch
+        verify(mockPincodeRegionZoneSearchRepository, times(1)).save(testPincodeRegionZone);
     }
 
     @Test
@@ -206,6 +231,9 @@ public class PincodeRegionZoneResourceIntTest {
         // Validate the PincodeRegionZone in the database
         List<PincodeRegionZone> pincodeRegionZoneList = pincodeRegionZoneRepository.findAll();
         assertThat(pincodeRegionZoneList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the PincodeRegionZone in Elasticsearch
+        verify(mockPincodeRegionZoneSearchRepository, times(0)).save(pincodeRegionZone);
     }
 
     @Test
@@ -224,6 +252,23 @@ public class PincodeRegionZoneResourceIntTest {
         // Validate the database is empty
         List<PincodeRegionZone> pincodeRegionZoneList = pincodeRegionZoneRepository.findAll();
         assertThat(pincodeRegionZoneList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the PincodeRegionZone in Elasticsearch
+        verify(mockPincodeRegionZoneSearchRepository, times(1)).deleteById(pincodeRegionZone.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchPincodeRegionZone() throws Exception {
+        // Initialize the database
+        pincodeRegionZoneRepository.saveAndFlush(pincodeRegionZone);
+        when(mockPincodeRegionZoneSearchRepository.search(queryStringQuery("id:" + pincodeRegionZone.getId())))
+            .thenReturn(Collections.singletonList(pincodeRegionZone));
+        // Search the pincodeRegionZone
+        restPincodeRegionZoneMockMvc.perform(get("/api/_search/pincode-region-zones?query=id:" + pincodeRegionZone.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(pincodeRegionZone.getId().intValue())));
     }
 
     @Test

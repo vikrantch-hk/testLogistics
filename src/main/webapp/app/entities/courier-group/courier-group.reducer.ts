@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
+import { ICrudSearchAction, ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
 import { SERVER_API_URL } from 'app/config/constants';
 
-import { ICourierGroup } from 'app/shared/model/courier-group.model';
+import { ICourierGroup, defaultValue } from 'app/shared/model/courier-group.model';
 
 export const ACTION_TYPES = {
+  SEARCH_COURIERGROUPS: 'courierGroup/SEARCH_COURIERGROUPS',
   FETCH_COURIERGROUP_LIST: 'courierGroup/FETCH_COURIERGROUP_LIST',
   FETCH_COURIERGROUP: 'courierGroup/FETCH_COURIERGROUP',
   CREATE_COURIERGROUP: 'courierGroup/CREATE_COURIERGROUP',
@@ -19,16 +20,19 @@ export const ACTION_TYPES = {
 const initialState = {
   loading: false,
   errorMessage: null,
-  entities: [],
-  entity: {},
+  entities: [] as ReadonlyArray<ICourierGroup>,
+  entity: defaultValue,
   updating: false,
   updateSuccess: false
 };
 
+export type CourierGroupState = Readonly<typeof initialState>;
+
 // Reducer
 
-export default (state = initialState, action) => {
+export default (state: CourierGroupState = initialState, action): CourierGroupState => {
   switch (action.type) {
+    case REQUEST(ACTION_TYPES.SEARCH_COURIERGROUPS):
     case REQUEST(ACTION_TYPES.FETCH_COURIERGROUP_LIST):
     case REQUEST(ACTION_TYPES.FETCH_COURIERGROUP):
       return {
@@ -46,6 +50,7 @@ export default (state = initialState, action) => {
         updateSuccess: false,
         updating: true
       };
+    case FAILURE(ACTION_TYPES.SEARCH_COURIERGROUPS):
     case FAILURE(ACTION_TYPES.FETCH_COURIERGROUP_LIST):
     case FAILURE(ACTION_TYPES.FETCH_COURIERGROUP):
     case FAILURE(ACTION_TYPES.CREATE_COURIERGROUP):
@@ -57,6 +62,12 @@ export default (state = initialState, action) => {
         updating: false,
         updateSuccess: false,
         errorMessage: action.payload
+      };
+    case SUCCESS(ACTION_TYPES.SEARCH_COURIERGROUPS):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
       };
     case SUCCESS(ACTION_TYPES.FETCH_COURIERGROUP_LIST):
       return {
@@ -95,19 +106,25 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/courier-groups';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/courier-groups';
 
 // Actions
 
+export const getSearchEntities: ICrudSearchAction<ICourierGroup> = query => ({
+  type: ACTION_TYPES.SEARCH_COURIERGROUPS,
+  payload: axios.get<ICourierGroup>(`${apiSearchUrl}?query=` + query)
+});
+
 export const getEntities: ICrudGetAllAction<ICourierGroup> = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_COURIERGROUP_LIST,
-  payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`) as Promise<ICourierGroup>
+  payload: axios.get<ICourierGroup>(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
 });
 
 export const getEntity: ICrudGetAction<ICourierGroup> = id => {
   const requestUrl = `${apiUrl}/${id}`;
   return {
     type: ACTION_TYPES.FETCH_COURIERGROUP,
-    payload: axios.get(requestUrl) as Promise<ICourierGroup>
+    payload: axios.get<ICourierGroup>(requestUrl)
   };
 };
 

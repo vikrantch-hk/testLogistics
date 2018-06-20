@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { ICrudGetAction, ICrudDeleteAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { IPincodeCourierMapping } from 'app/shared/model/pincode-courier-mapping.model';
+import { IRootState } from 'app/shared/reducers';
 import { getEntity, deleteEntity } from './pincode-courier-mapping.reducer';
 
-export interface IPincodeCourierMappingDeleteDialogProps {
-  getEntity: ICrudGetAction<IPincodeCourierMapping>;
-  deleteEntity: ICrudDeleteAction<IPincodeCourierMapping>;
-  pincodeCourierMapping: IPincodeCourierMapping;
-  match: any;
-  history: any;
-}
+export interface IPincodeCourierMappingDeleteDialogProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class PincodeCourierMappingDeleteDialog extends React.Component<IPincodeCourierMappingDeleteDialogProps> {
   componentDidMount() {
@@ -21,7 +17,7 @@ export class PincodeCourierMappingDeleteDialog extends React.Component<IPincodeC
   }
 
   confirmDelete = event => {
-    this.props.deleteEntity(this.props.pincodeCourierMapping.id);
+    this.props.deleteEntity(this.props.pincodeCourierMappingEntity.id);
     this.handleClose(event);
   };
 
@@ -31,7 +27,7 @@ export class PincodeCourierMappingDeleteDialog extends React.Component<IPincodeC
   };
 
   render() {
-    const { pincodeCourierMapping } = this.props;
+    const { pincodeCourierMappingEntity } = this.props;
     return (
       <Modal isOpen toggle={this.handleClose}>
         <ModalHeader toggle={this.handleClose}>Confirm delete operation</ModalHeader>
@@ -49,10 +45,13 @@ export class PincodeCourierMappingDeleteDialog extends React.Component<IPincodeC
   }
 }
 
-const mapStateToProps = ({ pincodeCourierMapping }) => ({
-  pincodeCourierMapping: pincodeCourierMapping.entity
+const mapStateToProps = ({ pincodeCourierMapping }: IRootState) => ({
+  pincodeCourierMappingEntity: pincodeCourierMapping.entity
 });
 
 const mapDispatchToProps = { getEntity, deleteEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(PincodeCourierMappingDeleteDialog);

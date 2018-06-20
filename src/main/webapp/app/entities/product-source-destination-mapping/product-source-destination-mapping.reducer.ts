@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
+import { ICrudSearchAction, ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
 import { SERVER_API_URL } from 'app/config/constants';
 
-import { IProductSourceDestinationMapping } from 'app/shared/model/product-source-destination-mapping.model';
+import { IProductSourceDestinationMapping, defaultValue } from 'app/shared/model/product-source-destination-mapping.model';
 
 export const ACTION_TYPES = {
+  SEARCH_PRODUCTSOURCEDESTINATIONMAPPINGS: 'productSourceDestinationMapping/SEARCH_PRODUCTSOURCEDESTINATIONMAPPINGS',
   FETCH_PRODUCTSOURCEDESTINATIONMAPPING_LIST: 'productSourceDestinationMapping/FETCH_PRODUCTSOURCEDESTINATIONMAPPING_LIST',
   FETCH_PRODUCTSOURCEDESTINATIONMAPPING: 'productSourceDestinationMapping/FETCH_PRODUCTSOURCEDESTINATIONMAPPING',
   CREATE_PRODUCTSOURCEDESTINATIONMAPPING: 'productSourceDestinationMapping/CREATE_PRODUCTSOURCEDESTINATIONMAPPING',
@@ -19,16 +20,19 @@ export const ACTION_TYPES = {
 const initialState = {
   loading: false,
   errorMessage: null,
-  entities: [],
-  entity: {},
+  entities: [] as ReadonlyArray<IProductSourceDestinationMapping>,
+  entity: defaultValue,
   updating: false,
   updateSuccess: false
 };
 
+export type ProductSourceDestinationMappingState = Readonly<typeof initialState>;
+
 // Reducer
 
-export default (state = initialState, action) => {
+export default (state: ProductSourceDestinationMappingState = initialState, action): ProductSourceDestinationMappingState => {
   switch (action.type) {
+    case REQUEST(ACTION_TYPES.SEARCH_PRODUCTSOURCEDESTINATIONMAPPINGS):
     case REQUEST(ACTION_TYPES.FETCH_PRODUCTSOURCEDESTINATIONMAPPING_LIST):
     case REQUEST(ACTION_TYPES.FETCH_PRODUCTSOURCEDESTINATIONMAPPING):
       return {
@@ -46,6 +50,7 @@ export default (state = initialState, action) => {
         updateSuccess: false,
         updating: true
       };
+    case FAILURE(ACTION_TYPES.SEARCH_PRODUCTSOURCEDESTINATIONMAPPINGS):
     case FAILURE(ACTION_TYPES.FETCH_PRODUCTSOURCEDESTINATIONMAPPING_LIST):
     case FAILURE(ACTION_TYPES.FETCH_PRODUCTSOURCEDESTINATIONMAPPING):
     case FAILURE(ACTION_TYPES.CREATE_PRODUCTSOURCEDESTINATIONMAPPING):
@@ -57,6 +62,12 @@ export default (state = initialState, action) => {
         updating: false,
         updateSuccess: false,
         errorMessage: action.payload
+      };
+    case SUCCESS(ACTION_TYPES.SEARCH_PRODUCTSOURCEDESTINATIONMAPPINGS):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
       };
     case SUCCESS(ACTION_TYPES.FETCH_PRODUCTSOURCEDESTINATIONMAPPING_LIST):
       return {
@@ -95,19 +106,25 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/product-source-destination-mappings';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/product-source-destination-mappings';
 
 // Actions
 
+export const getSearchEntities: ICrudSearchAction<IProductSourceDestinationMapping> = query => ({
+  type: ACTION_TYPES.SEARCH_PRODUCTSOURCEDESTINATIONMAPPINGS,
+  payload: axios.get<IProductSourceDestinationMapping>(`${apiSearchUrl}?query=` + query)
+});
+
 export const getEntities: ICrudGetAllAction<IProductSourceDestinationMapping> = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_PRODUCTSOURCEDESTINATIONMAPPING_LIST,
-  payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`) as Promise<IProductSourceDestinationMapping>
+  payload: axios.get<IProductSourceDestinationMapping>(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
 });
 
 export const getEntity: ICrudGetAction<IProductSourceDestinationMapping> = id => {
   const requestUrl = `${apiUrl}/${id}`;
   return {
     type: ACTION_TYPES.FETCH_PRODUCTSOURCEDESTINATIONMAPPING,
-    payload: axios.get(requestUrl) as Promise<IProductSourceDestinationMapping>
+    payload: axios.get<IProductSourceDestinationMapping>(requestUrl)
   };
 };
 

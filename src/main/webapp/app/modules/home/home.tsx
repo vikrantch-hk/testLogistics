@@ -6,43 +6,27 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Row, Col, Alert } from 'reactstrap';
 
+import { IRootState } from 'app/shared/reducers';
 import { getSession } from 'app/shared/reducers/authentication';
 import { getLoginUrl } from 'app/shared/util/url-utils';
 
-export interface IHomeProp {
-  account: any;
-  getSession: Function;
-}
+export interface IHomeProp extends StateProps, DispatchProps {}
 
-export interface IHomeState {
-  currentUser: any;
-}
-
-export class Home extends React.Component<IHomeProp, IHomeState> {
-  state: IHomeState = {
-    currentUser: this.props.account
-  };
-
-  componentWillMount() {
+export class Home extends React.Component<IHomeProp> {
+  componentDidMount() {
     this.props.getSession();
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.setState({
-      currentUser: nextProps.account
-    });
-  }
-
   render() {
-    const { currentUser } = this.state;
+    const { account } = this.props;
     return (
       <Row>
         <Col md="9">
           <h2>Welcome, Java Hipster!</h2>
           <p className="lead">This is your homepage</p>
-          {currentUser && currentUser.login ? (
+          {account && account.login ? (
             <div>
-              <Alert color="success">You are logged in as user {currentUser.login}.</Alert>
+              <Alert color="success">You are logged in as user {account.login}.</Alert>
             </div>
           ) : (
             <div>
@@ -54,13 +38,6 @@ export class Home extends React.Component<IHomeProp, IHomeState> {
                 , you can try the default accounts:
                 <br />- Administrator (login=&quot;admin&quot; and password=&quot;admin&quot;)
                 <br />- User (login=&quot;user&quot; and password=&quot;user&quot;).
-              </Alert>
-
-              <Alert color="warning">
-                You do not have an account yet?&nbsp;
-                <Link to="/register" className="alert-link">
-                  Register a new account
-                </Link>
               </Alert>
             </div>
           )}
@@ -115,5 +92,8 @@ const mapStateToProps = storeState => ({
 });
 
 const mapDispatchToProps = { getSession };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);

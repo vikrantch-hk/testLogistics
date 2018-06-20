@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { ICrudGetAction, ICrudDeleteAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { ISourceDestinationMapping } from 'app/shared/model/source-destination-mapping.model';
+import { IRootState } from 'app/shared/reducers';
 import { getEntity, deleteEntity } from './source-destination-mapping.reducer';
 
-export interface ISourceDestinationMappingDeleteDialogProps {
-  getEntity: ICrudGetAction<ISourceDestinationMapping>;
-  deleteEntity: ICrudDeleteAction<ISourceDestinationMapping>;
-  sourceDestinationMapping: ISourceDestinationMapping;
-  match: any;
-  history: any;
-}
+export interface ISourceDestinationMappingDeleteDialogProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class SourceDestinationMappingDeleteDialog extends React.Component<ISourceDestinationMappingDeleteDialogProps> {
   componentDidMount() {
@@ -21,7 +17,7 @@ export class SourceDestinationMappingDeleteDialog extends React.Component<ISourc
   }
 
   confirmDelete = event => {
-    this.props.deleteEntity(this.props.sourceDestinationMapping.id);
+    this.props.deleteEntity(this.props.sourceDestinationMappingEntity.id);
     this.handleClose(event);
   };
 
@@ -31,7 +27,7 @@ export class SourceDestinationMappingDeleteDialog extends React.Component<ISourc
   };
 
   render() {
-    const { sourceDestinationMapping } = this.props;
+    const { sourceDestinationMappingEntity } = this.props;
     return (
       <Modal isOpen toggle={this.handleClose}>
         <ModalHeader toggle={this.handleClose}>Confirm delete operation</ModalHeader>
@@ -49,10 +45,13 @@ export class SourceDestinationMappingDeleteDialog extends React.Component<ISourc
   }
 }
 
-const mapStateToProps = ({ sourceDestinationMapping }) => ({
-  sourceDestinationMapping: sourceDestinationMapping.entity
+const mapStateToProps = ({ sourceDestinationMapping }: IRootState) => ({
+  sourceDestinationMappingEntity: sourceDestinationMapping.entity
 });
 
 const mapDispatchToProps = { getEntity, deleteEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(SourceDestinationMappingDeleteDialog);

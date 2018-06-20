@@ -1,4 +1,5 @@
 {
+    "name": "Pincode",
     "fields": [
         {
             "fieldName": "pincode",
@@ -50,11 +51,11 @@
             "otherEntityField": "name"
         }
     ],
-    "changelogDate": "20180608074053",
+    "changelogDate": "20180619110516",
     "entityTableName": "pincode",
     "dto": "mapstruct",
     "pagination": "no",
-    "service": "no",
+    "service": "serviceImpl",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,
     "clientRootFolder": "",

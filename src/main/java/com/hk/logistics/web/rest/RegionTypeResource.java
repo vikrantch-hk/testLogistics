@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.RegionType;
-import com.hk.logistics.repository.RegionTypeRepository;
+import com.hk.logistics.service.RegionTypeService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.RegionTypeDTO;
-import com.hk.logistics.service.mapper.RegionTypeMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +16,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing RegionType.
@@ -30,13 +31,10 @@ public class RegionTypeResource {
 
     private static final String ENTITY_NAME = "regionType";
 
-    private final RegionTypeRepository regionTypeRepository;
+    private final RegionTypeService regionTypeService;
 
-    private final RegionTypeMapper regionTypeMapper;
-
-    public RegionTypeResource(RegionTypeRepository regionTypeRepository, RegionTypeMapper regionTypeMapper) {
-        this.regionTypeRepository = regionTypeRepository;
-        this.regionTypeMapper = regionTypeMapper;
+    public RegionTypeResource(RegionTypeService regionTypeService) {
+        this.regionTypeService = regionTypeService;
     }
 
     /**
@@ -52,10 +50,8 @@ public class RegionTypeResource {
         log.debug("REST request to save RegionType : {}", regionTypeDTO);
         if (regionTypeDTO.getId() != null) {
             throw new BadRequestAlertException("A new regionType cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        RegionType regionType = regionTypeMapper.toEntity(regionTypeDTO);
-        regionType = regionTypeRepository.save(regionType);
-        RegionTypeDTO result = regionTypeMapper.toDto(regionType);
+        }
+        RegionTypeDTO result = regionTypeService.save(regionTypeDTO);
         return ResponseEntity.created(new URI("/api/region-types/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -76,10 +72,8 @@ public class RegionTypeResource {
         log.debug("REST request to update RegionType : {}", regionTypeDTO);
         if (regionTypeDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        RegionType regionType = regionTypeMapper.toEntity(regionTypeDTO);
-        regionType = regionTypeRepository.save(regionType);
-        RegionTypeDTO result = regionTypeMapper.toDto(regionType);
+        }
+        RegionTypeDTO result = regionTypeService.save(regionTypeDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, regionTypeDTO.getId().toString()))
             .body(result);
@@ -94,8 +88,7 @@ public class RegionTypeResource {
     @Timed
     public List<RegionTypeDTO> getAllRegionTypes() {
         log.debug("REST request to get all RegionTypes");
-        List<RegionType> regionTypes = regionTypeRepository.findAll();
-        return regionTypeMapper.toDto(regionTypes);
+        return regionTypeService.findAll();
     }
 
     /**
@@ -108,8 +101,7 @@ public class RegionTypeResource {
     @Timed
     public ResponseEntity<RegionTypeDTO> getRegionType(@PathVariable Long id) {
         log.debug("REST request to get RegionType : {}", id);
-        Optional<RegionTypeDTO> regionTypeDTO = regionTypeRepository.findById(id)
-            .map(regionTypeMapper::toDto);
+        Optional<RegionTypeDTO> regionTypeDTO = regionTypeService.findOne(id);
         return ResponseUtil.wrapOrNotFound(regionTypeDTO);
     }
 
@@ -123,7 +115,22 @@ public class RegionTypeResource {
     @Timed
     public ResponseEntity<Void> deleteRegionType(@PathVariable Long id) {
         log.debug("REST request to delete RegionType : {}", id);
-        regionTypeRepository.deleteById(id);
+        regionTypeService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/region-types?query=:query : search for the regionType corresponding
+     * to the query.
+     *
+     * @param query the query of the regionType search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/region-types")
+    @Timed
+    public List<RegionTypeDTO> searchRegionTypes(@RequestParam String query) {
+        log.debug("REST request to search RegionTypes for query {}", query);
+        return regionTypeService.search(query);
+    }
+
 }

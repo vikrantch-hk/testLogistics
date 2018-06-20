@@ -1,11 +1,12 @@
 package com.hk.logistics.repository;
 
 import com.hk.logistics.domain.RegionType;
-import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.*;
+import org.springframework.stereotype.Repository;
+
 
 /**
- * Spring Data JPA repository for the RegionType entity.
+ * Spring Data  repository for the RegionType entity.
  */
 @SuppressWarnings("unused")
 @Repository

@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { ICrudGetAction, ICrudDeleteAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { IZone } from 'app/shared/model/zone.model';
+import { IRootState } from 'app/shared/reducers';
 import { getEntity, deleteEntity } from './zone.reducer';
 
-export interface IZoneDeleteDialogProps {
-  getEntity: ICrudGetAction<IZone>;
-  deleteEntity: ICrudDeleteAction<IZone>;
-  zone: IZone;
-  match: any;
-  history: any;
-}
+export interface IZoneDeleteDialogProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class ZoneDeleteDialog extends React.Component<IZoneDeleteDialogProps> {
   componentDidMount() {
@@ -21,7 +17,7 @@ export class ZoneDeleteDialog extends React.Component<IZoneDeleteDialogProps> {
   }
 
   confirmDelete = event => {
-    this.props.deleteEntity(this.props.zone.id);
+    this.props.deleteEntity(this.props.zoneEntity.id);
     this.handleClose(event);
   };
 
@@ -31,7 +27,7 @@ export class ZoneDeleteDialog extends React.Component<IZoneDeleteDialogProps> {
   };
 
   render() {
-    const { zone } = this.props;
+    const { zoneEntity } = this.props;
     return (
       <Modal isOpen toggle={this.handleClose}>
         <ModalHeader toggle={this.handleClose}>Confirm delete operation</ModalHeader>
@@ -49,10 +45,13 @@ export class ZoneDeleteDialog extends React.Component<IZoneDeleteDialogProps> {
   }
 }
 
-const mapStateToProps = ({ zone }) => ({
-  zone: zone.entity
+const mapStateToProps = ({ zone }: IRootState) => ({
+  zoneEntity: zone.entity
 });
 
 const mapDispatchToProps = { getEntity, deleteEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(ZoneDeleteDialog);

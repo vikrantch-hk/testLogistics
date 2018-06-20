@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvField } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { getEntity, updateEntity, createEntity, reset } from './product.reducer';
 import { IProduct } from 'app/shared/model/product.model';
@@ -13,17 +14,7 @@ import { IProduct } from 'app/shared/model/product.model';
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface IProductUpdateProps {
-  getEntity: ICrudGetAction<IProduct>;
-  updateEntity: ICrudPutAction<IProduct>;
-  createEntity: ICrudPutAction<IProduct>;
-  product: IProduct;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface IProductUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface IProductUpdateState {
   isNew: boolean;
@@ -47,9 +38,9 @@ export class ProductUpdate extends React.Component<IProductUpdateProps, IProduct
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { product } = this.props;
+      const { productEntity } = this.props;
       const entity = {
-        ...product,
+        ...productEntity,
         ...values
       };
 
@@ -68,14 +59,14 @@ export class ProductUpdate extends React.Component<IProductUpdateProps, IProduct
 
   render() {
     const isInvalid = false;
-    const { product, loading, updating } = this.props;
+    const { productEntity, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-product-heading">Create or edit a Product</h2>
+            <h2 id="testLogisticsApp.product.home.createOrEditLabel">Create or edit a Product</h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -83,11 +74,11 @@ export class ProductUpdate extends React.Component<IProductUpdateProps, IProduct
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : product} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : productEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="product-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <AvGroup>
@@ -95,6 +86,7 @@ export class ProductUpdate extends React.Component<IProductUpdateProps, IProduct
                     Name
                   </Label>
                   <AvField
+                    id="product-name"
                     type="text"
                     name="name"
                     validate={{
@@ -104,7 +96,7 @@ export class ProductUpdate extends React.Component<IProductUpdateProps, IProduct
                 </AvGroup>
                 <AvGroup>
                   <Label id="isServiceableLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="isServiceable" />
+                    <AvInput id="product-isServiceable" type="checkbox" className="form-control" name="isServiceable" />
                     Is Serviceable
                   </Label>
                 </AvGroup>
@@ -125,8 +117,8 @@ export class ProductUpdate extends React.Component<IProductUpdateProps, IProduct
   }
 }
 
-const mapStateToProps = storeState => ({
-  product: storeState.product.entity,
+const mapStateToProps = (storeState: IRootState) => ({
+  productEntity: storeState.product.entity,
   loading: storeState.product.loading,
   updating: storeState.product.updating
 });
@@ -137,5 +129,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProductUpdate);

@@ -3,6 +3,4 @@ export interface IZone {
   name?: string;
 }
 
-export class Zone implements IZone {
-  constructor(public id?: number, public name?: string) {}
-}
+export const defaultValue: Readonly<IZone> = {};

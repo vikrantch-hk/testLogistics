@@ -1,4 +1,5 @@
 {
+    "name": "SourceDestinationMapping",
     "fields": [
         {
             "fieldName": "sourcePincode",
@@ -23,11 +24,11 @@
             "otherEntityField": "name"
         }
     ],
-    "changelogDate": "20180608074057",
+    "changelogDate": "20180619110520",
     "entityTableName": "source_destination_mapping",
     "dto": "mapstruct",
     "pagination": "no",
-    "service": "no",
+    "service": "serviceImpl",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,
     "clientRootFolder": "",

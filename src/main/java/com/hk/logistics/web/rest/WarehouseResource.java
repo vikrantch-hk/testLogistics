@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.Warehouse;
-import com.hk.logistics.repository.WarehouseRepository;
+import com.hk.logistics.service.WarehouseService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.WarehouseDTO;
-import com.hk.logistics.service.mapper.WarehouseMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +17,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing Warehouse.
@@ -31,13 +32,10 @@ public class WarehouseResource {
 
     private static final String ENTITY_NAME = "warehouse";
 
-    private final WarehouseRepository warehouseRepository;
+    private final WarehouseService warehouseService;
 
-    private final WarehouseMapper warehouseMapper;
-
-    public WarehouseResource(WarehouseRepository warehouseRepository, WarehouseMapper warehouseMapper) {
-        this.warehouseRepository = warehouseRepository;
-        this.warehouseMapper = warehouseMapper;
+    public WarehouseResource(WarehouseService warehouseService) {
+        this.warehouseService = warehouseService;
     }
 
     /**
@@ -53,10 +51,8 @@ public class WarehouseResource {
         log.debug("REST request to save Warehouse : {}", warehouseDTO);
         if (warehouseDTO.getId() != null) {
             throw new BadRequestAlertException("A new warehouse cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        Warehouse warehouse = warehouseMapper.toEntity(warehouseDTO);
-        warehouse = warehouseRepository.save(warehouse);
-        WarehouseDTO result = warehouseMapper.toDto(warehouse);
+        }
+        WarehouseDTO result = warehouseService.save(warehouseDTO);
         return ResponseEntity.created(new URI("/api/warehouses/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -77,10 +73,8 @@ public class WarehouseResource {
         log.debug("REST request to update Warehouse : {}", warehouseDTO);
         if (warehouseDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        Warehouse warehouse = warehouseMapper.toEntity(warehouseDTO);
-        warehouse = warehouseRepository.save(warehouse);
-        WarehouseDTO result = warehouseMapper.toDto(warehouse);
+        }
+        WarehouseDTO result = warehouseService.save(warehouseDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, warehouseDTO.getId().toString()))
             .body(result);
@@ -95,8 +89,7 @@ public class WarehouseResource {
     @Timed
     public List<WarehouseDTO> getAllWarehouses() {
         log.debug("REST request to get all Warehouses");
-        List<Warehouse> warehouses = warehouseRepository.findAll();
-        return warehouseMapper.toDto(warehouses);
+        return warehouseService.findAll();
     }
 
     /**
@@ -109,8 +102,7 @@ public class WarehouseResource {
     @Timed
     public ResponseEntity<WarehouseDTO> getWarehouse(@PathVariable Long id) {
         log.debug("REST request to get Warehouse : {}", id);
-        Optional<WarehouseDTO> warehouseDTO = warehouseRepository.findById(id)
-            .map(warehouseMapper::toDto);
+        Optional<WarehouseDTO> warehouseDTO = warehouseService.findOne(id);
         return ResponseUtil.wrapOrNotFound(warehouseDTO);
     }
 
@@ -124,7 +116,22 @@ public class WarehouseResource {
     @Timed
     public ResponseEntity<Void> deleteWarehouse(@PathVariable Long id) {
         log.debug("REST request to delete Warehouse : {}", id);
-        warehouseRepository.deleteById(id);
+        warehouseService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/warehouses?query=:query : search for the warehouse corresponding
+     * to the query.
+     *
+     * @param query the query of the warehouse search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/warehouses")
+    @Timed
+    public List<WarehouseDTO> searchWarehouses(@RequestParam String query) {
+        log.debug("REST request to search Warehouses for query {}", query);
+        return warehouseService.search(query);
+    }
+
 }

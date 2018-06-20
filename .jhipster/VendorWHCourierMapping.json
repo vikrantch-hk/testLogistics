@@ -1,4 +1,5 @@
 {
+    "name": "VendorWHCourierMapping",
     "fields": [
         {
             "fieldName": "active",
@@ -13,7 +14,7 @@
             "relationshipType": "many-to-one",
             "relationshipName": "vendor",
             "otherEntityName": "vendor",
-            "otherEntityField": "shortCode"
+            "otherEntityField": "name"
         },
         {
             "relationshipType": "many-to-one",
@@ -28,11 +29,11 @@
             "otherEntityField": "name"
         }
     ],
-    "changelogDate": "20180608074059",
+    "changelogDate": "20180619110522",
     "entityTableName": "vendor_wh_courier_mapping",
     "dto": "mapstruct",
     "pagination": "no",
-    "service": "no",
+    "service": "serviceImpl",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,
     "clientRootFolder": "",

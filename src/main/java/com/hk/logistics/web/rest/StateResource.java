@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.State;
-import com.hk.logistics.repository.StateRepository;
+import com.hk.logistics.service.StateService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.StateDTO;
-import com.hk.logistics.service.mapper.StateMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +17,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing State.
@@ -31,13 +32,10 @@ public class StateResource {
 
     private static final String ENTITY_NAME = "state";
 
-    private final StateRepository stateRepository;
+    private final StateService stateService;
 
-    private final StateMapper stateMapper;
-
-    public StateResource(StateRepository stateRepository, StateMapper stateMapper) {
-        this.stateRepository = stateRepository;
-        this.stateMapper = stateMapper;
+    public StateResource(StateService stateService) {
+        this.stateService = stateService;
     }
 
     /**
@@ -53,10 +51,8 @@ public class StateResource {
         log.debug("REST request to save State : {}", stateDTO);
         if (stateDTO.getId() != null) {
             throw new BadRequestAlertException("A new state cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        State state = stateMapper.toEntity(stateDTO);
-        state = stateRepository.save(state);
-        StateDTO result = stateMapper.toDto(state);
+        }
+        StateDTO result = stateService.save(stateDTO);
         return ResponseEntity.created(new URI("/api/states/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -77,10 +73,8 @@ public class StateResource {
         log.debug("REST request to update State : {}", stateDTO);
         if (stateDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        State state = stateMapper.toEntity(stateDTO);
-        state = stateRepository.save(state);
-        StateDTO result = stateMapper.toDto(state);
+        }
+        StateDTO result = stateService.save(stateDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, stateDTO.getId().toString()))
             .body(result);
@@ -95,8 +89,7 @@ public class StateResource {
     @Timed
     public List<StateDTO> getAllStates() {
         log.debug("REST request to get all States");
-        List<State> states = stateRepository.findAll();
-        return stateMapper.toDto(states);
+        return stateService.findAll();
     }
 
     /**
@@ -109,8 +102,7 @@ public class StateResource {
     @Timed
     public ResponseEntity<StateDTO> getState(@PathVariable Long id) {
         log.debug("REST request to get State : {}", id);
-        Optional<StateDTO> stateDTO = stateRepository.findById(id)
-            .map(stateMapper::toDto);
+        Optional<StateDTO> stateDTO = stateService.findOne(id);
         return ResponseUtil.wrapOrNotFound(stateDTO);
     }
 
@@ -124,7 +116,22 @@ public class StateResource {
     @Timed
     public ResponseEntity<Void> deleteState(@PathVariable Long id) {
         log.debug("REST request to delete State : {}", id);
-        stateRepository.deleteById(id);
+        stateService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/states?query=:query : search for the state corresponding
+     * to the query.
+     *
+     * @param query the query of the state search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/states")
+    @Timed
+    public List<StateDTO> searchStates(@RequestParam String query) {
+        log.debug("REST request to search States for query {}", query);
+        return stateService.search(query);
+    }
+
 }

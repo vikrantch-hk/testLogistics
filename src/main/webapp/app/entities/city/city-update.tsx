@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvField } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { getEntity, updateEntity, createEntity, reset } from './city.reducer';
 import { ICity } from 'app/shared/model/city.model';
@@ -13,17 +14,7 @@ import { ICity } from 'app/shared/model/city.model';
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface ICityUpdateProps {
-  getEntity: ICrudGetAction<ICity>;
-  updateEntity: ICrudPutAction<ICity>;
-  createEntity: ICrudPutAction<ICity>;
-  city: ICity;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface ICityUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface ICityUpdateState {
   isNew: boolean;
@@ -47,9 +38,9 @@ export class CityUpdate extends React.Component<ICityUpdateProps, ICityUpdateSta
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { city } = this.props;
+      const { cityEntity } = this.props;
       const entity = {
-        ...city,
+        ...cityEntity,
         ...values
       };
 
@@ -68,14 +59,14 @@ export class CityUpdate extends React.Component<ICityUpdateProps, ICityUpdateSta
 
   render() {
     const isInvalid = false;
-    const { city, loading, updating } = this.props;
+    const { cityEntity, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-city-heading">Create or edit a City</h2>
+            <h2 id="testLogisticsApp.city.home.createOrEditLabel">Create or edit a City</h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -83,11 +74,11 @@ export class CityUpdate extends React.Component<ICityUpdateProps, ICityUpdateSta
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : city} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : cityEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="city-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <AvGroup>
@@ -95,6 +86,7 @@ export class CityUpdate extends React.Component<ICityUpdateProps, ICityUpdateSta
                     Name
                   </Label>
                   <AvField
+                    id="city-name"
                     type="text"
                     name="name"
                     validate={{
@@ -119,8 +111,8 @@ export class CityUpdate extends React.Component<ICityUpdateProps, ICityUpdateSta
   }
 }
 
-const mapStateToProps = storeState => ({
-  city: storeState.city.entity,
+const mapStateToProps = (storeState: IRootState) => ({
+  cityEntity: storeState.city.entity,
   loading: storeState.city.loading,
   updating: storeState.city.updating
 });
@@ -131,5 +123,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(CityUpdate);

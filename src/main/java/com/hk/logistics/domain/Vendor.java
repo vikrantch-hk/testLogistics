@@ -1,12 +1,13 @@
 package com.hk.logistics.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.poiji.annotation.ExcelCellName;
-import com.poiji.annotation.ExcelRow;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
 
+import org.springframework.data.elasticsearch.annotations.Document;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,6 +18,8 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "vendor")
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@Document(indexName = "vendor")
 public class Vendor implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -26,16 +29,15 @@ public class Vendor implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(name = "short_code", nullable = false)
-    @ExcelCellName("shortcode")
-    private String shortCode;
+    @Column(name = "name", nullable = false)
+    private String name;
 
     @NotNull
     @Column(name = "pincode", nullable = false)
-    @ExcelCellName("Pincode")
     private String pincode;
 
     @OneToMany(mappedBy = "vendor")
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<VendorWHCourierMapping> vendorWHCourierMappings = new HashSet<>();
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
@@ -47,17 +49,17 @@ public class Vendor implements Serializable {
         this.id = id;
     }
 
-    public String getShortCode() {
-        return shortCode;
+    public String getName() {
+        return name;
     }
 
-    public Vendor shortCode(String shortCode) {
-        this.shortCode = shortCode;
+    public Vendor name(String name) {
+        this.name = name;
         return this;
     }
 
-    public void setShortCode(String shortCode) {
-        this.shortCode = shortCode;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPincode() {
@@ -123,7 +125,7 @@ public class Vendor implements Serializable {
     public String toString() {
         return "Vendor{" +
             "id=" + getId() +
-            ", shortCode='" + getShortCode() + "'" +
+            ", name='" + getName() + "'" +
             ", pincode='" + getPincode() + "'" +
             "}";
     }

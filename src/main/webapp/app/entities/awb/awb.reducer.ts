@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
+import { ICrudSearchAction, ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
 import { SERVER_API_URL } from 'app/config/constants';
 
-import { IAwb } from 'app/shared/model/awb.model';
+import { IAwb, defaultValue } from 'app/shared/model/awb.model';
 
 export const ACTION_TYPES = {
+  SEARCH_AWBS: 'awb/SEARCH_AWBS',
   FETCH_AWB_LIST: 'awb/FETCH_AWB_LIST',
   FETCH_AWB: 'awb/FETCH_AWB',
   CREATE_AWB: 'awb/CREATE_AWB',
@@ -19,16 +20,19 @@ export const ACTION_TYPES = {
 const initialState = {
   loading: false,
   errorMessage: null,
-  entities: [],
-  entity: {},
+  entities: [] as ReadonlyArray<IAwb>,
+  entity: defaultValue,
   updating: false,
   updateSuccess: false
 };
 
+export type AwbState = Readonly<typeof initialState>;
+
 // Reducer
 
-export default (state = initialState, action) => {
+export default (state: AwbState = initialState, action): AwbState => {
   switch (action.type) {
+    case REQUEST(ACTION_TYPES.SEARCH_AWBS):
     case REQUEST(ACTION_TYPES.FETCH_AWB_LIST):
     case REQUEST(ACTION_TYPES.FETCH_AWB):
       return {
@@ -46,6 +50,7 @@ export default (state = initialState, action) => {
         updateSuccess: false,
         updating: true
       };
+    case FAILURE(ACTION_TYPES.SEARCH_AWBS):
     case FAILURE(ACTION_TYPES.FETCH_AWB_LIST):
     case FAILURE(ACTION_TYPES.FETCH_AWB):
     case FAILURE(ACTION_TYPES.CREATE_AWB):
@@ -57,6 +62,12 @@ export default (state = initialState, action) => {
         updating: false,
         updateSuccess: false,
         errorMessage: action.payload
+      };
+    case SUCCESS(ACTION_TYPES.SEARCH_AWBS):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
       };
     case SUCCESS(ACTION_TYPES.FETCH_AWB_LIST):
       return {
@@ -95,19 +106,25 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/awbs';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/awbs';
 
 // Actions
 
+export const getSearchEntities: ICrudSearchAction<IAwb> = query => ({
+  type: ACTION_TYPES.SEARCH_AWBS,
+  payload: axios.get<IAwb>(`${apiSearchUrl}?query=` + query)
+});
+
 export const getEntities: ICrudGetAllAction<IAwb> = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_AWB_LIST,
-  payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`) as Promise<IAwb>
+  payload: axios.get<IAwb>(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
 });
 
 export const getEntity: ICrudGetAction<IAwb> = id => {
   const requestUrl = `${apiUrl}/${id}`;
   return {
     type: ACTION_TYPES.FETCH_AWB,
-    payload: axios.get(requestUrl) as Promise<IAwb>
+    payload: axios.get<IAwb>(requestUrl)
   };
 };
 

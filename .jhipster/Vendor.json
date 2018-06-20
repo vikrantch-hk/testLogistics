@@ -1,7 +1,8 @@
 {
+    "name": "Vendor",
     "fields": [
         {
-            "fieldName": "shortCode",
+            "fieldName": "name",
             "fieldType": "String",
             "fieldValidateRules": [
                 "required"
@@ -23,11 +24,11 @@
             "otherEntityRelationshipName": "vendor"
         }
     ],
-    "changelogDate": "20180608074047",
+    "changelogDate": "20180619110510",
     "entityTableName": "vendor",
     "dto": "mapstruct",
     "pagination": "no",
-    "service": "no",
+    "service": "serviceImpl",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,
     "clientRootFolder": "",

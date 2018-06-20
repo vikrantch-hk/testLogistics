@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.CourierGroup;
 import com.hk.logistics.repository.CourierGroupRepository;
+import com.hk.logistics.repository.search.CourierGroupSearchRepository;
+import com.hk.logistics.service.CourierGroupService;
 import com.hk.logistics.service.dto.CourierGroupDTO;
 import com.hk.logistics.service.mapper.CourierGroupMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -51,6 +55,18 @@ public class CourierGroupResourceIntTest {
 
     @Autowired
     private CourierGroupMapper courierGroupMapper;
+    
+
+    @Autowired
+    private CourierGroupService courierGroupService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.CourierGroupSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private CourierGroupSearchRepository mockCourierGroupSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -71,7 +87,7 @@ public class CourierGroupResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final CourierGroupResource courierGroupResource = new CourierGroupResource(courierGroupRepository, courierGroupMapper);
+        final CourierGroupResource courierGroupResource = new CourierGroupResource(courierGroupService);
         this.restCourierGroupMockMvc = MockMvcBuilders.standaloneSetup(courierGroupResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -113,6 +129,9 @@ public class CourierGroupResourceIntTest {
         assertThat(courierGroupList).hasSize(databaseSizeBeforeCreate + 1);
         CourierGroup testCourierGroup = courierGroupList.get(courierGroupList.size() - 1);
         assertThat(testCourierGroup.getName()).isEqualTo(DEFAULT_NAME);
+
+        // Validate the CourierGroup in Elasticsearch
+        verify(mockCourierGroupSearchRepository, times(1)).save(testCourierGroup);
     }
 
     @Test
@@ -133,6 +152,9 @@ public class CourierGroupResourceIntTest {
         // Validate the CourierGroup in the database
         List<CourierGroup> courierGroupList = courierGroupRepository.findAll();
         assertThat(courierGroupList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the CourierGroup in Elasticsearch
+        verify(mockCourierGroupSearchRepository, times(0)).save(courierGroup);
     }
 
     @Test
@@ -197,6 +219,9 @@ public class CourierGroupResourceIntTest {
         assertThat(courierGroupList).hasSize(databaseSizeBeforeUpdate);
         CourierGroup testCourierGroup = courierGroupList.get(courierGroupList.size() - 1);
         assertThat(testCourierGroup.getName()).isEqualTo(UPDATED_NAME);
+
+        // Validate the CourierGroup in Elasticsearch
+        verify(mockCourierGroupSearchRepository, times(1)).save(testCourierGroup);
     }
 
     @Test
@@ -216,6 +241,9 @@ public class CourierGroupResourceIntTest {
         // Validate the CourierGroup in the database
         List<CourierGroup> courierGroupList = courierGroupRepository.findAll();
         assertThat(courierGroupList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the CourierGroup in Elasticsearch
+        verify(mockCourierGroupSearchRepository, times(0)).save(courierGroup);
     }
 
     @Test
@@ -234,6 +262,24 @@ public class CourierGroupResourceIntTest {
         // Validate the database is empty
         List<CourierGroup> courierGroupList = courierGroupRepository.findAll();
         assertThat(courierGroupList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the CourierGroup in Elasticsearch
+        verify(mockCourierGroupSearchRepository, times(1)).deleteById(courierGroup.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchCourierGroup() throws Exception {
+        // Initialize the database
+        courierGroupRepository.saveAndFlush(courierGroup);
+        when(mockCourierGroupSearchRepository.search(queryStringQuery("id:" + courierGroup.getId())))
+            .thenReturn(Collections.singletonList(courierGroup));
+        // Search the courierGroup
+        restCourierGroupMockMvc.perform(get("/api/_search/courier-groups?query=id:" + courierGroup.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(courierGroup.getId().intValue())))
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())));
     }
 
     @Test

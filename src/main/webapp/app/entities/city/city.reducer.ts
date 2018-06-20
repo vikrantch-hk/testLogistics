@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
+import { ICrudSearchAction, ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
 import { SERVER_API_URL } from 'app/config/constants';
 
-import { ICity } from 'app/shared/model/city.model';
+import { ICity, defaultValue } from 'app/shared/model/city.model';
 
 export const ACTION_TYPES = {
+  SEARCH_CITIES: 'city/SEARCH_CITIES',
   FETCH_CITY_LIST: 'city/FETCH_CITY_LIST',
   FETCH_CITY: 'city/FETCH_CITY',
   CREATE_CITY: 'city/CREATE_CITY',
@@ -19,16 +20,19 @@ export const ACTION_TYPES = {
 const initialState = {
   loading: false,
   errorMessage: null,
-  entities: [],
-  entity: {},
+  entities: [] as ReadonlyArray<ICity>,
+  entity: defaultValue,
   updating: false,
   updateSuccess: false
 };
 
+export type CityState = Readonly<typeof initialState>;
+
 // Reducer
 
-export default (state = initialState, action) => {
+export default (state: CityState = initialState, action): CityState => {
   switch (action.type) {
+    case REQUEST(ACTION_TYPES.SEARCH_CITIES):
     case REQUEST(ACTION_TYPES.FETCH_CITY_LIST):
     case REQUEST(ACTION_TYPES.FETCH_CITY):
       return {
@@ -46,6 +50,7 @@ export default (state = initialState, action) => {
         updateSuccess: false,
         updating: true
       };
+    case FAILURE(ACTION_TYPES.SEARCH_CITIES):
     case FAILURE(ACTION_TYPES.FETCH_CITY_LIST):
     case FAILURE(ACTION_TYPES.FETCH_CITY):
     case FAILURE(ACTION_TYPES.CREATE_CITY):
@@ -57,6 +62,12 @@ export default (state = initialState, action) => {
         updating: false,
         updateSuccess: false,
         errorMessage: action.payload
+      };
+    case SUCCESS(ACTION_TYPES.SEARCH_CITIES):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
       };
     case SUCCESS(ACTION_TYPES.FETCH_CITY_LIST):
       return {
@@ -95,19 +106,25 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/cities';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/cities';
 
 // Actions
 
+export const getSearchEntities: ICrudSearchAction<ICity> = query => ({
+  type: ACTION_TYPES.SEARCH_CITIES,
+  payload: axios.get<ICity>(`${apiSearchUrl}?query=` + query)
+});
+
 export const getEntities: ICrudGetAllAction<ICity> = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_CITY_LIST,
-  payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`) as Promise<ICity>
+  payload: axios.get<ICity>(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
 });
 
 export const getEntity: ICrudGetAction<ICity> = id => {
   const requestUrl = `${apiUrl}/${id}`;
   return {
     type: ACTION_TYPES.FETCH_CITY,
-    payload: axios.get(requestUrl) as Promise<ICity>
+    payload: axios.get<ICity>(requestUrl)
   };
 };
 

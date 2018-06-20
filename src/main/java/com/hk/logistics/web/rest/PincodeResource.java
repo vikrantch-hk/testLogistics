@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.Pincode;
-import com.hk.logistics.repository.PincodeRepository;
+import com.hk.logistics.service.PincodeService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.PincodeDTO;
-import com.hk.logistics.service.mapper.PincodeMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +17,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing Pincode.
@@ -31,13 +32,10 @@ public class PincodeResource {
 
     private static final String ENTITY_NAME = "pincode";
 
-    private final PincodeRepository pincodeRepository;
+    private final PincodeService pincodeService;
 
-    private final PincodeMapper pincodeMapper;
-
-    public PincodeResource(PincodeRepository pincodeRepository, PincodeMapper pincodeMapper) {
-        this.pincodeRepository = pincodeRepository;
-        this.pincodeMapper = pincodeMapper;
+    public PincodeResource(PincodeService pincodeService) {
+        this.pincodeService = pincodeService;
     }
 
     /**
@@ -53,10 +51,8 @@ public class PincodeResource {
         log.debug("REST request to save Pincode : {}", pincodeDTO);
         if (pincodeDTO.getId() != null) {
             throw new BadRequestAlertException("A new pincode cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        Pincode pincode = pincodeMapper.toEntity(pincodeDTO);
-        pincode = pincodeRepository.save(pincode);
-        PincodeDTO result = pincodeMapper.toDto(pincode);
+        }
+        PincodeDTO result = pincodeService.save(pincodeDTO);
         return ResponseEntity.created(new URI("/api/pincodes/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -77,10 +73,8 @@ public class PincodeResource {
         log.debug("REST request to update Pincode : {}", pincodeDTO);
         if (pincodeDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        Pincode pincode = pincodeMapper.toEntity(pincodeDTO);
-        pincode = pincodeRepository.save(pincode);
-        PincodeDTO result = pincodeMapper.toDto(pincode);
+        }
+        PincodeDTO result = pincodeService.save(pincodeDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, pincodeDTO.getId().toString()))
             .body(result);
@@ -95,8 +89,7 @@ public class PincodeResource {
     @Timed
     public List<PincodeDTO> getAllPincodes() {
         log.debug("REST request to get all Pincodes");
-        List<Pincode> pincodes = pincodeRepository.findAll();
-        return pincodeMapper.toDto(pincodes);
+        return pincodeService.findAll();
     }
 
     /**
@@ -109,8 +102,7 @@ public class PincodeResource {
     @Timed
     public ResponseEntity<PincodeDTO> getPincode(@PathVariable Long id) {
         log.debug("REST request to get Pincode : {}", id);
-        Optional<PincodeDTO> pincodeDTO = pincodeRepository.findById(id)
-            .map(pincodeMapper::toDto);
+        Optional<PincodeDTO> pincodeDTO = pincodeService.findOne(id);
         return ResponseUtil.wrapOrNotFound(pincodeDTO);
     }
 
@@ -124,7 +116,22 @@ public class PincodeResource {
     @Timed
     public ResponseEntity<Void> deletePincode(@PathVariable Long id) {
         log.debug("REST request to delete Pincode : {}", id);
-        pincodeRepository.deleteById(id);
+        pincodeService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/pincodes?query=:query : search for the pincode corresponding
+     * to the query.
+     *
+     * @param query the query of the pincode search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/pincodes")
+    @Timed
+    public List<PincodeDTO> searchPincodes(@RequestParam String query) {
+        log.debug("REST request to search Pincodes for query {}", query);
+        return pincodeService.search(query);
+    }
+
 }

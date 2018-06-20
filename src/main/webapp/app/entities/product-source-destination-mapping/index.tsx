@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+
+import ErrorBoundaryRoute from 'app/shared/error/error-boundary-route';
 
 import ProductSourceDestinationMapping from './product-source-destination-mapping';
 import ProductSourceDestinationMappingDetail from './product-source-destination-mapping-detail';
@@ -9,12 +11,12 @@ import ProductSourceDestinationMappingDeleteDialog from './product-source-destin
 const Routes = ({ match }) => (
   <>
     <Switch>
-      <Route exact path={`${match.url}/new`} component={ProductSourceDestinationMappingUpdate} />
-      <Route exact path={`${match.url}/:id/edit`} component={ProductSourceDestinationMappingUpdate} />
-      <Route exact path={`${match.url}/:id`} component={ProductSourceDestinationMappingDetail} />
-      <Route path={match.url} component={ProductSourceDestinationMapping} />
+      <ErrorBoundaryRoute exact path={`${match.url}/new`} component={ProductSourceDestinationMappingUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id/edit`} component={ProductSourceDestinationMappingUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id`} component={ProductSourceDestinationMappingDetail} />
+      <ErrorBoundaryRoute path={match.url} component={ProductSourceDestinationMapping} />
     </Switch>
-    <Route path={`${match.url}/:id/delete`} component={ProductSourceDestinationMappingDeleteDialog} />
+    <ErrorBoundaryRoute path={`${match.url}/:id/delete`} component={ProductSourceDestinationMappingDeleteDialog} />
   </>
 );
 

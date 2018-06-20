@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.RegionType;
 import com.hk.logistics.repository.RegionTypeRepository;
+import com.hk.logistics.repository.search.RegionTypeSearchRepository;
+import com.hk.logistics.service.RegionTypeService;
 import com.hk.logistics.service.dto.RegionTypeDTO;
 import com.hk.logistics.service.mapper.RegionTypeMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -54,6 +58,18 @@ public class RegionTypeResourceIntTest {
 
     @Autowired
     private RegionTypeMapper regionTypeMapper;
+    
+
+    @Autowired
+    private RegionTypeService regionTypeService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.RegionTypeSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private RegionTypeSearchRepository mockRegionTypeSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -74,7 +90,7 @@ public class RegionTypeResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final RegionTypeResource regionTypeResource = new RegionTypeResource(regionTypeRepository, regionTypeMapper);
+        final RegionTypeResource regionTypeResource = new RegionTypeResource(regionTypeService);
         this.restRegionTypeMockMvc = MockMvcBuilders.standaloneSetup(regionTypeResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -118,6 +134,9 @@ public class RegionTypeResourceIntTest {
         RegionType testRegionType = regionTypeList.get(regionTypeList.size() - 1);
         assertThat(testRegionType.getName()).isEqualTo(DEFAULT_NAME);
         assertThat(testRegionType.getPriority()).isEqualTo(DEFAULT_PRIORITY);
+
+        // Validate the RegionType in Elasticsearch
+        verify(mockRegionTypeSearchRepository, times(1)).save(testRegionType);
     }
 
     @Test
@@ -138,6 +157,9 @@ public class RegionTypeResourceIntTest {
         // Validate the RegionType in the database
         List<RegionType> regionTypeList = regionTypeRepository.findAll();
         assertThat(regionTypeList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the RegionType in Elasticsearch
+        verify(mockRegionTypeSearchRepository, times(0)).save(regionType);
     }
 
     @Test
@@ -206,6 +228,9 @@ public class RegionTypeResourceIntTest {
         RegionType testRegionType = regionTypeList.get(regionTypeList.size() - 1);
         assertThat(testRegionType.getName()).isEqualTo(UPDATED_NAME);
         assertThat(testRegionType.getPriority()).isEqualTo(UPDATED_PRIORITY);
+
+        // Validate the RegionType in Elasticsearch
+        verify(mockRegionTypeSearchRepository, times(1)).save(testRegionType);
     }
 
     @Test
@@ -225,6 +250,9 @@ public class RegionTypeResourceIntTest {
         // Validate the RegionType in the database
         List<RegionType> regionTypeList = regionTypeRepository.findAll();
         assertThat(regionTypeList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the RegionType in Elasticsearch
+        verify(mockRegionTypeSearchRepository, times(0)).save(regionType);
     }
 
     @Test
@@ -243,6 +271,25 @@ public class RegionTypeResourceIntTest {
         // Validate the database is empty
         List<RegionType> regionTypeList = regionTypeRepository.findAll();
         assertThat(regionTypeList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the RegionType in Elasticsearch
+        verify(mockRegionTypeSearchRepository, times(1)).deleteById(regionType.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchRegionType() throws Exception {
+        // Initialize the database
+        regionTypeRepository.saveAndFlush(regionType);
+        when(mockRegionTypeSearchRepository.search(queryStringQuery("id:" + regionType.getId())))
+            .thenReturn(Collections.singletonList(regionType));
+        // Search the regionType
+        restRegionTypeMockMvc.perform(get("/api/_search/region-types?query=id:" + regionType.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(regionType.getId().intValue())))
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
+            .andExpect(jsonPath("$.[*].priority").value(hasItem(DEFAULT_PRIORITY.intValue())));
     }
 
     @Test

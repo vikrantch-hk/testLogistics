@@ -1,4 +1,5 @@
 {
+    "name": "CourierAttributes",
     "fields": [
         {
             "fieldName": "prepaidAir",
@@ -58,11 +59,11 @@
         }
     ],
     "relationships": [],
-    "changelogDate": "20180608074058",
+    "changelogDate": "20180619110521",
     "entityTableName": "courier_attributes",
     "dto": "mapstruct",
     "pagination": "no",
-    "service": "no",
+    "service": "serviceImpl",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,
     "clientRootFolder": "",

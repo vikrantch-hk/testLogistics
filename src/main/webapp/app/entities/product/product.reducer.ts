@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
+import { ICrudSearchAction, ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
 import { SERVER_API_URL } from 'app/config/constants';
 
-import { IProduct } from 'app/shared/model/product.model';
+import { IProduct, defaultValue } from 'app/shared/model/product.model';
 
 export const ACTION_TYPES = {
+  SEARCH_PRODUCTS: 'product/SEARCH_PRODUCTS',
   FETCH_PRODUCT_LIST: 'product/FETCH_PRODUCT_LIST',
   FETCH_PRODUCT: 'product/FETCH_PRODUCT',
   CREATE_PRODUCT: 'product/CREATE_PRODUCT',
@@ -19,16 +20,19 @@ export const ACTION_TYPES = {
 const initialState = {
   loading: false,
   errorMessage: null,
-  entities: [],
-  entity: {},
+  entities: [] as ReadonlyArray<IProduct>,
+  entity: defaultValue,
   updating: false,
   updateSuccess: false
 };
 
+export type ProductState = Readonly<typeof initialState>;
+
 // Reducer
 
-export default (state = initialState, action) => {
+export default (state: ProductState = initialState, action): ProductState => {
   switch (action.type) {
+    case REQUEST(ACTION_TYPES.SEARCH_PRODUCTS):
     case REQUEST(ACTION_TYPES.FETCH_PRODUCT_LIST):
     case REQUEST(ACTION_TYPES.FETCH_PRODUCT):
       return {
@@ -46,6 +50,7 @@ export default (state = initialState, action) => {
         updateSuccess: false,
         updating: true
       };
+    case FAILURE(ACTION_TYPES.SEARCH_PRODUCTS):
     case FAILURE(ACTION_TYPES.FETCH_PRODUCT_LIST):
     case FAILURE(ACTION_TYPES.FETCH_PRODUCT):
     case FAILURE(ACTION_TYPES.CREATE_PRODUCT):
@@ -57,6 +62,12 @@ export default (state = initialState, action) => {
         updating: false,
         updateSuccess: false,
         errorMessage: action.payload
+      };
+    case SUCCESS(ACTION_TYPES.SEARCH_PRODUCTS):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
       };
     case SUCCESS(ACTION_TYPES.FETCH_PRODUCT_LIST):
       return {
@@ -95,19 +106,25 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/products';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/products';
 
 // Actions
 
+export const getSearchEntities: ICrudSearchAction<IProduct> = query => ({
+  type: ACTION_TYPES.SEARCH_PRODUCTS,
+  payload: axios.get<IProduct>(`${apiSearchUrl}?query=` + query)
+});
+
 export const getEntities: ICrudGetAllAction<IProduct> = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_PRODUCT_LIST,
-  payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`) as Promise<IProduct>
+  payload: axios.get<IProduct>(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
 });
 
 export const getEntity: ICrudGetAction<IProduct> = id => {
   const requestUrl = `${apiUrl}/${id}`;
   return {
     type: ACTION_TYPES.FETCH_PRODUCT,
-    payload: axios.get(requestUrl) as Promise<IProduct>
+    payload: axios.get<IProduct>(requestUrl)
   };
 };
 

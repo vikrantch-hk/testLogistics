@@ -3,6 +3,4 @@ export interface ICity {
   name?: string;
 }
 
-export class City implements ICity {
-  constructor(public id?: number, public name?: string) {}
-}
+export const defaultValue: Readonly<ICity> = {};

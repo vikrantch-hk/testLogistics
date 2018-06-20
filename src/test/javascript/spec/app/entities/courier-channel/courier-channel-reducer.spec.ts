@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { expect } from 'chai';
+
 import configureStore from 'redux-mock-store';
 import promiseMiddleware from 'redux-promise-middleware';
 import thunk from 'redux-thunk';
@@ -14,6 +14,7 @@ import reducer, {
   updateEntity
 } from 'app/entities/courier-channel/courier-channel.reducer';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
+import { ICourierChannel, defaultValue } from 'app/shared/model/courier-channel.model';
 
 // tslint:disable no-invalid-template-strings
 describe('Entities reducer tests', () => {
@@ -28,14 +29,14 @@ describe('Entities reducer tests', () => {
   const initialState = {
     loading: false,
     errorMessage: null,
-    entities: [],
-    entity: {},
+    entities: [] as ReadonlyArray<ICourierChannel>,
+    entity: defaultValue,
     updating: false,
     updateSuccess: false
   };
 
   function testInitialState(state) {
-    expect(state).to.contain({
+    expect(state).toMatchObject({
       loading: false,
       errorMessage: null,
       updating: false,
@@ -60,7 +61,7 @@ describe('Entities reducer tests', () => {
   describe('Requests', () => {
     it('should set state to loading', () => {
       testMultipleTypes([REQUEST(ACTION_TYPES.FETCH_COURIERCHANNEL_LIST), REQUEST(ACTION_TYPES.FETCH_COURIERCHANNEL)], {}, state => {
-        expect(state).to.contain({
+        expect(state).toMatchObject({
           errorMessage: null,
           updateSuccess: false,
           loading: true
@@ -77,7 +78,7 @@ describe('Entities reducer tests', () => {
         ],
         {},
         state => {
-          expect(state).to.contain({
+          expect(state).toMatchObject({
             errorMessage: null,
             updateSuccess: false,
             updating: true
@@ -99,7 +100,7 @@ describe('Entities reducer tests', () => {
         ],
         'error message',
         state => {
-          expect(state).to.contain({
+          expect(state).toMatchObject({
             errorMessage: 'error message',
             updateSuccess: false,
             updating: false
@@ -117,7 +118,7 @@ describe('Entities reducer tests', () => {
           type: SUCCESS(ACTION_TYPES.FETCH_COURIERCHANNEL_LIST),
           payload
         })
-      ).to.eql({
+      ).toEqual({
         ...initialState,
         loading: false,
         entities: payload.data
@@ -131,7 +132,7 @@ describe('Entities reducer tests', () => {
           type: SUCCESS(ACTION_TYPES.CREATE_COURIERCHANNEL),
           payload
         })
-      ).to.eql({
+      ).toEqual({
         ...initialState,
         updating: false,
         updateSuccess: true,
@@ -145,7 +146,7 @@ describe('Entities reducer tests', () => {
         type: SUCCESS(ACTION_TYPES.DELETE_COURIERCHANNEL),
         payload
       });
-      expect(toTest).to.contain({
+      expect(toTest).toMatchObject({
         updating: false,
         updateSuccess: true
       });
@@ -175,7 +176,7 @@ describe('Entities reducer tests', () => {
           payload: resolvedObject
         }
       ];
-      await store.dispatch(getEntities()).then(() => expect(store.getActions()).to.eql(expectedActions));
+      await store.dispatch(getEntities()).then(() => expect(store.getActions()).toEqual(expectedActions));
     });
 
     it('dispatches ACTION_TYPES.FETCH_COURIERCHANNEL actions', async () => {
@@ -188,7 +189,7 @@ describe('Entities reducer tests', () => {
           payload: resolvedObject
         }
       ];
-      await store.dispatch(getEntity(42666)).then(() => expect(store.getActions()).to.eql(expectedActions));
+      await store.dispatch(getEntity(42666)).then(() => expect(store.getActions()).toEqual(expectedActions));
     });
 
     it('dispatches ACTION_TYPES.CREATE_COURIERCHANNEL actions', async () => {
@@ -208,7 +209,7 @@ describe('Entities reducer tests', () => {
           payload: resolvedObject
         }
       ];
-      await store.dispatch(createEntity({ id: 1 })).then(() => expect(store.getActions()).to.eql(expectedActions));
+      await store.dispatch(createEntity({ id: 1 })).then(() => expect(store.getActions()).toEqual(expectedActions));
     });
 
     it('dispatches ACTION_TYPES.UPDATE_COURIERCHANNEL actions', async () => {
@@ -228,7 +229,7 @@ describe('Entities reducer tests', () => {
           payload: resolvedObject
         }
       ];
-      await store.dispatch(updateEntity({ id: 1 })).then(() => expect(store.getActions()).to.eql(expectedActions));
+      await store.dispatch(updateEntity({ id: 1 })).then(() => expect(store.getActions()).toEqual(expectedActions));
     });
 
     it('dispatches ACTION_TYPES.DELETE_COURIERCHANNEL actions', async () => {
@@ -248,7 +249,7 @@ describe('Entities reducer tests', () => {
           payload: resolvedObject
         }
       ];
-      await store.dispatch(deleteEntity(42666)).then(() => expect(store.getActions()).to.eql(expectedActions));
+      await store.dispatch(deleteEntity(42666)).then(() => expect(store.getActions()).toEqual(expectedActions));
     });
   });
 });

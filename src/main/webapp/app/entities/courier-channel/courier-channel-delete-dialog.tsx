@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { ICrudGetAction, ICrudDeleteAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { ICourierChannel } from 'app/shared/model/courier-channel.model';
+import { IRootState } from 'app/shared/reducers';
 import { getEntity, deleteEntity } from './courier-channel.reducer';
 
-export interface ICourierChannelDeleteDialogProps {
-  getEntity: ICrudGetAction<ICourierChannel>;
-  deleteEntity: ICrudDeleteAction<ICourierChannel>;
-  courierChannel: ICourierChannel;
-  match: any;
-  history: any;
-}
+export interface ICourierChannelDeleteDialogProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class CourierChannelDeleteDialog extends React.Component<ICourierChannelDeleteDialogProps> {
   componentDidMount() {
@@ -21,7 +17,7 @@ export class CourierChannelDeleteDialog extends React.Component<ICourierChannelD
   }
 
   confirmDelete = event => {
-    this.props.deleteEntity(this.props.courierChannel.id);
+    this.props.deleteEntity(this.props.courierChannelEntity.id);
     this.handleClose(event);
   };
 
@@ -31,7 +27,7 @@ export class CourierChannelDeleteDialog extends React.Component<ICourierChannelD
   };
 
   render() {
-    const { courierChannel } = this.props;
+    const { courierChannelEntity } = this.props;
     return (
       <Modal isOpen toggle={this.handleClose}>
         <ModalHeader toggle={this.handleClose}>Confirm delete operation</ModalHeader>
@@ -49,10 +45,13 @@ export class CourierChannelDeleteDialog extends React.Component<ICourierChannelD
   }
 }
 
-const mapStateToProps = ({ courierChannel }) => ({
-  courierChannel: courierChannel.entity
+const mapStateToProps = ({ courierChannel }: IRootState) => ({
+  courierChannelEntity: courierChannel.entity
 });
 
 const mapDispatchToProps = { getEntity, deleteEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(CourierChannelDeleteDialog);

@@ -4,6 +4,4 @@ export interface ICountry {
   countryCode?: string;
 }
 
-export class Country implements ICountry {
-  constructor(public id?: number, public name?: string, public countryCode?: string) {}
-}
+export const defaultValue: Readonly<ICountry> = {};

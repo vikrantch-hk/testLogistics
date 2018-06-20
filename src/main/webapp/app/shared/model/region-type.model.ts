@@ -4,6 +4,4 @@ export interface IRegionType {
   priority?: number;
 }
 
-export class RegionType implements IRegionType {
-  constructor(public id?: number, public name?: string, public priority?: number) {}
-}
+export const defaultValue: Readonly<IRegionType> = {};

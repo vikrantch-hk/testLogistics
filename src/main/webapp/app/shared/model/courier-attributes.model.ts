@@ -10,25 +10,13 @@ export interface ICourierAttributes {
   cardOnDeliveryGround?: boolean;
 }
 
-export class CourierAttributes implements ICourierAttributes {
-  constructor(
-    public id?: number,
-    public prepaidAir?: boolean,
-    public prepaidGround?: boolean,
-    public codAir?: boolean,
-    public codGround?: boolean,
-    public reverseAir?: boolean,
-    public reverseGround?: boolean,
-    public cardOnDeliveryAir?: boolean,
-    public cardOnDeliveryGround?: boolean
-  ) {
-    this.prepaidAir = false;
-    this.prepaidGround = false;
-    this.codAir = false;
-    this.codGround = false;
-    this.reverseAir = false;
-    this.reverseGround = false;
-    this.cardOnDeliveryAir = false;
-    this.cardOnDeliveryGround = false;
-  }
-}
+export const defaultValue: Readonly<ICourierAttributes> = {
+  prepaidAir: false,
+  prepaidGround: false,
+  codAir: false,
+  codGround: false,
+  reverseAir: false,
+  reverseGround: false,
+  cardOnDeliveryAir: false,
+  cardOnDeliveryGround: false
+};

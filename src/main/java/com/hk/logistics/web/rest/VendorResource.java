@@ -1,15 +1,12 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.config.batch.BatchConfiguration;
-import com.hk.logistics.domain.Vendor;
-import com.hk.logistics.repository.VendorRepository;
+import com.hk.logistics.service.VendorService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.poiji.bind.Poiji;
 import com.poiji.exception.PoijiExcelType;
 import com.hk.logistics.service.dto.VendorDTO;
-import com.hk.logistics.service.mapper.VendorMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -28,40 +25,18 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.validation.Valid;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing Vendor.
@@ -74,27 +49,10 @@ public class VendorResource {
 
     private static final String ENTITY_NAME = "vendor";
 
-    private final VendorRepository vendorRepository;
+    private final VendorService vendorService;
 
-    private final VendorMapper vendorMapper;
-    
-    private int batchSize = 100;
-    
-    @Autowired
-    JobLauncher jobLauncher;
-    
-    @Autowired
-    BatchConfiguration batchConfiguration;
-    
-    @Autowired
-    Job job;
-    
-    @PersistenceContext
-    private EntityManager em;
-
-    public VendorResource(VendorRepository vendorRepository, VendorMapper vendorMapper) {
-        this.vendorRepository = vendorRepository;
-        this.vendorMapper = vendorMapper;
+    public VendorResource(VendorService vendorService) {
+        this.vendorService = vendorService;
     }
     
 	@RequestMapping(value = "/upload", method = RequestMethod.POST,produces = MediaType.APPLICATION_JSON_VALUE)
@@ -188,10 +146,8 @@ public class VendorResource {
         log.debug("REST request to save Vendor : {}", vendorDTO);
         if (vendorDTO.getId() != null) {
             throw new BadRequestAlertException("A new vendor cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        Vendor vendor = vendorMapper.toEntity(vendorDTO);
-        vendor = vendorRepository.save(vendor);
-        VendorDTO result = vendorMapper.toDto(vendor);
+        }
+        VendorDTO result = vendorService.save(vendorDTO);
         return ResponseEntity.created(new URI("/api/vendors/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -212,10 +168,8 @@ public class VendorResource {
         log.debug("REST request to update Vendor : {}", vendorDTO);
         if (vendorDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        Vendor vendor = vendorMapper.toEntity(vendorDTO);
-        vendor = vendorRepository.save(vendor);
-        VendorDTO result = vendorMapper.toDto(vendor);
+        }
+        VendorDTO result = vendorService.save(vendorDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, vendorDTO.getId().toString()))
             .body(result);
@@ -230,8 +184,7 @@ public class VendorResource {
     @Timed
     public List<VendorDTO> getAllVendors() {
         log.debug("REST request to get all Vendors");
-        List<Vendor> vendors = vendorRepository.findAll();
-        return vendorMapper.toDto(vendors);
+        return vendorService.findAll();
     }
 
     /**
@@ -244,8 +197,7 @@ public class VendorResource {
     @Timed
     public ResponseEntity<VendorDTO> getVendor(@PathVariable Long id) {
         log.debug("REST request to get Vendor : {}", id);
-        Optional<VendorDTO> vendorDTO = vendorRepository.findById(id)
-            .map(vendorMapper::toDto);
+        Optional<VendorDTO> vendorDTO = vendorService.findOne(id);
         return ResponseUtil.wrapOrNotFound(vendorDTO);
     }
 
@@ -259,7 +211,22 @@ public class VendorResource {
     @Timed
     public ResponseEntity<Void> deleteVendor(@PathVariable Long id) {
         log.debug("REST request to delete Vendor : {}", id);
-        vendorRepository.deleteById(id);
+        vendorService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/vendors?query=:query : search for the vendor corresponding
+     * to the query.
+     *
+     * @param query the query of the vendor search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/vendors")
+    @Timed
+    public List<VendorDTO> searchVendors(@RequestParam String query) {
+        log.debug("REST request to search Vendors for query {}", query);
+        return vendorService.search(query);
+    }
+
 }

@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { ICrudGetAction, ICrudDeleteAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { IProduct } from 'app/shared/model/product.model';
+import { IRootState } from 'app/shared/reducers';
 import { getEntity, deleteEntity } from './product.reducer';
 
-export interface IProductDeleteDialogProps {
-  getEntity: ICrudGetAction<IProduct>;
-  deleteEntity: ICrudDeleteAction<IProduct>;
-  product: IProduct;
-  match: any;
-  history: any;
-}
+export interface IProductDeleteDialogProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class ProductDeleteDialog extends React.Component<IProductDeleteDialogProps> {
   componentDidMount() {
@@ -21,7 +17,7 @@ export class ProductDeleteDialog extends React.Component<IProductDeleteDialogPro
   }
 
   confirmDelete = event => {
-    this.props.deleteEntity(this.props.product.id);
+    this.props.deleteEntity(this.props.productEntity.id);
     this.handleClose(event);
   };
 
@@ -31,7 +27,7 @@ export class ProductDeleteDialog extends React.Component<IProductDeleteDialogPro
   };
 
   render() {
-    const { product } = this.props;
+    const { productEntity } = this.props;
     return (
       <Modal isOpen toggle={this.handleClose}>
         <ModalHeader toggle={this.handleClose}>Confirm delete operation</ModalHeader>
@@ -49,10 +45,13 @@ export class ProductDeleteDialog extends React.Component<IProductDeleteDialogPro
   }
 }
 
-const mapStateToProps = ({ product }) => ({
-  product: product.entity
+const mapStateToProps = ({ product }: IRootState) => ({
+  productEntity: product.entity
 });
 
 const mapDispatchToProps = { getEntity, deleteEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProductDeleteDialog);

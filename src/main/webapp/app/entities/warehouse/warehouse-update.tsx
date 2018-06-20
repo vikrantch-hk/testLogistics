@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvField } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { getEntity, updateEntity, createEntity, reset } from './warehouse.reducer';
 import { IWarehouse } from 'app/shared/model/warehouse.model';
@@ -13,17 +14,7 @@ import { IWarehouse } from 'app/shared/model/warehouse.model';
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface IWarehouseUpdateProps {
-  getEntity: ICrudGetAction<IWarehouse>;
-  updateEntity: ICrudPutAction<IWarehouse>;
-  createEntity: ICrudPutAction<IWarehouse>;
-  warehouse: IWarehouse;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface IWarehouseUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface IWarehouseUpdateState {
   isNew: boolean;
@@ -47,9 +38,9 @@ export class WarehouseUpdate extends React.Component<IWarehouseUpdateProps, IWar
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { warehouse } = this.props;
+      const { warehouseEntity } = this.props;
       const entity = {
-        ...warehouse,
+        ...warehouseEntity,
         ...values
       };
 
@@ -68,14 +59,14 @@ export class WarehouseUpdate extends React.Component<IWarehouseUpdateProps, IWar
 
   render() {
     const isInvalid = false;
-    const { warehouse, loading, updating } = this.props;
+    const { warehouseEntity, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-warehouse-heading">Create or edit a Warehouse</h2>
+            <h2 id="testLogisticsApp.warehouse.home.createOrEditLabel">Create or edit a Warehouse</h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -83,11 +74,11 @@ export class WarehouseUpdate extends React.Component<IWarehouseUpdateProps, IWar
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : warehouse} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : warehouseEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="warehouse-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <AvGroup>
@@ -95,6 +86,7 @@ export class WarehouseUpdate extends React.Component<IWarehouseUpdateProps, IWar
                     Name
                   </Label>
                   <AvField
+                    id="warehouse-name"
                     type="text"
                     name="name"
                     validate={{
@@ -107,6 +99,7 @@ export class WarehouseUpdate extends React.Component<IWarehouseUpdateProps, IWar
                     Pincode
                   </Label>
                   <AvField
+                    id="warehouse-pincode"
                     type="text"
                     name="pincode"
                     validate={{
@@ -131,8 +124,8 @@ export class WarehouseUpdate extends React.Component<IWarehouseUpdateProps, IWar
   }
 }
 
-const mapStateToProps = storeState => ({
-  warehouse: storeState.warehouse.entity,
+const mapStateToProps = (storeState: IRootState) => ({
+  warehouseEntity: storeState.warehouse.entity,
   loading: storeState.warehouse.loading,
   updating: storeState.warehouse.updating
 });
@@ -143,5 +136,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(WarehouseUpdate);

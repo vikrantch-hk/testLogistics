@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.CourierPricingEngine;
-import com.hk.logistics.repository.CourierPricingEngineRepository;
+import com.hk.logistics.service.CourierPricingEngineService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.CourierPricingEngineDTO;
-import com.hk.logistics.service.mapper.CourierPricingEngineMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +17,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing CourierPricingEngine.
@@ -31,13 +32,10 @@ public class CourierPricingEngineResource {
 
     private static final String ENTITY_NAME = "courierPricingEngine";
 
-    private final CourierPricingEngineRepository courierPricingEngineRepository;
+    private final CourierPricingEngineService courierPricingEngineService;
 
-    private final CourierPricingEngineMapper courierPricingEngineMapper;
-
-    public CourierPricingEngineResource(CourierPricingEngineRepository courierPricingEngineRepository, CourierPricingEngineMapper courierPricingEngineMapper) {
-        this.courierPricingEngineRepository = courierPricingEngineRepository;
-        this.courierPricingEngineMapper = courierPricingEngineMapper;
+    public CourierPricingEngineResource(CourierPricingEngineService courierPricingEngineService) {
+        this.courierPricingEngineService = courierPricingEngineService;
     }
 
     /**
@@ -53,10 +51,8 @@ public class CourierPricingEngineResource {
         log.debug("REST request to save CourierPricingEngine : {}", courierPricingEngineDTO);
         if (courierPricingEngineDTO.getId() != null) {
             throw new BadRequestAlertException("A new courierPricingEngine cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        CourierPricingEngine courierPricingEngine = courierPricingEngineMapper.toEntity(courierPricingEngineDTO);
-        courierPricingEngine = courierPricingEngineRepository.save(courierPricingEngine);
-        CourierPricingEngineDTO result = courierPricingEngineMapper.toDto(courierPricingEngine);
+        }
+        CourierPricingEngineDTO result = courierPricingEngineService.save(courierPricingEngineDTO);
         return ResponseEntity.created(new URI("/api/courier-pricing-engines/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -77,10 +73,8 @@ public class CourierPricingEngineResource {
         log.debug("REST request to update CourierPricingEngine : {}", courierPricingEngineDTO);
         if (courierPricingEngineDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        CourierPricingEngine courierPricingEngine = courierPricingEngineMapper.toEntity(courierPricingEngineDTO);
-        courierPricingEngine = courierPricingEngineRepository.save(courierPricingEngine);
-        CourierPricingEngineDTO result = courierPricingEngineMapper.toDto(courierPricingEngine);
+        }
+        CourierPricingEngineDTO result = courierPricingEngineService.save(courierPricingEngineDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, courierPricingEngineDTO.getId().toString()))
             .body(result);
@@ -95,8 +89,7 @@ public class CourierPricingEngineResource {
     @Timed
     public List<CourierPricingEngineDTO> getAllCourierPricingEngines() {
         log.debug("REST request to get all CourierPricingEngines");
-        List<CourierPricingEngine> courierPricingEngines = courierPricingEngineRepository.findAll();
-        return courierPricingEngineMapper.toDto(courierPricingEngines);
+        return courierPricingEngineService.findAll();
     }
 
     /**
@@ -109,8 +102,7 @@ public class CourierPricingEngineResource {
     @Timed
     public ResponseEntity<CourierPricingEngineDTO> getCourierPricingEngine(@PathVariable Long id) {
         log.debug("REST request to get CourierPricingEngine : {}", id);
-        Optional<CourierPricingEngineDTO> courierPricingEngineDTO = courierPricingEngineRepository.findById(id)
-            .map(courierPricingEngineMapper::toDto);
+        Optional<CourierPricingEngineDTO> courierPricingEngineDTO = courierPricingEngineService.findOne(id);
         return ResponseUtil.wrapOrNotFound(courierPricingEngineDTO);
     }
 
@@ -124,7 +116,22 @@ public class CourierPricingEngineResource {
     @Timed
     public ResponseEntity<Void> deleteCourierPricingEngine(@PathVariable Long id) {
         log.debug("REST request to delete CourierPricingEngine : {}", id);
-        courierPricingEngineRepository.deleteById(id);
+        courierPricingEngineService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/courier-pricing-engines?query=:query : search for the courierPricingEngine corresponding
+     * to the query.
+     *
+     * @param query the query of the courierPricingEngine search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/courier-pricing-engines")
+    @Timed
+    public List<CourierPricingEngineDTO> searchCourierPricingEngines(@RequestParam String query) {
+        log.debug("REST request to search CourierPricingEngines for query {}", query);
+        return courierPricingEngineService.search(query);
+    }
+
 }

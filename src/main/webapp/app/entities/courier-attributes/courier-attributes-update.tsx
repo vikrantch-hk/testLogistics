@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { getEntity, updateEntity, createEntity, reset } from './courier-attributes.reducer';
 import { ICourierAttributes } from 'app/shared/model/courier-attributes.model';
@@ -13,17 +14,7 @@ import { ICourierAttributes } from 'app/shared/model/courier-attributes.model';
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface ICourierAttributesUpdateProps {
-  getEntity: ICrudGetAction<ICourierAttributes>;
-  updateEntity: ICrudPutAction<ICourierAttributes>;
-  createEntity: ICrudPutAction<ICourierAttributes>;
-  courierAttributes: ICourierAttributes;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface ICourierAttributesUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface ICourierAttributesUpdateState {
   isNew: boolean;
@@ -47,9 +38,9 @@ export class CourierAttributesUpdate extends React.Component<ICourierAttributesU
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { courierAttributes } = this.props;
+      const { courierAttributesEntity } = this.props;
       const entity = {
-        ...courierAttributes,
+        ...courierAttributesEntity,
         ...values
       };
 
@@ -68,14 +59,14 @@ export class CourierAttributesUpdate extends React.Component<ICourierAttributesU
 
   render() {
     const isInvalid = false;
-    const { courierAttributes, loading, updating } = this.props;
+    const { courierAttributesEntity, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-courier-attributes-heading">Create or edit a CourierAttributes</h2>
+            <h2 id="testLogisticsApp.courierAttributes.home.createOrEditLabel">Create or edit a CourierAttributes</h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -83,58 +74,63 @@ export class CourierAttributesUpdate extends React.Component<ICourierAttributesU
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : courierAttributes} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : courierAttributesEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="courier-attributes-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <AvGroup>
                   <Label id="prepaidAirLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="prepaidAir" />
+                    <AvInput id="courier-attributes-prepaidAir" type="checkbox" className="form-control" name="prepaidAir" />
                     Prepaid Air
                   </Label>
                 </AvGroup>
                 <AvGroup>
                   <Label id="prepaidGroundLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="prepaidGround" />
+                    <AvInput id="courier-attributes-prepaidGround" type="checkbox" className="form-control" name="prepaidGround" />
                     Prepaid Ground
                   </Label>
                 </AvGroup>
                 <AvGroup>
                   <Label id="codAirLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="codAir" />
+                    <AvInput id="courier-attributes-codAir" type="checkbox" className="form-control" name="codAir" />
                     Cod Air
                   </Label>
                 </AvGroup>
                 <AvGroup>
                   <Label id="codGroundLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="codGround" />
+                    <AvInput id="courier-attributes-codGround" type="checkbox" className="form-control" name="codGround" />
                     Cod Ground
                   </Label>
                 </AvGroup>
                 <AvGroup>
                   <Label id="reverseAirLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="reverseAir" />
+                    <AvInput id="courier-attributes-reverseAir" type="checkbox" className="form-control" name="reverseAir" />
                     Reverse Air
                   </Label>
                 </AvGroup>
                 <AvGroup>
                   <Label id="reverseGroundLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="reverseGround" />
+                    <AvInput id="courier-attributes-reverseGround" type="checkbox" className="form-control" name="reverseGround" />
                     Reverse Ground
                   </Label>
                 </AvGroup>
                 <AvGroup>
                   <Label id="cardOnDeliveryAirLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="cardOnDeliveryAir" />
+                    <AvInput id="courier-attributes-cardOnDeliveryAir" type="checkbox" className="form-control" name="cardOnDeliveryAir" />
                     Card On Delivery Air
                   </Label>
                 </AvGroup>
                 <AvGroup>
                   <Label id="cardOnDeliveryGroundLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="cardOnDeliveryGround" />
+                    <AvInput
+                      id="courier-attributes-cardOnDeliveryGround"
+                      type="checkbox"
+                      className="form-control"
+                      name="cardOnDeliveryGround"
+                    />
                     Card On Delivery Ground
                   </Label>
                 </AvGroup>
@@ -155,8 +151,8 @@ export class CourierAttributesUpdate extends React.Component<ICourierAttributesU
   }
 }
 
-const mapStateToProps = storeState => ({
-  courierAttributes: storeState.courierAttributes.entity,
+const mapStateToProps = (storeState: IRootState) => ({
+  courierAttributesEntity: storeState.courierAttributes.entity,
   loading: storeState.courierAttributes.loading,
   updating: storeState.courierAttributes.updating
 });
@@ -167,5 +163,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(CourierAttributesUpdate);

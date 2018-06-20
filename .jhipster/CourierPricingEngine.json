@@ -1,4 +1,5 @@
 {
+    "name": "CourierPricingEngine",
     "fields": [
         {
             "fieldName": "firstBaseWt",
@@ -77,11 +78,11 @@
             "otherEntityField": "name"
         }
     ],
-    "changelogDate": "20180608074054",
+    "changelogDate": "20180619110517",
     "entityTableName": "courier_pricing_engine",
     "dto": "mapstruct",
     "pagination": "no",
-    "service": "no",
+    "service": "serviceImpl",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,
     "clientRootFolder": "",

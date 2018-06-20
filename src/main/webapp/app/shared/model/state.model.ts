@@ -5,8 +5,6 @@ export interface IState {
   unionTerritory?: boolean;
 }
 
-export class State implements IState {
-  constructor(public id?: number, public name?: string, public identifier?: string, public unionTerritory?: boolean) {
-    this.unionTerritory = false;
-  }
-}
+export const defaultValue: Readonly<IState> = {
+  unionTerritory: false
+};

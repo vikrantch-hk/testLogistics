@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.Zone;
 import com.hk.logistics.repository.ZoneRepository;
+import com.hk.logistics.repository.search.ZoneSearchRepository;
+import com.hk.logistics.service.ZoneService;
 import com.hk.logistics.service.dto.ZoneDTO;
 import com.hk.logistics.service.mapper.ZoneMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -51,6 +55,18 @@ public class ZoneResourceIntTest {
 
     @Autowired
     private ZoneMapper zoneMapper;
+    
+
+    @Autowired
+    private ZoneService zoneService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.ZoneSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private ZoneSearchRepository mockZoneSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -71,7 +87,7 @@ public class ZoneResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final ZoneResource zoneResource = new ZoneResource(zoneRepository, zoneMapper);
+        final ZoneResource zoneResource = new ZoneResource(zoneService);
         this.restZoneMockMvc = MockMvcBuilders.standaloneSetup(zoneResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -113,6 +129,9 @@ public class ZoneResourceIntTest {
         assertThat(zoneList).hasSize(databaseSizeBeforeCreate + 1);
         Zone testZone = zoneList.get(zoneList.size() - 1);
         assertThat(testZone.getName()).isEqualTo(DEFAULT_NAME);
+
+        // Validate the Zone in Elasticsearch
+        verify(mockZoneSearchRepository, times(1)).save(testZone);
     }
 
     @Test
@@ -133,6 +152,9 @@ public class ZoneResourceIntTest {
         // Validate the Zone in the database
         List<Zone> zoneList = zoneRepository.findAll();
         assertThat(zoneList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the Zone in Elasticsearch
+        verify(mockZoneSearchRepository, times(0)).save(zone);
     }
 
     @Test
@@ -216,6 +238,9 @@ public class ZoneResourceIntTest {
         assertThat(zoneList).hasSize(databaseSizeBeforeUpdate);
         Zone testZone = zoneList.get(zoneList.size() - 1);
         assertThat(testZone.getName()).isEqualTo(UPDATED_NAME);
+
+        // Validate the Zone in Elasticsearch
+        verify(mockZoneSearchRepository, times(1)).save(testZone);
     }
 
     @Test
@@ -235,6 +260,9 @@ public class ZoneResourceIntTest {
         // Validate the Zone in the database
         List<Zone> zoneList = zoneRepository.findAll();
         assertThat(zoneList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the Zone in Elasticsearch
+        verify(mockZoneSearchRepository, times(0)).save(zone);
     }
 
     @Test
@@ -253,6 +281,24 @@ public class ZoneResourceIntTest {
         // Validate the database is empty
         List<Zone> zoneList = zoneRepository.findAll();
         assertThat(zoneList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the Zone in Elasticsearch
+        verify(mockZoneSearchRepository, times(1)).deleteById(zone.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchZone() throws Exception {
+        // Initialize the database
+        zoneRepository.saveAndFlush(zone);
+        when(mockZoneSearchRepository.search(queryStringQuery("id:" + zone.getId())))
+            .thenReturn(Collections.singletonList(zone));
+        // Search the zone
+        restZoneMockMvc.perform(get("/api/_search/zones?query=id:" + zone.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(zone.getId().intValue())))
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())));
     }
 
     @Test

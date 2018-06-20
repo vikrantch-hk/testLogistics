@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { ICrudGetAction, ICrudDeleteAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { ICourierPricingEngine } from 'app/shared/model/courier-pricing-engine.model';
+import { IRootState } from 'app/shared/reducers';
 import { getEntity, deleteEntity } from './courier-pricing-engine.reducer';
 
-export interface ICourierPricingEngineDeleteDialogProps {
-  getEntity: ICrudGetAction<ICourierPricingEngine>;
-  deleteEntity: ICrudDeleteAction<ICourierPricingEngine>;
-  courierPricingEngine: ICourierPricingEngine;
-  match: any;
-  history: any;
-}
+export interface ICourierPricingEngineDeleteDialogProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class CourierPricingEngineDeleteDialog extends React.Component<ICourierPricingEngineDeleteDialogProps> {
   componentDidMount() {
@@ -21,7 +17,7 @@ export class CourierPricingEngineDeleteDialog extends React.Component<ICourierPr
   }
 
   confirmDelete = event => {
-    this.props.deleteEntity(this.props.courierPricingEngine.id);
+    this.props.deleteEntity(this.props.courierPricingEngineEntity.id);
     this.handleClose(event);
   };
 
@@ -31,7 +27,7 @@ export class CourierPricingEngineDeleteDialog extends React.Component<ICourierPr
   };
 
   render() {
-    const { courierPricingEngine } = this.props;
+    const { courierPricingEngineEntity } = this.props;
     return (
       <Modal isOpen toggle={this.handleClose}>
         <ModalHeader toggle={this.handleClose}>Confirm delete operation</ModalHeader>
@@ -49,10 +45,13 @@ export class CourierPricingEngineDeleteDialog extends React.Component<ICourierPr
   }
 }
 
-const mapStateToProps = ({ courierPricingEngine }) => ({
-  courierPricingEngine: courierPricingEngine.entity
+const mapStateToProps = ({ courierPricingEngine }: IRootState) => ({
+  courierPricingEngineEntity: courierPricingEngine.entity
 });
 
 const mapDispatchToProps = { getEntity, deleteEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(CourierPricingEngineDeleteDialog);

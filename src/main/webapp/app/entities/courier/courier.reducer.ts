@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
+import { ICrudSearchAction, ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
 import { SERVER_API_URL } from 'app/config/constants';
 
-import { ICourier } from 'app/shared/model/courier.model';
+import { ICourier, defaultValue } from 'app/shared/model/courier.model';
 
 export const ACTION_TYPES = {
+  SEARCH_COURIERS: 'courier/SEARCH_COURIERS',
   FETCH_COURIER_LIST: 'courier/FETCH_COURIER_LIST',
   FETCH_COURIER: 'courier/FETCH_COURIER',
   CREATE_COURIER: 'courier/CREATE_COURIER',
@@ -19,17 +20,20 @@ export const ACTION_TYPES = {
 const initialState = {
   loading: false,
   errorMessage: null,
-  entities: [],
-  entity: {},
+  entities: [] as ReadonlyArray<ICourier>,
+  entity: defaultValue,
   updating: false,
   totalItems: 0,
   updateSuccess: false
 };
 
+export type CourierState = Readonly<typeof initialState>;
+
 // Reducer
 
-export default (state = initialState, action) => {
+export default (state: CourierState = initialState, action): CourierState => {
   switch (action.type) {
+    case REQUEST(ACTION_TYPES.SEARCH_COURIERS):
     case REQUEST(ACTION_TYPES.FETCH_COURIER_LIST):
     case REQUEST(ACTION_TYPES.FETCH_COURIER):
       return {
@@ -47,6 +51,7 @@ export default (state = initialState, action) => {
         updateSuccess: false,
         updating: true
       };
+    case FAILURE(ACTION_TYPES.SEARCH_COURIERS):
     case FAILURE(ACTION_TYPES.FETCH_COURIER_LIST):
     case FAILURE(ACTION_TYPES.FETCH_COURIER):
     case FAILURE(ACTION_TYPES.CREATE_COURIER):
@@ -58,6 +63,12 @@ export default (state = initialState, action) => {
         updating: false,
         updateSuccess: false,
         errorMessage: action.payload
+      };
+    case SUCCESS(ACTION_TYPES.SEARCH_COURIERS):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
       };
     case SUCCESS(ACTION_TYPES.FETCH_COURIER_LIST):
       return {
@@ -97,14 +108,20 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/couriers';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/couriers';
 
 // Actions
+
+export const getSearchEntities: ICrudSearchAction<ICourier> = query => ({
+  type: ACTION_TYPES.SEARCH_COURIERS,
+  payload: axios.get<ICourier>(`${apiSearchUrl}?query=` + query)
+});
 
 export const getEntities: ICrudGetAllAction<ICourier> = (page, size, sort) => {
   const requestUrl = `${apiUrl}${sort ? `?page=${page}&size=${size}&sort=${sort}` : ''}`;
   return {
     type: ACTION_TYPES.FETCH_COURIER_LIST,
-    payload: axios.get(`${requestUrl}${sort ? '&' : '?'}cacheBuster=${new Date().getTime()}`) as Promise<ICourier>
+    payload: axios.get<ICourier>(`${requestUrl}${sort ? '&' : '?'}cacheBuster=${new Date().getTime()}`)
   };
 };
 
@@ -112,7 +129,7 @@ export const getEntity: ICrudGetAction<ICourier> = id => {
   const requestUrl = `${apiUrl}/${id}`;
   return {
     type: ACTION_TYPES.FETCH_COURIER,
-    payload: axios.get(requestUrl) as Promise<ICourier>
+    payload: axios.get<ICourier>(requestUrl)
   };
 };
 

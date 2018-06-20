@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.City;
 import com.hk.logistics.repository.CityRepository;
+import com.hk.logistics.repository.search.CitySearchRepository;
+import com.hk.logistics.service.CityService;
 import com.hk.logistics.service.dto.CityDTO;
 import com.hk.logistics.service.mapper.CityMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +25,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -51,6 +55,18 @@ public class CityResourceIntTest {
 
     @Autowired
     private CityMapper cityMapper;
+    
+
+    @Autowired
+    private CityService cityService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.CitySearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private CitySearchRepository mockCitySearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -71,7 +87,7 @@ public class CityResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final CityResource cityResource = new CityResource(cityRepository, cityMapper);
+        final CityResource cityResource = new CityResource(cityService);
         this.restCityMockMvc = MockMvcBuilders.standaloneSetup(cityResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -113,6 +129,9 @@ public class CityResourceIntTest {
         assertThat(cityList).hasSize(databaseSizeBeforeCreate + 1);
         City testCity = cityList.get(cityList.size() - 1);
         assertThat(testCity.getName()).isEqualTo(DEFAULT_NAME);
+
+        // Validate the City in Elasticsearch
+        verify(mockCitySearchRepository, times(1)).save(testCity);
     }
 
     @Test
@@ -133,6 +152,9 @@ public class CityResourceIntTest {
         // Validate the City in the database
         List<City> cityList = cityRepository.findAll();
         assertThat(cityList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the City in Elasticsearch
+        verify(mockCitySearchRepository, times(0)).save(city);
     }
 
     @Test
@@ -216,6 +238,9 @@ public class CityResourceIntTest {
         assertThat(cityList).hasSize(databaseSizeBeforeUpdate);
         City testCity = cityList.get(cityList.size() - 1);
         assertThat(testCity.getName()).isEqualTo(UPDATED_NAME);
+
+        // Validate the City in Elasticsearch
+        verify(mockCitySearchRepository, times(1)).save(testCity);
     }
 
     @Test
@@ -235,6 +260,9 @@ public class CityResourceIntTest {
         // Validate the City in the database
         List<City> cityList = cityRepository.findAll();
         assertThat(cityList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the City in Elasticsearch
+        verify(mockCitySearchRepository, times(0)).save(city);
     }
 
     @Test
@@ -253,6 +281,24 @@ public class CityResourceIntTest {
         // Validate the database is empty
         List<City> cityList = cityRepository.findAll();
         assertThat(cityList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the City in Elasticsearch
+        verify(mockCitySearchRepository, times(1)).deleteById(city.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchCity() throws Exception {
+        // Initialize the database
+        cityRepository.saveAndFlush(city);
+        when(mockCitySearchRepository.search(queryStringQuery("id:" + city.getId())))
+            .thenReturn(Collections.singletonList(city));
+        // Search the city
+        restCityMockMvc.perform(get("/api/_search/cities?query=id:" + city.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(city.getId().intValue())))
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())));
     }
 
     @Test

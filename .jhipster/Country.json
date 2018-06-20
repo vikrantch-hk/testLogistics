@@ -1,4 +1,5 @@
 {
+    "name": "Country",
     "fields": [
         {
             "fieldName": "name",
@@ -16,11 +17,11 @@
         }
     ],
     "relationships": [],
-    "changelogDate": "20180608074103",
+    "changelogDate": "20180619110526",
     "entityTableName": "country",
     "dto": "mapstruct",
     "pagination": "no",
-    "service": "no",
+    "service": "serviceImpl",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,
     "clientRootFolder": "",

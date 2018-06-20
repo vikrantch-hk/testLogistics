@@ -1,21 +1,18 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col } from 'reactstrap';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
+import { IRootState } from 'app/shared/reducers';
 import { getEntity } from './courier-group.reducer';
 import { ICourierGroup } from 'app/shared/model/courier-group.model';
 // tslint:disable-next-line:no-unused-variable
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
 
-export interface ICourierGroupDetailProps {
-  getEntity: ICrudGetAction<ICourierGroup>;
-  courierGroup: ICourierGroup;
-  match: any;
-}
+export interface ICourierGroupDetailProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class CourierGroupDetail extends React.Component<ICourierGroupDetailProps> {
   componentDidMount() {
@@ -23,25 +20,23 @@ export class CourierGroupDetail extends React.Component<ICourierGroupDetailProps
   }
 
   render() {
-    const { courierGroup } = this.props;
+    const { courierGroupEntity } = this.props;
     return (
       <Row>
         <Col md="8">
           <h2>
-            CourierGroup [<b>{courierGroup.id}</b>]
+            CourierGroup [<b>{courierGroupEntity.id}</b>]
           </h2>
-          <Row size="md">
-            <dl className="jh-entity-details">
-              <dt>
-                <span id="name">Name</span>
-              </dt>
-              <dd>{courierGroup.name}</dd>
-            </dl>
-          </Row>
+          <dl className="jh-entity-details">
+            <dt>
+              <span id="name">Name</span>
+            </dt>
+            <dd>{courierGroupEntity.name}</dd>
+          </dl>
           <Button tag={Link} to="/entity/courier-group" replace color="info">
             <FontAwesomeIcon icon="arrow-left" /> <span className="d-none d-md-inline">Back</span>
-          </Button>
-          <Button tag={Link} to={`/entity/courier-group/${courierGroup.id}/edit`} replace color="primary">
+          </Button>&nbsp;
+          <Button tag={Link} to={`/entity/courier-group/${courierGroupEntity.id}/edit`} replace color="primary">
             <FontAwesomeIcon icon="pencil-alt" /> <span className="d-none d-md-inline">Edit</span>
           </Button>
         </Col>
@@ -50,10 +45,13 @@ export class CourierGroupDetail extends React.Component<ICourierGroupDetailProps
   }
 }
 
-const mapStateToProps = ({ courierGroup }) => ({
-  courierGroup: courierGroup.entity
+const mapStateToProps = ({ courierGroup }: IRootState) => ({
+  courierGroupEntity: courierGroup.entity
 });
 
 const mapDispatchToProps = { getEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(CourierGroupDetail);

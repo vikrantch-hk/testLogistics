@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.Courier;
 import com.hk.logistics.repository.CourierRepository;
+import com.hk.logistics.repository.search.CourierSearchRepository;
+import com.hk.logistics.service.CourierService;
 import com.hk.logistics.service.dto.CourierDTO;
 import com.hk.logistics.service.mapper.CourierMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -26,11 +28,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -67,6 +72,20 @@ public class CourierResourceIntTest {
 
     @Autowired
     private CourierMapper courierMapper;
+    
+    @Mock
+    private CourierService courierServiceMock;
+
+    @Autowired
+    private CourierService courierService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.CourierSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private CourierSearchRepository mockCourierSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -87,7 +106,7 @@ public class CourierResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final CourierResource courierResource = new CourierResource(courierRepository, courierMapper);
+        final CourierResource courierResource = new CourierResource(courierService);
         this.restCourierMockMvc = MockMvcBuilders.standaloneSetup(courierResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -137,6 +156,9 @@ public class CourierResourceIntTest {
         assertThat(testCourier.getTrackingParameter()).isEqualTo(DEFAULT_TRACKING_PARAMETER);
         assertThat(testCourier.getTrackingUrl()).isEqualTo(DEFAULT_TRACKING_URL);
         assertThat(testCourier.getParentCourierId()).isEqualTo(DEFAULT_PARENT_COURIER_ID);
+
+        // Validate the Courier in Elasticsearch
+        verify(mockCourierSearchRepository, times(1)).save(testCourier);
     }
 
     @Test
@@ -157,6 +179,9 @@ public class CourierResourceIntTest {
         // Validate the Courier in the database
         List<Courier> courierList = courierRepository.findAll();
         assertThat(courierList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the Courier in Elasticsearch
+        verify(mockCourierSearchRepository, times(0)).save(courier);
     }
 
     @Test
@@ -216,8 +241,8 @@ public class CourierResourceIntTest {
     }
     
     public void getAllCouriersWithEagerRelationshipsIsEnabled() throws Exception {
-        CourierResource courierResource = new CourierResource(courierRepositoryMock, courierMapper);
-        when(courierRepositoryMock.findAllWithEagerRelationships(any())).thenReturn(new PageImpl(new ArrayList<>()));
+        CourierResource courierResource = new CourierResource(courierServiceMock);
+        when(courierServiceMock.findAllWithEagerRelationships(any())).thenReturn(new PageImpl(new ArrayList<>()));
 
         MockMvc restCourierMockMvc = MockMvcBuilders.standaloneSetup(courierResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
@@ -228,12 +253,12 @@ public class CourierResourceIntTest {
         restCourierMockMvc.perform(get("/api/couriers?eagerload=true"))
         .andExpect(status().isOk());
 
-        verify(courierRepositoryMock, times(1)).findAllWithEagerRelationships(any());
+        verify(courierServiceMock, times(1)).findAllWithEagerRelationships(any());
     }
 
     public void getAllCouriersWithEagerRelationshipsIsNotEnabled() throws Exception {
-        CourierResource courierResource = new CourierResource(courierRepositoryMock, courierMapper);
-            when(courierRepositoryMock.findAllWithEagerRelationships(any())).thenReturn(new PageImpl(new ArrayList<>()));
+        CourierResource courierResource = new CourierResource(courierServiceMock);
+            when(courierServiceMock.findAllWithEagerRelationships(any())).thenReturn(new PageImpl(new ArrayList<>()));
             MockMvc restCourierMockMvc = MockMvcBuilders.standaloneSetup(courierResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -243,7 +268,7 @@ public class CourierResourceIntTest {
         restCourierMockMvc.perform(get("/api/couriers?eagerload=true"))
         .andExpect(status().isOk());
 
-            verify(courierRepositoryMock, times(1)).findAllWithEagerRelationships(any());
+            verify(courierServiceMock, times(1)).findAllWithEagerRelationships(any());
     }
 
     @Test
@@ -305,6 +330,9 @@ public class CourierResourceIntTest {
         assertThat(testCourier.getTrackingParameter()).isEqualTo(UPDATED_TRACKING_PARAMETER);
         assertThat(testCourier.getTrackingUrl()).isEqualTo(UPDATED_TRACKING_URL);
         assertThat(testCourier.getParentCourierId()).isEqualTo(UPDATED_PARENT_COURIER_ID);
+
+        // Validate the Courier in Elasticsearch
+        verify(mockCourierSearchRepository, times(1)).save(testCourier);
     }
 
     @Test
@@ -324,6 +352,9 @@ public class CourierResourceIntTest {
         // Validate the Courier in the database
         List<Courier> courierList = courierRepository.findAll();
         assertThat(courierList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the Courier in Elasticsearch
+        verify(mockCourierSearchRepository, times(0)).save(courier);
     }
 
     @Test
@@ -342,6 +373,28 @@ public class CourierResourceIntTest {
         // Validate the database is empty
         List<Courier> courierList = courierRepository.findAll();
         assertThat(courierList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the Courier in Elasticsearch
+        verify(mockCourierSearchRepository, times(1)).deleteById(courier.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchCourier() throws Exception {
+        // Initialize the database
+        courierRepository.saveAndFlush(courier);
+        when(mockCourierSearchRepository.search(queryStringQuery("id:" + courier.getId()), PageRequest.of(0, 20)))
+            .thenReturn(new PageImpl<>(Collections.singletonList(courier), PageRequest.of(0, 1), 1));
+        // Search the courier
+        restCourierMockMvc.perform(get("/api/_search/couriers?query=id:" + courier.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(courier.getId().intValue())))
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
+            .andExpect(jsonPath("$.[*].active").value(hasItem(DEFAULT_ACTIVE.booleanValue())))
+            .andExpect(jsonPath("$.[*].trackingParameter").value(hasItem(DEFAULT_TRACKING_PARAMETER.toString())))
+            .andExpect(jsonPath("$.[*].trackingUrl").value(hasItem(DEFAULT_TRACKING_URL.toString())))
+            .andExpect(jsonPath("$.[*].parentCourierId").value(hasItem(DEFAULT_PARENT_COURIER_ID.intValue())));
     }
 
     @Test

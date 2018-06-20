@@ -8,6 +8,7 @@ import DevTools from './config/devtools';
 import initStore from './config/store';
 import setupAxiosInterceptors from './config/axios-interceptor';
 import { clearAuthentication } from './shared/reducers/authentication';
+import ErrorBoundary from './shared/error/error-boundary';
 import AppComponent from './app';
 import { loadIcons } from './config/icon-loader';
 
@@ -24,15 +25,17 @@ const rootEl = document.getElementById('root');
 
 const render = Component =>
   ReactDOM.render(
-    <AppContainer>
-      <Provider store={store}>
-        <div>
-          {/* If this slows down the app in dev disable it and enable when required  */}
-          {devTools}
-          <Component />
-        </div>
-      </Provider>
-    </AppContainer>,
+    <ErrorBoundary>
+      <AppContainer>
+        <Provider store={store}>
+          <div>
+            {/* If this slows down the app in dev disable it and enable when required  */}
+            {devTools}
+            <Component />
+          </div>
+        </Provider>
+      </AppContainer>
+    </ErrorBoundary>,
     rootEl
   );
 

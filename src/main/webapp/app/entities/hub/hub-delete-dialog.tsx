@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { ICrudGetAction, ICrudDeleteAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { IHub } from 'app/shared/model/hub.model';
+import { IRootState } from 'app/shared/reducers';
 import { getEntity, deleteEntity } from './hub.reducer';
 
-export interface IHubDeleteDialogProps {
-  getEntity: ICrudGetAction<IHub>;
-  deleteEntity: ICrudDeleteAction<IHub>;
-  hub: IHub;
-  match: any;
-  history: any;
-}
+export interface IHubDeleteDialogProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class HubDeleteDialog extends React.Component<IHubDeleteDialogProps> {
   componentDidMount() {
@@ -21,7 +17,7 @@ export class HubDeleteDialog extends React.Component<IHubDeleteDialogProps> {
   }
 
   confirmDelete = event => {
-    this.props.deleteEntity(this.props.hub.id);
+    this.props.deleteEntity(this.props.hubEntity.id);
     this.handleClose(event);
   };
 
@@ -31,7 +27,7 @@ export class HubDeleteDialog extends React.Component<IHubDeleteDialogProps> {
   };
 
   render() {
-    const { hub } = this.props;
+    const { hubEntity } = this.props;
     return (
       <Modal isOpen toggle={this.handleClose}>
         <ModalHeader toggle={this.handleClose}>Confirm delete operation</ModalHeader>
@@ -49,10 +45,13 @@ export class HubDeleteDialog extends React.Component<IHubDeleteDialogProps> {
   }
 }
 
-const mapStateToProps = ({ hub }) => ({
-  hub: hub.entity
+const mapStateToProps = ({ hub }: IRootState) => ({
+  hubEntity: hub.entity
 });
 
 const mapDispatchToProps = { getEntity, deleteEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(HubDeleteDialog);

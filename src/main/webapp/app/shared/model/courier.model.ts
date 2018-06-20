@@ -12,17 +12,6 @@ export interface ICourier {
   courierGroups?: ICourierGroup[];
 }
 
-export class Courier implements ICourier {
-  constructor(
-    public id?: number,
-    public name?: string,
-    public active?: boolean,
-    public trackingParameter?: string,
-    public trackingUrl?: string,
-    public parentCourierId?: number,
-    public courierChannels?: ICourierChannel[],
-    public courierGroups?: ICourierGroup[]
-  ) {
-    this.active = false;
-  }
-}
+export const defaultValue: Readonly<ICourier> = {
+  active: false
+};

@@ -1,21 +1,18 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col } from 'reactstrap';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
+import { IRootState } from 'app/shared/reducers';
 import { getEntity } from './country.reducer';
 import { ICountry } from 'app/shared/model/country.model';
 // tslint:disable-next-line:no-unused-variable
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
 
-export interface ICountryDetailProps {
-  getEntity: ICrudGetAction<ICountry>;
-  country: ICountry;
-  match: any;
-}
+export interface ICountryDetailProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class CountryDetail extends React.Component<ICountryDetailProps> {
   componentDidMount() {
@@ -23,29 +20,27 @@ export class CountryDetail extends React.Component<ICountryDetailProps> {
   }
 
   render() {
-    const { country } = this.props;
+    const { countryEntity } = this.props;
     return (
       <Row>
         <Col md="8">
           <h2>
-            Country [<b>{country.id}</b>]
+            Country [<b>{countryEntity.id}</b>]
           </h2>
-          <Row size="md">
-            <dl className="jh-entity-details">
-              <dt>
-                <span id="name">Name</span>
-              </dt>
-              <dd>{country.name}</dd>
-              <dt>
-                <span id="countryCode">Country Code</span>
-              </dt>
-              <dd>{country.countryCode}</dd>
-            </dl>
-          </Row>
+          <dl className="jh-entity-details">
+            <dt>
+              <span id="name">Name</span>
+            </dt>
+            <dd>{countryEntity.name}</dd>
+            <dt>
+              <span id="countryCode">Country Code</span>
+            </dt>
+            <dd>{countryEntity.countryCode}</dd>
+          </dl>
           <Button tag={Link} to="/entity/country" replace color="info">
             <FontAwesomeIcon icon="arrow-left" /> <span className="d-none d-md-inline">Back</span>
-          </Button>
-          <Button tag={Link} to={`/entity/country/${country.id}/edit`} replace color="primary">
+          </Button>&nbsp;
+          <Button tag={Link} to={`/entity/country/${countryEntity.id}/edit`} replace color="primary">
             <FontAwesomeIcon icon="pencil-alt" /> <span className="d-none d-md-inline">Edit</span>
           </Button>
         </Col>
@@ -54,10 +49,13 @@ export class CountryDetail extends React.Component<ICountryDetailProps> {
   }
 }
 
-const mapStateToProps = ({ country }) => ({
-  country: country.entity
+const mapStateToProps = ({ country }: IRootState) => ({
+  countryEntity: country.entity
 });
 
 const mapDispatchToProps = { getEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(CountryDetail);

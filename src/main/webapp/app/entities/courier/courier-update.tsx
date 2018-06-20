@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvField } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { ICourierChannel } from 'app/shared/model/courier-channel.model';
 import { getEntities as getCourierChannels } from 'app/entities/courier-channel/courier-channel.reducer';
@@ -17,21 +18,7 @@ import { ICourier } from 'app/shared/model/courier.model';
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface ICourierUpdateProps {
-  getEntity: ICrudGetAction<ICourier>;
-  updateEntity: ICrudPutAction<ICourier>;
-  createEntity: ICrudPutAction<ICourier>;
-  getCourierChannels: ICrudGetAllAction<ICourierChannel>;
-  courierChannels: ICourierChannel[];
-  getCourierGroups: ICrudGetAllAction<ICourierGroup>;
-  courierGroups: ICourierGroup[];
-  courier: ICourier;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface ICourierUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface ICourierUpdateState {
   isNew: boolean;
@@ -62,9 +49,9 @@ export class CourierUpdate extends React.Component<ICourierUpdateProps, ICourier
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { courier } = this.props;
+      const { courierEntity } = this.props;
       const entity = {
-        ...courier,
+        ...courierEntity,
         ...values
       };
 
@@ -147,14 +134,14 @@ export class CourierUpdate extends React.Component<ICourierUpdateProps, ICourier
 
   render() {
     const isInvalid = false;
-    const { courier, courierChannels, courierGroups, loading, updating } = this.props;
+    const { courierEntity, courierChannels, courierGroups, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-courier-heading">Create or edit a Courier</h2>
+            <h2 id="testLogisticsApp.courier.home.createOrEditLabel">Create or edit a Courier</h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -162,11 +149,11 @@ export class CourierUpdate extends React.Component<ICourierUpdateProps, ICourier
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : courier} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : courierEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="courier-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <AvGroup>
@@ -174,6 +161,7 @@ export class CourierUpdate extends React.Component<ICourierUpdateProps, ICourier
                     Name
                   </Label>
                   <AvField
+                    id="courier-name"
                     type="text"
                     name="name"
                     validate={{
@@ -183,7 +171,7 @@ export class CourierUpdate extends React.Component<ICourierUpdateProps, ICourier
                 </AvGroup>
                 <AvGroup>
                   <Label id="activeLabel" check>
-                    <AvInput type="checkbox" className="form-control" name="active" />
+                    <AvInput id="courier-active" type="checkbox" className="form-control" name="active" />
                     Active
                   </Label>
                 </AvGroup>
@@ -191,28 +179,29 @@ export class CourierUpdate extends React.Component<ICourierUpdateProps, ICourier
                   <Label id="trackingParameterLabel" for="trackingParameter">
                     Tracking Parameter
                   </Label>
-                  <AvField type="text" name="trackingParameter" />
+                  <AvField id="courier-trackingParameter" type="text" name="trackingParameter" />
                 </AvGroup>
                 <AvGroup>
                   <Label id="trackingUrlLabel" for="trackingUrl">
                     Tracking Url
                   </Label>
-                  <AvField type="text" name="trackingUrl" />
+                  <AvField id="courier-trackingUrl" type="text" name="trackingUrl" />
                 </AvGroup>
                 <AvGroup>
                   <Label id="parentCourierIdLabel" for="parentCourierId">
                     Parent Courier Id
                   </Label>
-                  <AvField type="number" className="form-control" name="parentCourierId" />
+                  <AvField id="courier-parentCourierId" type="number" className="form-control" name="parentCourierId" />
                 </AvGroup>
                 <AvGroup>
                   <Label for="courierChannels">Courier Channel</Label>
                   <AvInput
+                    id="courier-courierChannel"
                     type="select"
                     multiple
                     className="form-control"
                     name="fakecourierChannels"
-                    value={this.displaycourierChannel(courier)}
+                    value={this.displaycourierChannel(courierEntity)}
                     onChange={this.courierChannelUpdate}
                   >
                     <option value="" key="0" />
@@ -224,16 +213,17 @@ export class CourierUpdate extends React.Component<ICourierUpdateProps, ICourier
                         ))
                       : null}
                   </AvInput>
-                  <AvInput type="hidden" name="courierChannels" value={this.state.idscourierChannel} />
+                  <AvInput id="courier-courierChannel" type="hidden" name="courierChannels" value={this.state.idscourierChannel} />
                 </AvGroup>
                 <AvGroup>
                   <Label for="courierGroups">Courier Group</Label>
                   <AvInput
+                    id="courier-courierGroup"
                     type="select"
                     multiple
                     className="form-control"
                     name="fakecourierGroups"
-                    value={this.displaycourierGroup(courier)}
+                    value={this.displaycourierGroup(courierEntity)}
                     onChange={this.courierGroupUpdate}
                   >
                     <option value="" key="0" />
@@ -245,7 +235,7 @@ export class CourierUpdate extends React.Component<ICourierUpdateProps, ICourier
                         ))
                       : null}
                   </AvInput>
-                  <AvInput type="hidden" name="courierGroups" value={this.state.idscourierGroup} />
+                  <AvInput id="courier-courierGroup" type="hidden" name="courierGroups" value={this.state.idscourierGroup} />
                 </AvGroup>
                 <Button tag={Link} id="cancel-save" to="/entity/courier" replace color="info">
                   <FontAwesomeIcon icon="arrow-left" />&nbsp;
@@ -264,10 +254,10 @@ export class CourierUpdate extends React.Component<ICourierUpdateProps, ICourier
   }
 }
 
-const mapStateToProps = storeState => ({
+const mapStateToProps = (storeState: IRootState) => ({
   courierChannels: storeState.courierChannel.entities,
   courierGroups: storeState.courierGroup.entities,
-  courier: storeState.courier.entity,
+  courierEntity: storeState.courier.entity,
   loading: storeState.courier.loading,
   updating: storeState.courier.updating
 });
@@ -280,5 +270,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(CourierUpdate);

@@ -1,4 +1,5 @@
 {
+    "name": "CourierChannel",
     "fields": [
         {
             "fieldName": "name",
@@ -20,11 +21,11 @@
             "otherEntityRelationshipName": "courierChannel"
         }
     ],
-    "changelogDate": "20180608074049",
+    "changelogDate": "20180619110512",
     "entityTableName": "courier_channel",
     "dto": "mapstruct",
     "pagination": "no",
-    "service": "no",
+    "service": "serviceImpl",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,
     "clientRootFolder": "",

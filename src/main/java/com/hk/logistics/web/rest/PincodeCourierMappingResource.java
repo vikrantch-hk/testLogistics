@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.PincodeCourierMapping;
-import com.hk.logistics.repository.PincodeCourierMappingRepository;
+import com.hk.logistics.service.PincodeCourierMappingService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.PincodeCourierMappingDTO;
-import com.hk.logistics.service.mapper.PincodeCourierMappingMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +17,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing PincodeCourierMapping.
@@ -31,13 +32,10 @@ public class PincodeCourierMappingResource {
 
     private static final String ENTITY_NAME = "pincodeCourierMapping";
 
-    private final PincodeCourierMappingRepository pincodeCourierMappingRepository;
+    private final PincodeCourierMappingService pincodeCourierMappingService;
 
-    private final PincodeCourierMappingMapper pincodeCourierMappingMapper;
-
-    public PincodeCourierMappingResource(PincodeCourierMappingRepository pincodeCourierMappingRepository, PincodeCourierMappingMapper pincodeCourierMappingMapper) {
-        this.pincodeCourierMappingRepository = pincodeCourierMappingRepository;
-        this.pincodeCourierMappingMapper = pincodeCourierMappingMapper;
+    public PincodeCourierMappingResource(PincodeCourierMappingService pincodeCourierMappingService) {
+        this.pincodeCourierMappingService = pincodeCourierMappingService;
     }
 
     /**
@@ -53,10 +51,8 @@ public class PincodeCourierMappingResource {
         log.debug("REST request to save PincodeCourierMapping : {}", pincodeCourierMappingDTO);
         if (pincodeCourierMappingDTO.getId() != null) {
             throw new BadRequestAlertException("A new pincodeCourierMapping cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        PincodeCourierMapping pincodeCourierMapping = pincodeCourierMappingMapper.toEntity(pincodeCourierMappingDTO);
-        pincodeCourierMapping = pincodeCourierMappingRepository.save(pincodeCourierMapping);
-        PincodeCourierMappingDTO result = pincodeCourierMappingMapper.toDto(pincodeCourierMapping);
+        }
+        PincodeCourierMappingDTO result = pincodeCourierMappingService.save(pincodeCourierMappingDTO);
         return ResponseEntity.created(new URI("/api/pincode-courier-mappings/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -77,10 +73,8 @@ public class PincodeCourierMappingResource {
         log.debug("REST request to update PincodeCourierMapping : {}", pincodeCourierMappingDTO);
         if (pincodeCourierMappingDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        PincodeCourierMapping pincodeCourierMapping = pincodeCourierMappingMapper.toEntity(pincodeCourierMappingDTO);
-        pincodeCourierMapping = pincodeCourierMappingRepository.save(pincodeCourierMapping);
-        PincodeCourierMappingDTO result = pincodeCourierMappingMapper.toDto(pincodeCourierMapping);
+        }
+        PincodeCourierMappingDTO result = pincodeCourierMappingService.save(pincodeCourierMappingDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, pincodeCourierMappingDTO.getId().toString()))
             .body(result);
@@ -95,8 +89,7 @@ public class PincodeCourierMappingResource {
     @Timed
     public List<PincodeCourierMappingDTO> getAllPincodeCourierMappings() {
         log.debug("REST request to get all PincodeCourierMappings");
-        List<PincodeCourierMapping> pincodeCourierMappings = pincodeCourierMappingRepository.findAll();
-        return pincodeCourierMappingMapper.toDto(pincodeCourierMappings);
+        return pincodeCourierMappingService.findAll();
     }
 
     /**
@@ -109,8 +102,7 @@ public class PincodeCourierMappingResource {
     @Timed
     public ResponseEntity<PincodeCourierMappingDTO> getPincodeCourierMapping(@PathVariable Long id) {
         log.debug("REST request to get PincodeCourierMapping : {}", id);
-        Optional<PincodeCourierMappingDTO> pincodeCourierMappingDTO = pincodeCourierMappingRepository.findById(id)
-            .map(pincodeCourierMappingMapper::toDto);
+        Optional<PincodeCourierMappingDTO> pincodeCourierMappingDTO = pincodeCourierMappingService.findOne(id);
         return ResponseUtil.wrapOrNotFound(pincodeCourierMappingDTO);
     }
 
@@ -124,7 +116,22 @@ public class PincodeCourierMappingResource {
     @Timed
     public ResponseEntity<Void> deletePincodeCourierMapping(@PathVariable Long id) {
         log.debug("REST request to delete PincodeCourierMapping : {}", id);
-        pincodeCourierMappingRepository.deleteById(id);
+        pincodeCourierMappingService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/pincode-courier-mappings?query=:query : search for the pincodeCourierMapping corresponding
+     * to the query.
+     *
+     * @param query the query of the pincodeCourierMapping search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/pincode-courier-mappings")
+    @Timed
+    public List<PincodeCourierMappingDTO> searchPincodeCourierMappings(@RequestParam String query) {
+        log.debug("REST request to search PincodeCourierMappings for query {}", query);
+        return pincodeCourierMappingService.search(query);
+    }
+
 }

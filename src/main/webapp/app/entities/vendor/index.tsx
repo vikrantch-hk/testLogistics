@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+
+import ErrorBoundaryRoute from 'app/shared/error/error-boundary-route';
 
 import Vendor from './vendor';
 import VendorDetail from './vendor-detail';
@@ -9,12 +11,12 @@ import VendorDeleteDialog from './vendor-delete-dialog';
 const Routes = ({ match }) => (
   <>
     <Switch>
-      <Route exact path={`${match.url}/new`} component={VendorUpdate} />
-      <Route exact path={`${match.url}/:id/edit`} component={VendorUpdate} />
-      <Route exact path={`${match.url}/:id`} component={VendorDetail} />
-      <Route path={match.url} component={Vendor} />
+      <ErrorBoundaryRoute exact path={`${match.url}/new`} component={VendorUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id/edit`} component={VendorUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id`} component={VendorDetail} />
+      <ErrorBoundaryRoute path={match.url} component={Vendor} />
     </Switch>
-    <Route path={`${match.url}/:id/delete`} component={VendorDeleteDialog} />
+    <ErrorBoundaryRoute path={`${match.url}/:id/delete`} component={VendorDeleteDialog} />
   </>
 );
 

@@ -1,4 +1,5 @@
 {
+    "name": "Zone",
     "fields": [
         {
             "fieldName": "name",
@@ -9,11 +10,11 @@
         }
     ],
     "relationships": [],
-    "changelogDate": "20180608074105",
+    "changelogDate": "20180619110528",
     "entityTableName": "zone",
     "dto": "mapstruct",
     "pagination": "no",
-    "service": "no",
+    "service": "serviceImpl",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,
     "clientRootFolder": "",

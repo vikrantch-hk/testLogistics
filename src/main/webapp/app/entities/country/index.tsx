@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+
+import ErrorBoundaryRoute from 'app/shared/error/error-boundary-route';
 
 import Country from './country';
 import CountryDetail from './country-detail';
@@ -9,12 +11,12 @@ import CountryDeleteDialog from './country-delete-dialog';
 const Routes = ({ match }) => (
   <>
     <Switch>
-      <Route exact path={`${match.url}/new`} component={CountryUpdate} />
-      <Route exact path={`${match.url}/:id/edit`} component={CountryUpdate} />
-      <Route exact path={`${match.url}/:id`} component={CountryDetail} />
-      <Route path={match.url} component={Country} />
+      <ErrorBoundaryRoute exact path={`${match.url}/new`} component={CountryUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id/edit`} component={CountryUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id`} component={CountryDetail} />
+      <ErrorBoundaryRoute path={match.url} component={Country} />
     </Switch>
-    <Route path={`${match.url}/:id/delete`} component={CountryDeleteDialog} />
+    <ErrorBoundaryRoute path={`${match.url}/:id/delete`} component={CountryDeleteDialog} />
   </>
 );
 

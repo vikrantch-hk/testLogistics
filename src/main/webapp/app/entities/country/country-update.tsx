@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvField } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { getEntity, updateEntity, createEntity, reset } from './country.reducer';
 import { ICountry } from 'app/shared/model/country.model';
@@ -13,17 +14,7 @@ import { ICountry } from 'app/shared/model/country.model';
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface ICountryUpdateProps {
-  getEntity: ICrudGetAction<ICountry>;
-  updateEntity: ICrudPutAction<ICountry>;
-  createEntity: ICrudPutAction<ICountry>;
-  country: ICountry;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface ICountryUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface ICountryUpdateState {
   isNew: boolean;
@@ -47,9 +38,9 @@ export class CountryUpdate extends React.Component<ICountryUpdateProps, ICountry
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { country } = this.props;
+      const { countryEntity } = this.props;
       const entity = {
-        ...country,
+        ...countryEntity,
         ...values
       };
 
@@ -68,14 +59,14 @@ export class CountryUpdate extends React.Component<ICountryUpdateProps, ICountry
 
   render() {
     const isInvalid = false;
-    const { country, loading, updating } = this.props;
+    const { countryEntity, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-country-heading">Create or edit a Country</h2>
+            <h2 id="testLogisticsApp.country.home.createOrEditLabel">Create or edit a Country</h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -83,11 +74,11 @@ export class CountryUpdate extends React.Component<ICountryUpdateProps, ICountry
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : country} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : countryEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="country-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <AvGroup>
@@ -95,6 +86,7 @@ export class CountryUpdate extends React.Component<ICountryUpdateProps, ICountry
                     Name
                   </Label>
                   <AvField
+                    id="country-name"
                     type="text"
                     name="name"
                     validate={{
@@ -107,6 +99,7 @@ export class CountryUpdate extends React.Component<ICountryUpdateProps, ICountry
                     Country Code
                   </Label>
                   <AvField
+                    id="country-countryCode"
                     type="text"
                     name="countryCode"
                     validate={{
@@ -131,8 +124,8 @@ export class CountryUpdate extends React.Component<ICountryUpdateProps, ICountry
   }
 }
 
-const mapStateToProps = storeState => ({
-  country: storeState.country.entity,
+const mapStateToProps = (storeState: IRootState) => ({
+  countryEntity: storeState.country.entity,
   loading: storeState.country.loading,
   updating: storeState.country.updating
 });
@@ -143,5 +136,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(CountryUpdate);

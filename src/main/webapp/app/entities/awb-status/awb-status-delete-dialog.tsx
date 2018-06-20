@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { ICrudGetAction, ICrudDeleteAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { IAwbStatus } from 'app/shared/model/awb-status.model';
+import { IRootState } from 'app/shared/reducers';
 import { getEntity, deleteEntity } from './awb-status.reducer';
 
-export interface IAwbStatusDeleteDialogProps {
-  getEntity: ICrudGetAction<IAwbStatus>;
-  deleteEntity: ICrudDeleteAction<IAwbStatus>;
-  awbStatus: IAwbStatus;
-  match: any;
-  history: any;
-}
+export interface IAwbStatusDeleteDialogProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class AwbStatusDeleteDialog extends React.Component<IAwbStatusDeleteDialogProps> {
   componentDidMount() {
@@ -21,7 +17,7 @@ export class AwbStatusDeleteDialog extends React.Component<IAwbStatusDeleteDialo
   }
 
   confirmDelete = event => {
-    this.props.deleteEntity(this.props.awbStatus.id);
+    this.props.deleteEntity(this.props.awbStatusEntity.id);
     this.handleClose(event);
   };
 
@@ -31,7 +27,7 @@ export class AwbStatusDeleteDialog extends React.Component<IAwbStatusDeleteDialo
   };
 
   render() {
-    const { awbStatus } = this.props;
+    const { awbStatusEntity } = this.props;
     return (
       <Modal isOpen toggle={this.handleClose}>
         <ModalHeader toggle={this.handleClose}>Confirm delete operation</ModalHeader>
@@ -49,10 +45,13 @@ export class AwbStatusDeleteDialog extends React.Component<IAwbStatusDeleteDialo
   }
 }
 
-const mapStateToProps = ({ awbStatus }) => ({
-  awbStatus: awbStatus.entity
+const mapStateToProps = ({ awbStatus }: IRootState) => ({
+  awbStatusEntity: awbStatus.entity
 });
 
 const mapDispatchToProps = { getEntity, deleteEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(AwbStatusDeleteDialog);

@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { ICrudGetAction, ICrudDeleteAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { IAwb } from 'app/shared/model/awb.model';
+import { IRootState } from 'app/shared/reducers';
 import { getEntity, deleteEntity } from './awb.reducer';
 
-export interface IAwbDeleteDialogProps {
-  getEntity: ICrudGetAction<IAwb>;
-  deleteEntity: ICrudDeleteAction<IAwb>;
-  awb: IAwb;
-  match: any;
-  history: any;
-}
+export interface IAwbDeleteDialogProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class AwbDeleteDialog extends React.Component<IAwbDeleteDialogProps> {
   componentDidMount() {
@@ -21,7 +17,7 @@ export class AwbDeleteDialog extends React.Component<IAwbDeleteDialogProps> {
   }
 
   confirmDelete = event => {
-    this.props.deleteEntity(this.props.awb.id);
+    this.props.deleteEntity(this.props.awbEntity.id);
     this.handleClose(event);
   };
 
@@ -31,7 +27,7 @@ export class AwbDeleteDialog extends React.Component<IAwbDeleteDialogProps> {
   };
 
   render() {
-    const { awb } = this.props;
+    const { awbEntity } = this.props;
     return (
       <Modal isOpen toggle={this.handleClose}>
         <ModalHeader toggle={this.handleClose}>Confirm delete operation</ModalHeader>
@@ -49,10 +45,13 @@ export class AwbDeleteDialog extends React.Component<IAwbDeleteDialogProps> {
   }
 }
 
-const mapStateToProps = ({ awb }) => ({
-  awb: awb.entity
+const mapStateToProps = ({ awb }: IRootState) => ({
+  awbEntity: awb.entity
 });
 
 const mapDispatchToProps = { getEntity, deleteEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(AwbDeleteDialog);

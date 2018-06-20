@@ -1,4 +1,5 @@
 {
+    "name": "PincodeRegionZone",
     "fields": [],
     "relationships": [
         {
@@ -20,11 +21,11 @@
             "otherEntityField": "id"
         }
     ],
-    "changelogDate": "20180608074108",
+    "changelogDate": "20180619110531",
     "entityTableName": "pincode_region_zone",
     "dto": "mapstruct",
     "pagination": "no",
-    "service": "no",
+    "service": "serviceImpl",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,
     "clientRootFolder": "",

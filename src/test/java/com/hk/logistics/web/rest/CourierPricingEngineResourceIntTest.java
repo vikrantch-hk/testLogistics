@@ -4,6 +4,8 @@ import com.hk.logistics.TestLogisticsApp;
 
 import com.hk.logistics.domain.CourierPricingEngine;
 import com.hk.logistics.repository.CourierPricingEngineRepository;
+import com.hk.logistics.repository.search.CourierPricingEngineSearchRepository;
+import com.hk.logistics.service.CourierPricingEngineService;
 import com.hk.logistics.service.dto.CourierPricingEngineDTO;
 import com.hk.logistics.service.mapper.CourierPricingEngineMapper;
 import com.hk.logistics.web.rest.errors.ExceptionTranslator;
@@ -11,7 +13,6 @@ import com.hk.logistics.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,12 +27,15 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
+
 
 import static com.hk.logistics.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -83,6 +87,18 @@ public class CourierPricingEngineResourceIntTest {
 
     @Autowired
     private CourierPricingEngineMapper courierPricingEngineMapper;
+    
+
+    @Autowired
+    private CourierPricingEngineService courierPricingEngineService;
+
+    /**
+     * This repository is mocked in the com.hk.logistics.repository.search test package.
+     *
+     * @see com.hk.logistics.repository.search.CourierPricingEngineSearchRepositoryMockConfiguration
+     */
+    @Autowired
+    private CourierPricingEngineSearchRepository mockCourierPricingEngineSearchRepository;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -103,7 +119,7 @@ public class CourierPricingEngineResourceIntTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        final CourierPricingEngineResource courierPricingEngineResource = new CourierPricingEngineResource(courierPricingEngineRepository, courierPricingEngineMapper);
+        final CourierPricingEngineResource courierPricingEngineResource = new CourierPricingEngineResource(courierPricingEngineService);
         this.restCourierPricingEngineMockMvc = MockMvcBuilders.standaloneSetup(courierPricingEngineResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
@@ -165,6 +181,9 @@ public class CourierPricingEngineResourceIntTest {
         assertThat(testCourierPricingEngine.getCodCutoffAmount()).isEqualTo(DEFAULT_COD_CUTOFF_AMOUNT);
         assertThat(testCourierPricingEngine.getVariableCodCharges()).isEqualTo(DEFAULT_VARIABLE_COD_CHARGES);
         assertThat(testCourierPricingEngine.getValidUpto()).isEqualTo(DEFAULT_VALID_UPTO);
+
+        // Validate the CourierPricingEngine in Elasticsearch
+        verify(mockCourierPricingEngineSearchRepository, times(1)).save(testCourierPricingEngine);
     }
 
     @Test
@@ -185,6 +204,9 @@ public class CourierPricingEngineResourceIntTest {
         // Validate the CourierPricingEngine in the database
         List<CourierPricingEngine> courierPricingEngineList = courierPricingEngineRepository.findAll();
         assertThat(courierPricingEngineList).hasSize(databaseSizeBeforeCreate);
+
+        // Validate the CourierPricingEngine in Elasticsearch
+        verify(mockCourierPricingEngineSearchRepository, times(0)).save(courierPricingEngine);
     }
 
     @Test
@@ -365,6 +387,9 @@ public class CourierPricingEngineResourceIntTest {
         assertThat(testCourierPricingEngine.getCodCutoffAmount()).isEqualTo(UPDATED_COD_CUTOFF_AMOUNT);
         assertThat(testCourierPricingEngine.getVariableCodCharges()).isEqualTo(UPDATED_VARIABLE_COD_CHARGES);
         assertThat(testCourierPricingEngine.getValidUpto()).isEqualTo(UPDATED_VALID_UPTO);
+
+        // Validate the CourierPricingEngine in Elasticsearch
+        verify(mockCourierPricingEngineSearchRepository, times(1)).save(testCourierPricingEngine);
     }
 
     @Test
@@ -384,6 +409,9 @@ public class CourierPricingEngineResourceIntTest {
         // Validate the CourierPricingEngine in the database
         List<CourierPricingEngine> courierPricingEngineList = courierPricingEngineRepository.findAll();
         assertThat(courierPricingEngineList).hasSize(databaseSizeBeforeUpdate);
+
+        // Validate the CourierPricingEngine in Elasticsearch
+        verify(mockCourierPricingEngineSearchRepository, times(0)).save(courierPricingEngine);
     }
 
     @Test
@@ -402,6 +430,34 @@ public class CourierPricingEngineResourceIntTest {
         // Validate the database is empty
         List<CourierPricingEngine> courierPricingEngineList = courierPricingEngineRepository.findAll();
         assertThat(courierPricingEngineList).hasSize(databaseSizeBeforeDelete - 1);
+
+        // Validate the CourierPricingEngine in Elasticsearch
+        verify(mockCourierPricingEngineSearchRepository, times(1)).deleteById(courierPricingEngine.getId());
+    }
+
+    @Test
+    @Transactional
+    public void searchCourierPricingEngine() throws Exception {
+        // Initialize the database
+        courierPricingEngineRepository.saveAndFlush(courierPricingEngine);
+        when(mockCourierPricingEngineSearchRepository.search(queryStringQuery("id:" + courierPricingEngine.getId())))
+            .thenReturn(Collections.singletonList(courierPricingEngine));
+        // Search the courierPricingEngine
+        restCourierPricingEngineMockMvc.perform(get("/api/_search/courier-pricing-engines?query=id:" + courierPricingEngine.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(courierPricingEngine.getId().intValue())))
+            .andExpect(jsonPath("$.[*].firstBaseWt").value(hasItem(DEFAULT_FIRST_BASE_WT.doubleValue())))
+            .andExpect(jsonPath("$.[*].firstBaseCost").value(hasItem(DEFAULT_FIRST_BASE_COST.doubleValue())))
+            .andExpect(jsonPath("$.[*].secondBaseWt").value(hasItem(DEFAULT_SECOND_BASE_WT.doubleValue())))
+            .andExpect(jsonPath("$.[*].secondBaseCost").value(hasItem(DEFAULT_SECOND_BASE_COST.doubleValue())))
+            .andExpect(jsonPath("$.[*].additionalWt").value(hasItem(DEFAULT_ADDITIONAL_WT.doubleValue())))
+            .andExpect(jsonPath("$.[*].additionalCost").value(hasItem(DEFAULT_ADDITIONAL_COST.doubleValue())))
+            .andExpect(jsonPath("$.[*].fuelSurcharge").value(hasItem(DEFAULT_FUEL_SURCHARGE.doubleValue())))
+            .andExpect(jsonPath("$.[*].minCodCharges").value(hasItem(DEFAULT_MIN_COD_CHARGES.doubleValue())))
+            .andExpect(jsonPath("$.[*].codCutoffAmount").value(hasItem(DEFAULT_COD_CUTOFF_AMOUNT.doubleValue())))
+            .andExpect(jsonPath("$.[*].variableCodCharges").value(hasItem(DEFAULT_VARIABLE_COD_CHARGES.doubleValue())))
+            .andExpect(jsonPath("$.[*].validUpto").value(hasItem(DEFAULT_VALID_UPTO.toString())));
     }
 
     @Test

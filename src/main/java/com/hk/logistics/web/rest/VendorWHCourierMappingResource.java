@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.VendorWHCourierMapping;
-import com.hk.logistics.repository.VendorWHCourierMappingRepository;
+import com.hk.logistics.service.VendorWHCourierMappingService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.VendorWHCourierMappingDTO;
-import com.hk.logistics.service.mapper.VendorWHCourierMappingMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +17,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing VendorWHCourierMapping.
@@ -31,13 +32,10 @@ public class VendorWHCourierMappingResource {
 
     private static final String ENTITY_NAME = "vendorWHCourierMapping";
 
-    private final VendorWHCourierMappingRepository vendorWHCourierMappingRepository;
+    private final VendorWHCourierMappingService vendorWHCourierMappingService;
 
-    private final VendorWHCourierMappingMapper vendorWHCourierMappingMapper;
-
-    public VendorWHCourierMappingResource(VendorWHCourierMappingRepository vendorWHCourierMappingRepository, VendorWHCourierMappingMapper vendorWHCourierMappingMapper) {
-        this.vendorWHCourierMappingRepository = vendorWHCourierMappingRepository;
-        this.vendorWHCourierMappingMapper = vendorWHCourierMappingMapper;
+    public VendorWHCourierMappingResource(VendorWHCourierMappingService vendorWHCourierMappingService) {
+        this.vendorWHCourierMappingService = vendorWHCourierMappingService;
     }
 
     /**
@@ -53,10 +51,8 @@ public class VendorWHCourierMappingResource {
         log.debug("REST request to save VendorWHCourierMapping : {}", vendorWHCourierMappingDTO);
         if (vendorWHCourierMappingDTO.getId() != null) {
             throw new BadRequestAlertException("A new vendorWHCourierMapping cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        VendorWHCourierMapping vendorWHCourierMapping = vendorWHCourierMappingMapper.toEntity(vendorWHCourierMappingDTO);
-        vendorWHCourierMapping = vendorWHCourierMappingRepository.save(vendorWHCourierMapping);
-        VendorWHCourierMappingDTO result = vendorWHCourierMappingMapper.toDto(vendorWHCourierMapping);
+        }
+        VendorWHCourierMappingDTO result = vendorWHCourierMappingService.save(vendorWHCourierMappingDTO);
         return ResponseEntity.created(new URI("/api/vendor-wh-courier-mappings/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -77,10 +73,8 @@ public class VendorWHCourierMappingResource {
         log.debug("REST request to update VendorWHCourierMapping : {}", vendorWHCourierMappingDTO);
         if (vendorWHCourierMappingDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        VendorWHCourierMapping vendorWHCourierMapping = vendorWHCourierMappingMapper.toEntity(vendorWHCourierMappingDTO);
-        vendorWHCourierMapping = vendorWHCourierMappingRepository.save(vendorWHCourierMapping);
-        VendorWHCourierMappingDTO result = vendorWHCourierMappingMapper.toDto(vendorWHCourierMapping);
+        }
+        VendorWHCourierMappingDTO result = vendorWHCourierMappingService.save(vendorWHCourierMappingDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, vendorWHCourierMappingDTO.getId().toString()))
             .body(result);
@@ -95,8 +89,7 @@ public class VendorWHCourierMappingResource {
     @Timed
     public List<VendorWHCourierMappingDTO> getAllVendorWHCourierMappings() {
         log.debug("REST request to get all VendorWHCourierMappings");
-        List<VendorWHCourierMapping> vendorWHCourierMappings = vendorWHCourierMappingRepository.findAll();
-        return vendorWHCourierMappingMapper.toDto(vendorWHCourierMappings);
+        return vendorWHCourierMappingService.findAll();
     }
 
     /**
@@ -109,8 +102,7 @@ public class VendorWHCourierMappingResource {
     @Timed
     public ResponseEntity<VendorWHCourierMappingDTO> getVendorWHCourierMapping(@PathVariable Long id) {
         log.debug("REST request to get VendorWHCourierMapping : {}", id);
-        Optional<VendorWHCourierMappingDTO> vendorWHCourierMappingDTO = vendorWHCourierMappingRepository.findById(id)
-            .map(vendorWHCourierMappingMapper::toDto);
+        Optional<VendorWHCourierMappingDTO> vendorWHCourierMappingDTO = vendorWHCourierMappingService.findOne(id);
         return ResponseUtil.wrapOrNotFound(vendorWHCourierMappingDTO);
     }
 
@@ -124,7 +116,22 @@ public class VendorWHCourierMappingResource {
     @Timed
     public ResponseEntity<Void> deleteVendorWHCourierMapping(@PathVariable Long id) {
         log.debug("REST request to delete VendorWHCourierMapping : {}", id);
-        vendorWHCourierMappingRepository.deleteById(id);
+        vendorWHCourierMappingService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/vendor-wh-courier-mappings?query=:query : search for the vendorWHCourierMapping corresponding
+     * to the query.
+     *
+     * @param query the query of the vendorWHCourierMapping search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/vendor-wh-courier-mappings")
+    @Timed
+    public List<VendorWHCourierMappingDTO> searchVendorWHCourierMappings(@RequestParam String query) {
+        log.debug("REST request to search VendorWHCourierMappings for query {}", query);
+        return vendorWHCourierMappingService.search(query);
+    }
+
 }

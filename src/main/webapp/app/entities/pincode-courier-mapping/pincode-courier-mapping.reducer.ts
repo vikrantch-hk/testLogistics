@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
+import { ICrudSearchAction, ICrudGetAction, ICrudGetAllAction, ICrudPutAction, ICrudDeleteAction } from 'react-jhipster';
 
 import { cleanEntity } from 'app/shared/util/entity-utils';
 import { REQUEST, SUCCESS, FAILURE } from 'app/shared/reducers/action-type.util';
 import { SERVER_API_URL } from 'app/config/constants';
 
-import { IPincodeCourierMapping } from 'app/shared/model/pincode-courier-mapping.model';
+import { IPincodeCourierMapping, defaultValue } from 'app/shared/model/pincode-courier-mapping.model';
 
 export const ACTION_TYPES = {
+  SEARCH_PINCODECOURIERMAPPINGS: 'pincodeCourierMapping/SEARCH_PINCODECOURIERMAPPINGS',
   FETCH_PINCODECOURIERMAPPING_LIST: 'pincodeCourierMapping/FETCH_PINCODECOURIERMAPPING_LIST',
   FETCH_PINCODECOURIERMAPPING: 'pincodeCourierMapping/FETCH_PINCODECOURIERMAPPING',
   CREATE_PINCODECOURIERMAPPING: 'pincodeCourierMapping/CREATE_PINCODECOURIERMAPPING',
@@ -19,16 +20,19 @@ export const ACTION_TYPES = {
 const initialState = {
   loading: false,
   errorMessage: null,
-  entities: [],
-  entity: {},
+  entities: [] as ReadonlyArray<IPincodeCourierMapping>,
+  entity: defaultValue,
   updating: false,
   updateSuccess: false
 };
 
+export type PincodeCourierMappingState = Readonly<typeof initialState>;
+
 // Reducer
 
-export default (state = initialState, action) => {
+export default (state: PincodeCourierMappingState = initialState, action): PincodeCourierMappingState => {
   switch (action.type) {
+    case REQUEST(ACTION_TYPES.SEARCH_PINCODECOURIERMAPPINGS):
     case REQUEST(ACTION_TYPES.FETCH_PINCODECOURIERMAPPING_LIST):
     case REQUEST(ACTION_TYPES.FETCH_PINCODECOURIERMAPPING):
       return {
@@ -46,6 +50,7 @@ export default (state = initialState, action) => {
         updateSuccess: false,
         updating: true
       };
+    case FAILURE(ACTION_TYPES.SEARCH_PINCODECOURIERMAPPINGS):
     case FAILURE(ACTION_TYPES.FETCH_PINCODECOURIERMAPPING_LIST):
     case FAILURE(ACTION_TYPES.FETCH_PINCODECOURIERMAPPING):
     case FAILURE(ACTION_TYPES.CREATE_PINCODECOURIERMAPPING):
@@ -57,6 +62,12 @@ export default (state = initialState, action) => {
         updating: false,
         updateSuccess: false,
         errorMessage: action.payload
+      };
+    case SUCCESS(ACTION_TYPES.SEARCH_PINCODECOURIERMAPPINGS):
+      return {
+        ...state,
+        loading: false,
+        entities: action.payload.data
       };
     case SUCCESS(ACTION_TYPES.FETCH_PINCODECOURIERMAPPING_LIST):
       return {
@@ -95,19 +106,25 @@ export default (state = initialState, action) => {
 };
 
 const apiUrl = SERVER_API_URL + '/api/pincode-courier-mappings';
+const apiSearchUrl = SERVER_API_URL + '/api/_search/pincode-courier-mappings';
 
 // Actions
 
+export const getSearchEntities: ICrudSearchAction<IPincodeCourierMapping> = query => ({
+  type: ACTION_TYPES.SEARCH_PINCODECOURIERMAPPINGS,
+  payload: axios.get<IPincodeCourierMapping>(`${apiSearchUrl}?query=` + query)
+});
+
 export const getEntities: ICrudGetAllAction<IPincodeCourierMapping> = (page, size, sort) => ({
   type: ACTION_TYPES.FETCH_PINCODECOURIERMAPPING_LIST,
-  payload: axios.get(`${apiUrl}?cacheBuster=${new Date().getTime()}`) as Promise<IPincodeCourierMapping>
+  payload: axios.get<IPincodeCourierMapping>(`${apiUrl}?cacheBuster=${new Date().getTime()}`)
 });
 
 export const getEntity: ICrudGetAction<IPincodeCourierMapping> = id => {
   const requestUrl = `${apiUrl}/${id}`;
   return {
     type: ACTION_TYPES.FETCH_PINCODECOURIERMAPPING,
-    payload: axios.get(requestUrl) as Promise<IPincodeCourierMapping>
+    payload: axios.get<IPincodeCourierMapping>(requestUrl)
   };
 };
 

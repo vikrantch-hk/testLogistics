@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.CourierAttributes;
-import com.hk.logistics.repository.CourierAttributesRepository;
+import com.hk.logistics.service.CourierAttributesService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.CourierAttributesDTO;
-import com.hk.logistics.service.mapper.CourierAttributesMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +17,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing CourierAttributes.
@@ -31,13 +32,10 @@ public class CourierAttributesResource {
 
     private static final String ENTITY_NAME = "courierAttributes";
 
-    private final CourierAttributesRepository courierAttributesRepository;
+    private final CourierAttributesService courierAttributesService;
 
-    private final CourierAttributesMapper courierAttributesMapper;
-
-    public CourierAttributesResource(CourierAttributesRepository courierAttributesRepository, CourierAttributesMapper courierAttributesMapper) {
-        this.courierAttributesRepository = courierAttributesRepository;
-        this.courierAttributesMapper = courierAttributesMapper;
+    public CourierAttributesResource(CourierAttributesService courierAttributesService) {
+        this.courierAttributesService = courierAttributesService;
     }
 
     /**
@@ -53,10 +51,8 @@ public class CourierAttributesResource {
         log.debug("REST request to save CourierAttributes : {}", courierAttributesDTO);
         if (courierAttributesDTO.getId() != null) {
             throw new BadRequestAlertException("A new courierAttributes cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        CourierAttributes courierAttributes = courierAttributesMapper.toEntity(courierAttributesDTO);
-        courierAttributes = courierAttributesRepository.save(courierAttributes);
-        CourierAttributesDTO result = courierAttributesMapper.toDto(courierAttributes);
+        }
+        CourierAttributesDTO result = courierAttributesService.save(courierAttributesDTO);
         return ResponseEntity.created(new URI("/api/courier-attributes/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -77,10 +73,8 @@ public class CourierAttributesResource {
         log.debug("REST request to update CourierAttributes : {}", courierAttributesDTO);
         if (courierAttributesDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        CourierAttributes courierAttributes = courierAttributesMapper.toEntity(courierAttributesDTO);
-        courierAttributes = courierAttributesRepository.save(courierAttributes);
-        CourierAttributesDTO result = courierAttributesMapper.toDto(courierAttributes);
+        }
+        CourierAttributesDTO result = courierAttributesService.save(courierAttributesDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, courierAttributesDTO.getId().toString()))
             .body(result);
@@ -95,8 +89,7 @@ public class CourierAttributesResource {
     @Timed
     public List<CourierAttributesDTO> getAllCourierAttributes() {
         log.debug("REST request to get all CourierAttributes");
-        List<CourierAttributes> courierAttributes = courierAttributesRepository.findAll();
-        return courierAttributesMapper.toDto(courierAttributes);
+        return courierAttributesService.findAll();
     }
 
     /**
@@ -109,8 +102,7 @@ public class CourierAttributesResource {
     @Timed
     public ResponseEntity<CourierAttributesDTO> getCourierAttributes(@PathVariable Long id) {
         log.debug("REST request to get CourierAttributes : {}", id);
-        Optional<CourierAttributesDTO> courierAttributesDTO = courierAttributesRepository.findById(id)
-            .map(courierAttributesMapper::toDto);
+        Optional<CourierAttributesDTO> courierAttributesDTO = courierAttributesService.findOne(id);
         return ResponseUtil.wrapOrNotFound(courierAttributesDTO);
     }
 
@@ -124,7 +116,22 @@ public class CourierAttributesResource {
     @Timed
     public ResponseEntity<Void> deleteCourierAttributes(@PathVariable Long id) {
         log.debug("REST request to delete CourierAttributes : {}", id);
-        courierAttributesRepository.deleteById(id);
+        courierAttributesService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/courier-attributes?query=:query : search for the courierAttributes corresponding
+     * to the query.
+     *
+     * @param query the query of the courierAttributes search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/courier-attributes")
+    @Timed
+    public List<CourierAttributesDTO> searchCourierAttributes(@RequestParam String query) {
+        log.debug("REST request to search CourierAttributes for query {}", query);
+        return courierAttributesService.search(query);
+    }
+
 }

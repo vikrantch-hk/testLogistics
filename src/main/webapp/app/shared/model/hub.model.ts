@@ -8,6 +8,4 @@ export interface IHub {
   pinCodes?: IPincode[];
 }
 
-export class Hub implements IHub {
-  constructor(public id?: number, public name?: string, public address?: string, public country?: string, public pinCodes?: IPincode[]) {}
-}
+export const defaultValue: Readonly<IHub> = {};

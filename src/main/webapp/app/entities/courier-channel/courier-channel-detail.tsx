@@ -1,21 +1,18 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col } from 'reactstrap';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
+import { IRootState } from 'app/shared/reducers';
 import { getEntity } from './courier-channel.reducer';
 import { ICourierChannel } from 'app/shared/model/courier-channel.model';
 // tslint:disable-next-line:no-unused-variable
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
 
-export interface ICourierChannelDetailProps {
-  getEntity: ICrudGetAction<ICourierChannel>;
-  courierChannel: ICourierChannel;
-  match: any;
-}
+export interface ICourierChannelDetailProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class CourierChannelDetail extends React.Component<ICourierChannelDetailProps> {
   componentDidMount() {
@@ -23,25 +20,23 @@ export class CourierChannelDetail extends React.Component<ICourierChannelDetailP
   }
 
   render() {
-    const { courierChannel } = this.props;
+    const { courierChannelEntity } = this.props;
     return (
       <Row>
         <Col md="8">
           <h2>
-            CourierChannel [<b>{courierChannel.id}</b>]
+            CourierChannel [<b>{courierChannelEntity.id}</b>]
           </h2>
-          <Row size="md">
-            <dl className="jh-entity-details">
-              <dt>
-                <span id="name">Name</span>
-              </dt>
-              <dd>{courierChannel.name}</dd>
-            </dl>
-          </Row>
+          <dl className="jh-entity-details">
+            <dt>
+              <span id="name">Name</span>
+            </dt>
+            <dd>{courierChannelEntity.name}</dd>
+          </dl>
           <Button tag={Link} to="/entity/courier-channel" replace color="info">
             <FontAwesomeIcon icon="arrow-left" /> <span className="d-none d-md-inline">Back</span>
-          </Button>
-          <Button tag={Link} to={`/entity/courier-channel/${courierChannel.id}/edit`} replace color="primary">
+          </Button>&nbsp;
+          <Button tag={Link} to={`/entity/courier-channel/${courierChannelEntity.id}/edit`} replace color="primary">
             <FontAwesomeIcon icon="pencil-alt" /> <span className="d-none d-md-inline">Edit</span>
           </Button>
         </Col>
@@ -50,10 +45,13 @@ export class CourierChannelDetail extends React.Component<ICourierChannelDetailP
   }
 }
 
-const mapStateToProps = ({ courierChannel }) => ({
-  courierChannel: courierChannel.entity
+const mapStateToProps = ({ courierChannel }: IRootState) => ({
+  courierChannelEntity: courierChannel.entity
 });
 
 const mapDispatchToProps = { getEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(CourierChannelDetail);

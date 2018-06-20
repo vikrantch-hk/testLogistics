@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+
+import ErrorBoundaryRoute from 'app/shared/error/error-boundary-route';
 
 import PincodeCourierMapping from './pincode-courier-mapping';
 import PincodeCourierMappingDetail from './pincode-courier-mapping-detail';
@@ -9,12 +11,12 @@ import PincodeCourierMappingDeleteDialog from './pincode-courier-mapping-delete-
 const Routes = ({ match }) => (
   <>
     <Switch>
-      <Route exact path={`${match.url}/new`} component={PincodeCourierMappingUpdate} />
-      <Route exact path={`${match.url}/:id/edit`} component={PincodeCourierMappingUpdate} />
-      <Route exact path={`${match.url}/:id`} component={PincodeCourierMappingDetail} />
-      <Route path={match.url} component={PincodeCourierMapping} />
+      <ErrorBoundaryRoute exact path={`${match.url}/new`} component={PincodeCourierMappingUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id/edit`} component={PincodeCourierMappingUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id`} component={PincodeCourierMappingDetail} />
+      <ErrorBoundaryRoute path={match.url} component={PincodeCourierMapping} />
     </Switch>
-    <Route path={`${match.url}/:id/delete`} component={PincodeCourierMappingDeleteDialog} />
+    <ErrorBoundaryRoute path={`${match.url}/:id/delete`} component={PincodeCourierMappingDeleteDialog} />
   </>
 );
 

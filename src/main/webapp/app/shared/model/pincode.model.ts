@@ -15,21 +15,4 @@ export interface IPincode {
   hubId?: number;
 }
 
-export class Pincode implements IPincode {
-  constructor(
-    public id?: number,
-    public pincode?: string,
-    public region?: string,
-    public locality?: string,
-    public lastMileCost?: number,
-    public tier?: string,
-    public cityName?: string,
-    public cityId?: number,
-    public stateName?: string,
-    public stateId?: number,
-    public zoneName?: string,
-    public zoneId?: number,
-    public hubName?: string,
-    public hubId?: number
-  ) {}
-}
+export const defaultValue: Readonly<IPincode> = {};

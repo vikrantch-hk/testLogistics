@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+
+import ErrorBoundaryRoute from 'app/shared/error/error-boundary-route';
 
 import SourceDestinationMapping from './source-destination-mapping';
 import SourceDestinationMappingDetail from './source-destination-mapping-detail';
@@ -9,12 +11,12 @@ import SourceDestinationMappingDeleteDialog from './source-destination-mapping-d
 const Routes = ({ match }) => (
   <>
     <Switch>
-      <Route exact path={`${match.url}/new`} component={SourceDestinationMappingUpdate} />
-      <Route exact path={`${match.url}/:id/edit`} component={SourceDestinationMappingUpdate} />
-      <Route exact path={`${match.url}/:id`} component={SourceDestinationMappingDetail} />
-      <Route path={match.url} component={SourceDestinationMapping} />
+      <ErrorBoundaryRoute exact path={`${match.url}/new`} component={SourceDestinationMappingUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id/edit`} component={SourceDestinationMappingUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id`} component={SourceDestinationMappingDetail} />
+      <ErrorBoundaryRoute path={match.url} component={SourceDestinationMapping} />
     </Switch>
-    <Route path={`${match.url}/:id/delete`} component={SourceDestinationMappingDeleteDialog} />
+    <ErrorBoundaryRoute path={`${match.url}/:id/delete`} component={SourceDestinationMappingDeleteDialog} />
   </>
 );
 

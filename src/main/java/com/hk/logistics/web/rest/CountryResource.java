@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.Country;
-import com.hk.logistics.repository.CountryRepository;
+import com.hk.logistics.service.CountryService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.CountryDTO;
-import com.hk.logistics.service.mapper.CountryMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +17,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing Country.
@@ -31,13 +32,10 @@ public class CountryResource {
 
     private static final String ENTITY_NAME = "country";
 
-    private final CountryRepository countryRepository;
+    private final CountryService countryService;
 
-    private final CountryMapper countryMapper;
-
-    public CountryResource(CountryRepository countryRepository, CountryMapper countryMapper) {
-        this.countryRepository = countryRepository;
-        this.countryMapper = countryMapper;
+    public CountryResource(CountryService countryService) {
+        this.countryService = countryService;
     }
 
     /**
@@ -53,10 +51,8 @@ public class CountryResource {
         log.debug("REST request to save Country : {}", countryDTO);
         if (countryDTO.getId() != null) {
             throw new BadRequestAlertException("A new country cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        Country country = countryMapper.toEntity(countryDTO);
-        country = countryRepository.save(country);
-        CountryDTO result = countryMapper.toDto(country);
+        }
+        CountryDTO result = countryService.save(countryDTO);
         return ResponseEntity.created(new URI("/api/countries/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -77,10 +73,8 @@ public class CountryResource {
         log.debug("REST request to update Country : {}", countryDTO);
         if (countryDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        Country country = countryMapper.toEntity(countryDTO);
-        country = countryRepository.save(country);
-        CountryDTO result = countryMapper.toDto(country);
+        }
+        CountryDTO result = countryService.save(countryDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, countryDTO.getId().toString()))
             .body(result);
@@ -95,8 +89,7 @@ public class CountryResource {
     @Timed
     public List<CountryDTO> getAllCountries() {
         log.debug("REST request to get all Countries");
-        List<Country> countries = countryRepository.findAll();
-        return countryMapper.toDto(countries);
+        return countryService.findAll();
     }
 
     /**
@@ -109,8 +102,7 @@ public class CountryResource {
     @Timed
     public ResponseEntity<CountryDTO> getCountry(@PathVariable Long id) {
         log.debug("REST request to get Country : {}", id);
-        Optional<CountryDTO> countryDTO = countryRepository.findById(id)
-            .map(countryMapper::toDto);
+        Optional<CountryDTO> countryDTO = countryService.findOne(id);
         return ResponseUtil.wrapOrNotFound(countryDTO);
     }
 
@@ -124,7 +116,22 @@ public class CountryResource {
     @Timed
     public ResponseEntity<Void> deleteCountry(@PathVariable Long id) {
         log.debug("REST request to delete Country : {}", id);
-        countryRepository.deleteById(id);
+        countryService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/countries?query=:query : search for the country corresponding
+     * to the query.
+     *
+     * @param query the query of the country search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/countries")
+    @Timed
+    public List<CountryDTO> searchCountries(@RequestParam String query) {
+        log.debug("REST request to search Countries for query {}", query);
+        return countryService.search(query);
+    }
+
 }

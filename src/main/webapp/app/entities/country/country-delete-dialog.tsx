@@ -1,19 +1,15 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { ICrudGetAction, ICrudDeleteAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 
 import { ICountry } from 'app/shared/model/country.model';
+import { IRootState } from 'app/shared/reducers';
 import { getEntity, deleteEntity } from './country.reducer';
 
-export interface ICountryDeleteDialogProps {
-  getEntity: ICrudGetAction<ICountry>;
-  deleteEntity: ICrudDeleteAction<ICountry>;
-  country: ICountry;
-  match: any;
-  history: any;
-}
+export interface ICountryDeleteDialogProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export class CountryDeleteDialog extends React.Component<ICountryDeleteDialogProps> {
   componentDidMount() {
@@ -21,7 +17,7 @@ export class CountryDeleteDialog extends React.Component<ICountryDeleteDialogPro
   }
 
   confirmDelete = event => {
-    this.props.deleteEntity(this.props.country.id);
+    this.props.deleteEntity(this.props.countryEntity.id);
     this.handleClose(event);
   };
 
@@ -31,7 +27,7 @@ export class CountryDeleteDialog extends React.Component<ICountryDeleteDialogPro
   };
 
   render() {
-    const { country } = this.props;
+    const { countryEntity } = this.props;
     return (
       <Modal isOpen toggle={this.handleClose}>
         <ModalHeader toggle={this.handleClose}>Confirm delete operation</ModalHeader>
@@ -49,10 +45,13 @@ export class CountryDeleteDialog extends React.Component<ICountryDeleteDialogPro
   }
 }
 
-const mapStateToProps = ({ country }) => ({
-  country: country.entity
+const mapStateToProps = ({ country }: IRootState) => ({
+  countryEntity: country.entity
 });
 
 const mapDispatchToProps = { getEntity, deleteEntity };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(CountryDeleteDialog);

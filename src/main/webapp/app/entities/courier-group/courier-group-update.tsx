@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvField } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { ICourier } from 'app/shared/model/courier.model';
 import { getEntities as getCouriers } from 'app/entities/courier/courier.reducer';
@@ -15,19 +16,7 @@ import { ICourierGroup } from 'app/shared/model/courier-group.model';
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface ICourierGroupUpdateProps {
-  getEntity: ICrudGetAction<ICourierGroup>;
-  updateEntity: ICrudPutAction<ICourierGroup>;
-  createEntity: ICrudPutAction<ICourierGroup>;
-  getCouriers: ICrudGetAllAction<ICourier>;
-  couriers: ICourier[];
-  courierGroup: ICourierGroup;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface ICourierGroupUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface ICourierGroupUpdateState {
   isNew: boolean;
@@ -55,9 +44,9 @@ export class CourierGroupUpdate extends React.Component<ICourierGroupUpdateProps
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { courierGroup } = this.props;
+      const { courierGroupEntity } = this.props;
       const entity = {
-        ...courierGroup,
+        ...courierGroupEntity,
         ...values
       };
 
@@ -76,14 +65,14 @@ export class CourierGroupUpdate extends React.Component<ICourierGroupUpdateProps
 
   render() {
     const isInvalid = false;
-    const { courierGroup, couriers, loading, updating } = this.props;
+    const { courierGroupEntity, couriers, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-courier-group-heading">Create or edit a CourierGroup</h2>
+            <h2 id="testLogisticsApp.courierGroup.home.createOrEditLabel">Create or edit a CourierGroup</h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -91,18 +80,18 @@ export class CourierGroupUpdate extends React.Component<ICourierGroupUpdateProps
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : courierGroup} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : courierGroupEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="courier-group-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <AvGroup>
                   <Label id="nameLabel" for="name">
                     Name
                   </Label>
-                  <AvField type="text" name="name" />
+                  <AvField id="courier-group-name" type="text" name="name" />
                 </AvGroup>
                 <Button tag={Link} id="cancel-save" to="/entity/courier-group" replace color="info">
                   <FontAwesomeIcon icon="arrow-left" />&nbsp;
@@ -121,9 +110,9 @@ export class CourierGroupUpdate extends React.Component<ICourierGroupUpdateProps
   }
 }
 
-const mapStateToProps = storeState => ({
+const mapStateToProps = (storeState: IRootState) => ({
   couriers: storeState.courier.entities,
-  courierGroup: storeState.courierGroup.entity,
+  courierGroupEntity: storeState.courierGroup.entity,
   loading: storeState.courierGroup.loading,
   updating: storeState.courierGroup.updating
 });
@@ -135,5 +124,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(CourierGroupUpdate);

@@ -6,12 +6,4 @@ export interface ISourceDestinationMapping {
   productId?: number;
 }
 
-export class SourceDestinationMapping implements ISourceDestinationMapping {
-  constructor(
-    public id?: number,
-    public sourcePincode?: string,
-    public destinationPincode?: string,
-    public productName?: string,
-    public productId?: number
-  ) {}
-}
+export const defaultValue: Readonly<ISourceDestinationMapping> = {};

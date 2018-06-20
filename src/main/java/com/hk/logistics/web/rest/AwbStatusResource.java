@@ -1,12 +1,10 @@
 package com.hk.logistics.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
-import com.hk.logistics.domain.AwbStatus;
-import com.hk.logistics.repository.AwbStatusRepository;
+import com.hk.logistics.service.AwbStatusService;
 import com.hk.logistics.web.rest.errors.BadRequestAlertException;
 import com.hk.logistics.web.rest.util.HeaderUtil;
 import com.hk.logistics.service.dto.AwbStatusDTO;
-import com.hk.logistics.service.mapper.AwbStatusMapper;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +16,9 @@ import java.net.URISyntaxException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing AwbStatus.
@@ -30,13 +31,10 @@ public class AwbStatusResource {
 
     private static final String ENTITY_NAME = "awbStatus";
 
-    private final AwbStatusRepository awbStatusRepository;
+    private final AwbStatusService awbStatusService;
 
-    private final AwbStatusMapper awbStatusMapper;
-
-    public AwbStatusResource(AwbStatusRepository awbStatusRepository, AwbStatusMapper awbStatusMapper) {
-        this.awbStatusRepository = awbStatusRepository;
-        this.awbStatusMapper = awbStatusMapper;
+    public AwbStatusResource(AwbStatusService awbStatusService) {
+        this.awbStatusService = awbStatusService;
     }
 
     /**
@@ -52,10 +50,8 @@ public class AwbStatusResource {
         log.debug("REST request to save AwbStatus : {}", awbStatusDTO);
         if (awbStatusDTO.getId() != null) {
             throw new BadRequestAlertException("A new awbStatus cannot already have an ID", ENTITY_NAME, "idexists");
-        }        
-        AwbStatus awbStatus = awbStatusMapper.toEntity(awbStatusDTO);
-        awbStatus = awbStatusRepository.save(awbStatus);
-        AwbStatusDTO result = awbStatusMapper.toDto(awbStatus);
+        }
+        AwbStatusDTO result = awbStatusService.save(awbStatusDTO);
         return ResponseEntity.created(new URI("/api/awb-statuses/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -76,10 +72,8 @@ public class AwbStatusResource {
         log.debug("REST request to update AwbStatus : {}", awbStatusDTO);
         if (awbStatusDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }        
-        AwbStatus awbStatus = awbStatusMapper.toEntity(awbStatusDTO);
-        awbStatus = awbStatusRepository.save(awbStatus);
-        AwbStatusDTO result = awbStatusMapper.toDto(awbStatus);
+        }
+        AwbStatusDTO result = awbStatusService.save(awbStatusDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(ENTITY_NAME, awbStatusDTO.getId().toString()))
             .body(result);
@@ -94,8 +88,7 @@ public class AwbStatusResource {
     @Timed
     public List<AwbStatusDTO> getAllAwbStatuses() {
         log.debug("REST request to get all AwbStatuses");
-        List<AwbStatus> awbStatuses = awbStatusRepository.findAll();
-        return awbStatusMapper.toDto(awbStatuses);
+        return awbStatusService.findAll();
     }
 
     /**
@@ -108,8 +101,7 @@ public class AwbStatusResource {
     @Timed
     public ResponseEntity<AwbStatusDTO> getAwbStatus(@PathVariable Long id) {
         log.debug("REST request to get AwbStatus : {}", id);
-        Optional<AwbStatusDTO> awbStatusDTO = awbStatusRepository.findById(id)
-            .map(awbStatusMapper::toDto);
+        Optional<AwbStatusDTO> awbStatusDTO = awbStatusService.findOne(id);
         return ResponseUtil.wrapOrNotFound(awbStatusDTO);
     }
 
@@ -123,7 +115,22 @@ public class AwbStatusResource {
     @Timed
     public ResponseEntity<Void> deleteAwbStatus(@PathVariable Long id) {
         log.debug("REST request to delete AwbStatus : {}", id);
-        awbStatusRepository.deleteById(id);
+        awbStatusService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/awb-statuses?query=:query : search for the awbStatus corresponding
+     * to the query.
+     *
+     * @param query the query of the awbStatus search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/awb-statuses")
+    @Timed
+    public List<AwbStatusDTO> searchAwbStatuses(@RequestParam String query) {
+        log.debug("REST request to search AwbStatuses for query {}", query);
+        return awbStatusService.search(query);
+    }
+
 }

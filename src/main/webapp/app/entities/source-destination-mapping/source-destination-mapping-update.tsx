@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvField } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { IProduct } from 'app/shared/model/product.model';
 import { getEntities as getProducts } from 'app/entities/product/product.reducer';
@@ -15,19 +16,7 @@ import { ISourceDestinationMapping } from 'app/shared/model/source-destination-m
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface ISourceDestinationMappingUpdateProps {
-  getEntity: ICrudGetAction<ISourceDestinationMapping>;
-  updateEntity: ICrudPutAction<ISourceDestinationMapping>;
-  createEntity: ICrudPutAction<ISourceDestinationMapping>;
-  getProducts: ICrudGetAllAction<IProduct>;
-  products: IProduct[];
-  sourceDestinationMapping: ISourceDestinationMapping;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface ISourceDestinationMappingUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface ISourceDestinationMappingUpdateState {
   isNew: boolean;
@@ -58,9 +47,9 @@ export class SourceDestinationMappingUpdate extends React.Component<
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { sourceDestinationMapping } = this.props;
+      const { sourceDestinationMappingEntity } = this.props;
       const entity = {
-        ...sourceDestinationMapping,
+        ...sourceDestinationMappingEntity,
         ...values
       };
 
@@ -96,14 +85,14 @@ export class SourceDestinationMappingUpdate extends React.Component<
 
   render() {
     const isInvalid = false;
-    const { sourceDestinationMapping, products, loading, updating } = this.props;
+    const { sourceDestinationMappingEntity, products, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-source-destination-mapping-heading">Create or edit a SourceDestinationMapping</h2>
+            <h2 id="testLogisticsApp.sourceDestinationMapping.home.createOrEditLabel">Create or edit a SourceDestinationMapping</h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -111,11 +100,11 @@ export class SourceDestinationMappingUpdate extends React.Component<
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : sourceDestinationMapping} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : sourceDestinationMappingEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="source-destination-mapping-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <AvGroup>
@@ -123,6 +112,7 @@ export class SourceDestinationMappingUpdate extends React.Component<
                     Source Pincode
                   </Label>
                   <AvField
+                    id="source-destination-mapping-sourcePincode"
                     type="text"
                     name="sourcePincode"
                     validate={{
@@ -135,6 +125,7 @@ export class SourceDestinationMappingUpdate extends React.Component<
                     Destination Pincode
                   </Label>
                   <AvField
+                    id="source-destination-mapping-destinationPincode"
                     type="text"
                     name="destinationPincode"
                     validate={{
@@ -144,7 +135,13 @@ export class SourceDestinationMappingUpdate extends React.Component<
                 </AvGroup>
                 <AvGroup>
                   <Label for="product.name">Product</Label>
-                  <AvInput type="select" className="form-control" name="productId" onChange={this.productUpdate}>
+                  <AvInput
+                    id="source-destination-mapping-product"
+                    type="select"
+                    className="form-control"
+                    name="productId"
+                    onChange={this.productUpdate}
+                  >
                     <option value="" key="0" />
                     {products
                       ? products.map(otherEntity => (
@@ -172,9 +169,9 @@ export class SourceDestinationMappingUpdate extends React.Component<
   }
 }
 
-const mapStateToProps = storeState => ({
+const mapStateToProps = (storeState: IRootState) => ({
   products: storeState.product.entities,
-  sourceDestinationMapping: storeState.sourceDestinationMapping.entity,
+  sourceDestinationMappingEntity: storeState.sourceDestinationMapping.entity,
   loading: storeState.sourceDestinationMapping.loading,
   updating: storeState.sourceDestinationMapping.updating
 });
@@ -186,5 +183,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(SourceDestinationMappingUpdate);

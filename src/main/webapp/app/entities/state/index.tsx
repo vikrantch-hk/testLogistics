@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+
+import ErrorBoundaryRoute from 'app/shared/error/error-boundary-route';
 
 import State from './state';
 import StateDetail from './state-detail';
@@ -9,12 +11,12 @@ import StateDeleteDialog from './state-delete-dialog';
 const Routes = ({ match }) => (
   <>
     <Switch>
-      <Route exact path={`${match.url}/new`} component={StateUpdate} />
-      <Route exact path={`${match.url}/:id/edit`} component={StateUpdate} />
-      <Route exact path={`${match.url}/:id`} component={StateDetail} />
-      <Route path={match.url} component={State} />
+      <ErrorBoundaryRoute exact path={`${match.url}/new`} component={StateUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id/edit`} component={StateUpdate} />
+      <ErrorBoundaryRoute exact path={`${match.url}/:id`} component={StateDetail} />
+      <ErrorBoundaryRoute path={match.url} component={State} />
     </Switch>
-    <Route path={`${match.url}/:id/delete`} component={StateDeleteDialog} />
+    <ErrorBoundaryRoute path={`${match.url}/:id/delete`} component={StateDeleteDialog} />
   </>
 );
 

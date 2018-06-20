@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvField } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { getEntity, updateEntity, createEntity, reset } from './zone.reducer';
 import { IZone } from 'app/shared/model/zone.model';
@@ -13,17 +14,7 @@ import { IZone } from 'app/shared/model/zone.model';
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface IZoneUpdateProps {
-  getEntity: ICrudGetAction<IZone>;
-  updateEntity: ICrudPutAction<IZone>;
-  createEntity: ICrudPutAction<IZone>;
-  zone: IZone;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface IZoneUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface IZoneUpdateState {
   isNew: boolean;
@@ -47,9 +38,9 @@ export class ZoneUpdate extends React.Component<IZoneUpdateProps, IZoneUpdateSta
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { zone } = this.props;
+      const { zoneEntity } = this.props;
       const entity = {
-        ...zone,
+        ...zoneEntity,
         ...values
       };
 
@@ -68,14 +59,14 @@ export class ZoneUpdate extends React.Component<IZoneUpdateProps, IZoneUpdateSta
 
   render() {
     const isInvalid = false;
-    const { zone, loading, updating } = this.props;
+    const { zoneEntity, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-zone-heading">Create or edit a Zone</h2>
+            <h2 id="testLogisticsApp.zone.home.createOrEditLabel">Create or edit a Zone</h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -83,11 +74,11 @@ export class ZoneUpdate extends React.Component<IZoneUpdateProps, IZoneUpdateSta
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : zone} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : zoneEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="zone-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <AvGroup>
@@ -95,6 +86,7 @@ export class ZoneUpdate extends React.Component<IZoneUpdateProps, IZoneUpdateSta
                     Name
                   </Label>
                   <AvField
+                    id="zone-name"
                     type="text"
                     name="name"
                     validate={{
@@ -119,8 +111,8 @@ export class ZoneUpdate extends React.Component<IZoneUpdateProps, IZoneUpdateSta
   }
 }
 
-const mapStateToProps = storeState => ({
-  zone: storeState.zone.entity,
+const mapStateToProps = (storeState: IRootState) => ({
+  zoneEntity: storeState.zone.entity,
   loading: storeState.zone.loading,
   updating: storeState.zone.updating
 });
@@ -131,5 +123,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(ZoneUpdate);

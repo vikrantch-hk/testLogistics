@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvField } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { ICourier } from 'app/shared/model/courier.model';
 import { getEntities as getCouriers } from 'app/entities/courier/courier.reducer';
@@ -19,23 +20,7 @@ import { ICourierPricingEngine } from 'app/shared/model/courier-pricing-engine.m
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface ICourierPricingEngineUpdateProps {
-  getEntity: ICrudGetAction<ICourierPricingEngine>;
-  updateEntity: ICrudPutAction<ICourierPricingEngine>;
-  createEntity: ICrudPutAction<ICourierPricingEngine>;
-  getCouriers: ICrudGetAllAction<ICourier>;
-  couriers: ICourier[];
-  getWarehouses: ICrudGetAllAction<IWarehouse>;
-  warehouses: IWarehouse[];
-  getRegionTypes: ICrudGetAllAction<IRegionType>;
-  regionTypes: IRegionType[];
-  courierPricingEngine: ICourierPricingEngine;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface ICourierPricingEngineUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface ICourierPricingEngineUpdateState {
   isNew: boolean;
@@ -69,9 +54,9 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { courierPricingEngine } = this.props;
+      const { courierPricingEngineEntity } = this.props;
       const entity = {
-        ...courierPricingEngine,
+        ...courierPricingEngineEntity,
         ...values
       };
 
@@ -141,14 +126,14 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
 
   render() {
     const isInvalid = false;
-    const { courierPricingEngine, couriers, warehouses, regionTypes, loading, updating } = this.props;
+    const { courierPricingEngineEntity, couriers, warehouses, regionTypes, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-courier-pricing-engine-heading">Create or edit a CourierPricingEngine</h2>
+            <h2 id="testLogisticsApp.courierPricingEngine.home.createOrEditLabel">Create or edit a CourierPricingEngine</h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -156,11 +141,11 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : courierPricingEngine} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : courierPricingEngineEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="courier-pricing-engine-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <AvGroup>
@@ -168,6 +153,7 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
                     First Base Wt
                   </Label>
                   <AvField
+                    id="courier-pricing-engine-firstBaseWt"
                     type="number"
                     className="form-control"
                     name="firstBaseWt"
@@ -182,6 +168,7 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
                     First Base Cost
                   </Label>
                   <AvField
+                    id="courier-pricing-engine-firstBaseCost"
                     type="number"
                     className="form-control"
                     name="firstBaseCost"
@@ -195,19 +182,20 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
                   <Label id="secondBaseWtLabel" for="secondBaseWt">
                     Second Base Wt
                   </Label>
-                  <AvField type="number" className="form-control" name="secondBaseWt" />
+                  <AvField id="courier-pricing-engine-secondBaseWt" type="number" className="form-control" name="secondBaseWt" />
                 </AvGroup>
                 <AvGroup>
                   <Label id="secondBaseCostLabel" for="secondBaseCost">
                     Second Base Cost
                   </Label>
-                  <AvField type="number" className="form-control" name="secondBaseCost" />
+                  <AvField id="courier-pricing-engine-secondBaseCost" type="number" className="form-control" name="secondBaseCost" />
                 </AvGroup>
                 <AvGroup>
                   <Label id="additionalWtLabel" for="additionalWt">
                     Additional Wt
                   </Label>
                   <AvField
+                    id="courier-pricing-engine-additionalWt"
                     type="number"
                     className="form-control"
                     name="additionalWt"
@@ -222,6 +210,7 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
                     Additional Cost
                   </Label>
                   <AvField
+                    id="courier-pricing-engine-additionalCost"
                     type="number"
                     className="form-control"
                     name="additionalCost"
@@ -235,35 +224,46 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
                   <Label id="fuelSurchargeLabel" for="fuelSurcharge">
                     Fuel Surcharge
                   </Label>
-                  <AvField type="number" className="form-control" name="fuelSurcharge" />
+                  <AvField id="courier-pricing-engine-fuelSurcharge" type="number" className="form-control" name="fuelSurcharge" />
                 </AvGroup>
                 <AvGroup>
                   <Label id="minCodChargesLabel" for="minCodCharges">
                     Min Cod Charges
                   </Label>
-                  <AvField type="number" className="form-control" name="minCodCharges" />
+                  <AvField id="courier-pricing-engine-minCodCharges" type="number" className="form-control" name="minCodCharges" />
                 </AvGroup>
                 <AvGroup>
                   <Label id="codCutoffAmountLabel" for="codCutoffAmount">
                     Cod Cutoff Amount
                   </Label>
-                  <AvField type="number" className="form-control" name="codCutoffAmount" />
+                  <AvField id="courier-pricing-engine-codCutoffAmount" type="number" className="form-control" name="codCutoffAmount" />
                 </AvGroup>
                 <AvGroup>
                   <Label id="variableCodChargesLabel" for="variableCodCharges">
                     Variable Cod Charges
                   </Label>
-                  <AvField type="number" className="form-control" name="variableCodCharges" />
+                  <AvField
+                    id="courier-pricing-engine-variableCodCharges"
+                    type="number"
+                    className="form-control"
+                    name="variableCodCharges"
+                  />
                 </AvGroup>
                 <AvGroup>
                   <Label id="validUptoLabel" for="validUpto">
                     Valid Upto
                   </Label>
-                  <AvField type="date" className="form-control" name="validUpto" />
+                  <AvField id="courier-pricing-engine-validUpto" type="date" className="form-control" name="validUpto" />
                 </AvGroup>
                 <AvGroup>
                   <Label for="courier.name">Courier</Label>
-                  <AvInput type="select" className="form-control" name="courierId" onChange={this.courierUpdate}>
+                  <AvInput
+                    id="courier-pricing-engine-courier"
+                    type="select"
+                    className="form-control"
+                    name="courierId"
+                    onChange={this.courierUpdate}
+                  >
                     <option value="" key="0" />
                     {couriers
                       ? couriers.map(otherEntity => (
@@ -276,7 +276,13 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
                 </AvGroup>
                 <AvGroup>
                   <Label for="warehouse.name">Warehouse</Label>
-                  <AvInput type="select" className="form-control" name="warehouseId" onChange={this.warehouseUpdate}>
+                  <AvInput
+                    id="courier-pricing-engine-warehouse"
+                    type="select"
+                    className="form-control"
+                    name="warehouseId"
+                    onChange={this.warehouseUpdate}
+                  >
                     <option value="" key="0" />
                     {warehouses
                       ? warehouses.map(otherEntity => (
@@ -289,7 +295,13 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
                 </AvGroup>
                 <AvGroup>
                   <Label for="regionType.name">Region Type</Label>
-                  <AvInput type="select" className="form-control" name="regionTypeId" onChange={this.regionTypeUpdate}>
+                  <AvInput
+                    id="courier-pricing-engine-regionType"
+                    type="select"
+                    className="form-control"
+                    name="regionTypeId"
+                    onChange={this.regionTypeUpdate}
+                  >
                     <option value="" key="0" />
                     {regionTypes
                       ? regionTypes.map(otherEntity => (
@@ -317,11 +329,11 @@ export class CourierPricingEngineUpdate extends React.Component<ICourierPricingE
   }
 }
 
-const mapStateToProps = storeState => ({
+const mapStateToProps = (storeState: IRootState) => ({
   couriers: storeState.courier.entities,
   warehouses: storeState.warehouse.entities,
   regionTypes: storeState.regionType.entities,
-  courierPricingEngine: storeState.courierPricingEngine.entity,
+  courierPricingEngineEntity: storeState.courierPricingEngine.entity,
   loading: storeState.courierPricingEngine.loading,
   updating: storeState.courierPricingEngine.updating
 });
@@ -335,5 +347,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(CourierPricingEngineUpdate);

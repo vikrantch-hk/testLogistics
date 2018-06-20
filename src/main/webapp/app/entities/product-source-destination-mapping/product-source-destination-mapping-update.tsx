@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import { Button, Row, Col, Label } from 'reactstrap';
 import { AvForm, AvGroup, AvInput } from 'availity-reactstrap-validation';
 // tslint:disable-next-line:no-unused-variable
 import { ICrudGetAction, ICrudGetAllAction, ICrudPutAction } from 'react-jhipster';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { IRootState } from 'app/shared/reducers';
 
 import { getEntity, updateEntity, createEntity, reset } from './product-source-destination-mapping.reducer';
 import { IProductSourceDestinationMapping } from 'app/shared/model/product-source-destination-mapping.model';
@@ -13,17 +14,7 @@ import { IProductSourceDestinationMapping } from 'app/shared/model/product-sourc
 import { convertDateTimeFromServer } from 'app/shared/util/date-utils';
 import { keysToValues } from 'app/shared/util/entity-utils';
 
-export interface IProductSourceDestinationMappingUpdateProps {
-  getEntity: ICrudGetAction<IProductSourceDestinationMapping>;
-  updateEntity: ICrudPutAction<IProductSourceDestinationMapping>;
-  createEntity: ICrudPutAction<IProductSourceDestinationMapping>;
-  productSourceDestinationMapping: IProductSourceDestinationMapping;
-  reset: Function;
-  loading: boolean;
-  updating: boolean;
-  match: any;
-  history: any;
-}
+export interface IProductSourceDestinationMappingUpdateProps extends StateProps, DispatchProps, RouteComponentProps<{ id: number }> {}
 
 export interface IProductSourceDestinationMappingUpdateState {
   isNew: boolean;
@@ -50,9 +41,9 @@ export class ProductSourceDestinationMappingUpdate extends React.Component<
 
   saveEntity = (event, errors, values) => {
     if (errors.length === 0) {
-      const { productSourceDestinationMapping } = this.props;
+      const { productSourceDestinationMappingEntity } = this.props;
       const entity = {
-        ...productSourceDestinationMapping,
+        ...productSourceDestinationMappingEntity,
         ...values
       };
 
@@ -71,14 +62,16 @@ export class ProductSourceDestinationMappingUpdate extends React.Component<
 
   render() {
     const isInvalid = false;
-    const { productSourceDestinationMapping, loading, updating } = this.props;
+    const { productSourceDestinationMappingEntity, loading, updating } = this.props;
     const { isNew } = this.state;
 
     return (
       <div>
         <Row className="justify-content-center">
           <Col md="8">
-            <h2 id="jhi-product-source-destination-mapping-heading">Create or edit a ProductSourceDestinationMapping</h2>
+            <h2 id="testLogisticsApp.productSourceDestinationMapping.home.createOrEditLabel">
+              Create or edit a ProductSourceDestinationMapping
+            </h2>
           </Col>
         </Row>
         <Row className="justify-content-center">
@@ -86,11 +79,11 @@ export class ProductSourceDestinationMappingUpdate extends React.Component<
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <AvForm model={isNew ? {} : productSourceDestinationMapping} onSubmit={this.saveEntity}>
+              <AvForm model={isNew ? {} : productSourceDestinationMappingEntity} onSubmit={this.saveEntity}>
                 {!isNew ? (
                   <AvGroup>
                     <Label for="id">ID</Label>
-                    <AvInput type="text" className="form-control" name="id" required readOnly />
+                    <AvInput id="product-source-destination-mapping-id" type="text" className="form-control" name="id" required readOnly />
                   </AvGroup>
                 ) : null}
                 <Button tag={Link} id="cancel-save" to="/entity/product-source-destination-mapping" replace color="info">
@@ -110,8 +103,8 @@ export class ProductSourceDestinationMappingUpdate extends React.Component<
   }
 }
 
-const mapStateToProps = storeState => ({
-  productSourceDestinationMapping: storeState.productSourceDestinationMapping.entity,
+const mapStateToProps = (storeState: IRootState) => ({
+  productSourceDestinationMappingEntity: storeState.productSourceDestinationMapping.entity,
   loading: storeState.productSourceDestinationMapping.loading,
   updating: storeState.productSourceDestinationMapping.updating
 });
@@ -122,5 +115,8 @@ const mapDispatchToProps = {
   createEntity,
   reset
 };
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProductSourceDestinationMappingUpdate);

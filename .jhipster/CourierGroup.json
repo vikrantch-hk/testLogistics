@@ -1,4 +1,5 @@
 {
+    "name": "CourierGroup",
     "fields": [
         {
             "fieldName": "name",
@@ -14,11 +15,11 @@
             "otherEntityRelationshipName": "courierGroup"
         }
     ],
-    "changelogDate": "20180608074050",
+    "changelogDate": "20180619110513",
     "entityTableName": "courier_group",
     "dto": "mapstruct",
     "pagination": "no",
-    "service": "no",
+    "service": "serviceImpl",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,
     "clientRootFolder": "",
